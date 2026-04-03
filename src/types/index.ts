@@ -65,6 +65,7 @@ export interface AppState {
 }
 
 export interface Website {
+  id?: string;
   n: string; // name
   u: string; // url
   c: string; // category

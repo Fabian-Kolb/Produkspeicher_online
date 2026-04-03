@@ -1,8 +1,9 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { Menu, Moon, Sun } from 'lucide-react';
+import { Menu, Moon, Sun, LogOut } from 'lucide-react';
 import { useUIStore } from '../../store/useUIStore';
 import { useAppStore } from '../../store/useAppStore';
+import { supabase } from '../../lib/supabase';
 
 export const TopNav: React.FC = () => {
   const toggleMainMenu = useUIStore((s) => s.toggleMainMenu);
@@ -54,6 +55,15 @@ export const TopNav: React.FC = () => {
           <div className={`w-6 h-6 rounded-full bg-bg-primary shadow-md flex items-center justify-center transition-transform duration-300 ${settings.theme === 'dark' ? 'translate-x-6' : 'translate-x-0'}`}>
             {settings.theme === 'dark' ? <Moon size={14} className="text-text-primary" /> : <Sun size={14} className="text-text-primary" />}
           </div>
+        </button>
+
+        {/* Logout Button */}
+        <button
+          onClick={async () => await supabase.auth.signOut()}
+          className="w-10 h-10 bg-bg-primary rounded-full shadow-sm flex items-center justify-center hover:bg-red-500/10 text-red-500 transition-colors border border-border-primary/50 group"
+          title="Logout"
+        >
+          <LogOut size={18} className="group-hover:scale-110 transition-transform" />
         </button>
 
         {/* Hamburger */}

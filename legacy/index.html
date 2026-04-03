@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shop Manager</title>
+    <!-- Fonts laden -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap"
+        rel="stylesheet">
+    <!-- Verknüpfung zur CSS-Datei -->
+    <link rel="stylesheet" href="style.css">
+
+</head>
+
+
+<body>
+    <div id="toastContainer" class="toast-container"></div>
+
+    <div id="glass-stage" class="use-blobs">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+    </div>
+
+    <header>
+        <div class="logo">
+            <div class="logo-icon">M</div><span>Shop Manager</span>
+        </div>
+        <div class="top-nav">
+            <div id="navGlider" class="nav-glider"></div>
+            <button class="top-nav-btn active" id="btnDashboard" onclick="switchView('websites')">
+                <span class="btn-text-spacer">Dashboard</span>
+                <span class="btn-text-visible">Dashboard</span>
+            </button>
+            <button class="top-nav-btn" id="btnKatalog" onclick="switchView('products')">
+                <span class="btn-text-spacer">Katalog</span>
+                <span class="btn-text-visible">Katalog</span>
+            </button>
+            <button class="top-nav-btn" id="btnFavoriten" onclick="switchView('saved')">
+                <span class="btn-text-spacer">Favoriten</span>
+                <span class="btn-text-visible">Favoriten</span>
+            </button>
+            <button class="top-nav-btn" id="btnBundles" onclick="switchView('bundles')">
+                <span class="btn-text-spacer">Bundles</span>
+                <span class="btn-text-visible">Bundles</span>
+            </button>
+            <button class="top-nav-btn" id="btnBudget" onclick="switchView('analytics')">
+                <span class="btn-text-spacer">Budget</span>
+                <span class="btn-text-visible">Budget</span>
+            </button>
+            <button class="top-nav-btn" id="btnDeals" onclick="switchView('deals')">
+                <span class="btn-text-spacer">Deals</span>
+                <span class="btn-text-visible">Deals</span>
+            </button>
+        </div>
+        <div class="header-right-group">
+            <div class="theme-controls">
+                <label class="theme-switch" title="Light/Dark Mode"><input type="checkbox" id="themeToggle"
+                        onchange="toggleTheme()"><span class="slider"></span></label>
+            </div>
+
+            <div class="menu-container" style="position: relative;">
+                <button class="tool-btn menu-trigger" onclick="toggleMainMenu()" title="Menü">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round" width="20" height="20">
+                        <line x1="3" y1="12" x2="21" y2="12"></line>
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <line x1="3" y1="18" x2="21" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- SEKUNDÄRE NAVIGATION (PILLE) -->
+    <div class="secondary-nav-container" id="secondaryNav">
+        <div class="secondary-nav-bar" id="secondaryNavPill">
+            <!-- Wird von script.js dynamisch gefüllt -->
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- SHARED FILTER SECTION -->
+        <div id="sharedFilterSection">
+            <div class="primary-controls">
+                <div class="search-input-wrapper">
+                    <svg class="icon-svg search-icon" viewBox="0 0 24 24">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                    <input type="text" id="searchInput" class="search-input" placeholder="Suchen..."
+                        oninput="handleSearch(this.value)" onkeydown="if(event.key==='Enter') navigateToCreatePage()">
+                    <div id="searchClearBtn" class="search-clear-btn" onclick="clearSearch()" style="display:none;">×
+                    </div>
+                </div>
+                <select id="sortSelect" onchange="changeSortMode(this.value)" class="modern-select">
+                    <option value="default">Sort: Favoriten</option>
+                    <option value="priceAsc">Preis aufsteigend</option>
+                    <option value="priceDesc">Preis absteigend</option>
+                    <option value="newest">Neueste zuerst</option>
+                    <option value="oldest">Älteste zuerst</option>
+                </select>
+                <div class="status-chip-group">
+                    <button class="filter-chip" id="chipStatBought"
+                        onclick="toggleStatusFilter('bought')">Gekauft</button>
+                    <button class="filter-chip" id="chipStatReduced"
+                        onclick="toggleStatusFilter('reduced')">Reduziert</button>
+
+                    <!-- Mobile Grid Toggle -->
+                    <button class="nav-tools-btn" id="btnToggleGrid" onclick="toggleMobileGridMode()"
+                        style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; padding: 0; background: var(--card-bg); border: 1px solid var(--input-border); border-radius: 50%; color: var(--text-dark);">
+                        <svg id="iconGridSingle" style="display: none;" fill="none" stroke="currentColor"
+                            viewBox="0 0 24 24" width="20" height="20">
+                            <!-- Single column icon -->
+                            <rect x="4" y="4" width="16" height="5" rx="1" ry="1"></rect>
+                            <rect x="4" y="11" width="16" height="5" rx="1" ry="1"></rect>
+                            <rect x="4" y="18" width="16" height="5" rx="1" ry="1"></rect>
+                        </svg>
+                        <svg id="iconGridMulti" fill="none" stroke="currentColor" viewBox="0 0 24 24" width="20"
+                            height="20">
+                            <!-- Multi column icon -->
+                            <rect x="4" y="4" width="7" height="7" rx="1" ry="1"></rect>
+                            <rect x="13" y="4" width="7" height="7" rx="1" ry="1"></rect>
+                            <rect x="4" y="13" width="7" height="7" rx="1" ry="1"></rect>
+                            <rect x="13" y="13" width="7" height="7" rx="1" ry="1"></rect>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <!-- Sub-Filter Container -->
+            <div class="sub-filter-container" id="sharedSubFilterContainer"></div>
+        </div>
+
+        <!-- WEBSITES VIEW -->
+        <div id="viewWebsites" class="view-section active">
+            <div id="websitesContentWrapper" class="content-wrapper">
+                <div class="dashboard-page-header">
+                    <div class="welcome-text-centered">
+                        <h1 class="welcome-title" id="dynamicGreeting">Willkommen zurück</h1>
+                        <p class="welcome-subtitle">Hier ist dein Shopping-Überblick für den <input type="date"
+                                class="inline-date-picker" id="dashboardDate"></p>
+                    </div>
+                </div>
+
+                <div class="stats-row">
+                    <div class="stat-card" onclick="switchView('analytics')" style="cursor: pointer;">
+                        <div class="stat-header">
+                            <span class="stat-title">Monatsbudget</span>
+                            <span class="stat-icon">€</span>
+                        </div>
+                        <div class="budget-widget-unified">
+                            <div class="budget-amount-large" id="dashBudgetSpent">0 €</div>
+                            <div class="budget-limit-small">
+                                von <span id="dashBudgetLimit">2.000 €</span> Budget
+                            </div>
+                            <div class="progress-container-unified" id="dashBudgetProgress">
+                                <div id="dashBarGreen" class="progress-bar-segment green"></div>
+                                <div id="dashBarRed" class="progress-bar-segment red"></div>
+                                <div id="dashOverflowBadge" class="overflow-badge"></div>
+                            </div>
+                            <div id="dashBudgetStatusText" class="budget-status-tip"></div>
+                            <!-- Overflow Date Indicator -->
+                            <div id="dashOverflowDateContainer" style="display:none;"></div>
+                        </div>
+                    </div>
+                    <div class="stat-card" onclick="switchView('saved')" style="cursor: pointer;">
+                        <div class="stat-header">
+                            <span class="stat-title">Favoriten</span>
+                            <span class="stat-icon">♥</span>
+                        </div>
+                        <div class="stat-content-large" id="statWishlistCount">0</div>
+                    </div>
+                    <div class="stat-card" onclick="navigateToReduced()" style="cursor: pointer;">
+                        <div class="stat-header">
+                            <span class="stat-title">Preisalarme</span>
+                            <div class="notification-indicator"></div>
+                        </div>
+                        <div class="stat-content-large red" id="statAlertCount">3</div>
+                        <div class="stat-footer-text">Artikel reduziert</div>
+                    </div>
+                </div>
+
+                <div class="dashboard-shops-header">
+                    <h2 class="section-title">Deine Shops</h2>
+                    <div class="filter-container no-margin" id="websiteFilterContainer">
+                        <!-- Static Wrapper for Vertical Layout -->
+                        <div class="website-filter-vertical-wrapper"
+                            style="display: flex; flex-direction: column; align-items: center; gap: 12px; width: 100%;">
+                            <!-- Row 1: Chips (Dynamic) -->
+                            <div id="websiteChipContainer" class="sub-filter-container"
+                                style="justify-content: center; height: auto; flex-wrap: wrap; display: flex; gap: 4px;">
+                            </div>
+
+                            <!-- Row 2: Gear Icon (Static) -->
+                            <div id="websiteToolsContainer" class="sub-filter-tools"
+                                style="display: flex !important; visibility: visible !important; opacity: 1 !important; position: relative; justify-content: center;">
+                                <button class="nav-tools-btn gear-icon-btn" onclick="window.toggleWebEdit(event)"
+                                    style="display: flex !important; visibility: visible !important; opacity: 1 !important; z-index: 10;">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                        stroke-linecap="round" stroke-linejoin="round" width="18" height="18">
+                                        <circle cx="12" cy="12" r="3"></circle>
+                                        <path
+                                            d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1Z">
+                                        </path>
+                                    </svg>
+                                </button>
+                                <div id="websiteToolsPanel" class="sub-filter-panel">
+                                    <button class="nav-tools-btn share-btn" onclick="window.toggleWebDelete(event)">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                            stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
+                                            <polyline points="3 6 5 6 21 6"></polyline>
+                                            <path
+                                                d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2">
+                                            </path>
+                                            <line x1="10" y1="11" x2="10" y2="17"></line>
+                                            <line x1="14" y1="11" x2="14" y2="17"></line>
+                                        </svg>
+                                    </button>
+                                    <input type="text" id="newWebCatInp" class="cat-input" placeholder="Neue Kategorie"
+                                        onkeydown="if(event.key==='Enter')window.addNewWebCat()">
+                                    <button class="cat-confirm-btn" onclick="window.addNewWebCat()">+</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="websites-grid-modern" id="websiteGrid"></div>
+            </div>
+        </div>
+
+        <!-- PRODUCTS VIEW -->
+        <div id="viewProducts" class="view-section">
+            <div id="productsContentWrapper" class="content-wrapper">
+                <div class="add-section" id="addProductSection">
+                    <div class="add-section-inner">
+                        <div class="plus-circle" onclick="openModal()">+</div>
+                        <h2 class="add-title">Katalog erweitern</h2>
+                        <div class="main-input-group">
+                            <input type="text" id="quickLinkInput" class="main-input" placeholder="Link einfügen..."
+                                onkeydown="if(event.key==='Enter') openModalWithLink()">
+                            <button class="main-btn" onclick="openModalWithLink()">Hinzufügen</button>
+                        </div>
+                    </div>
+                </div>
+                <div id="productsDynamicArea" class="content-wrapper">
+                    <div id="emptyState" class="empty-state"></div>
+                    <div id="productGrid" class="grid-container"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- FAVORITEN (Wishlist) -->
+        <div id="viewSaved" class="view-section">
+            <div id="savedContentWrapper" class="content-wrapper">
+                <div class="view-header-flex">
+                    <h2 class="view-title-large">Favoriten</h2>
+                </div>
+                <div id="savedDynamicArea" style="margin-top: 30px;">
+                    <div id="savedEmptyState" class="empty-state"></div>
+                    <div id="savedGrid" class="grid-container"></div>
+                </div>
+            </div>
+        </div>
+
+
+
+        <!-- NEW: COLLECTIONS OVERVIEW -->
+        <div id="viewBundles" class="view-section">
+            <div class="content-wrapper">
+                <div class="view-header-flex">
+                    <h2 class="view-title-large">Bundles</h2>
+                    <button class="main-btn glass-btn" onclick="openBundleEditor()">
+                        <span style="font-size: 20px; margin-right: 8px;">+</span> Neues Bundle
+                    </button>
+                </div>
+                <div id="bundlesGrid" class="grid-container" style="margin-top: 30px;">
+                    <!-- Rendered via script.js -->
+                </div>
+            </div>
+        </div>
+
+        <!-- NEW: COLLECTIONS EDITOR (Split Layout) -->
+        <div id="viewBundlesEditor" class="view-section">
+            <div class="editor-split-layout">
+                <!-- LEFT PANEL: Source Gallery -->
+                <div class="editor-left-panel">
+                    <div class="editor-panel-header custom-grid-layout">
+                        <!-- LEFT COLUMN: Search & Status -->
+                        <div class="header-col-left">
+                            <div class="search-input-wrapper">
+                                <svg class="icon-svg search-icon" viewBox="0 0 24 24">
+                                    <circle cx="11" cy="11" r="8"></circle>
+                                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                                </svg>
+                                <input type="text" id="bundleSearch" class="search-matched" placeholder="Suchen..."
+                                    oninput="handleBundleSearch(this.value)">
+                            </div>
+                            <div id="bundleStatusFilters" class="status-group-matched"></div>
+                        </div>
+
+                        <!-- RIGHT COLUMN: Cats & Subs -->
+                        <div class="header-col-right">
+                            <div id="bundleMainCats" class="bundle-scroll-row header-row-top"></div>
+                            <div id="bundleSubCats" class="bundle-scroll-row header-row-bottom"></div>
+                        </div>
+                    </div>
+                    <div class="editor-scroll-area">
+                        <div id="bundleSourceGrid" class="compact-grid">
+                            <!-- Compact Product Cards -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- RIGHT PANEL: The Draft -->
+                <div class="editor-right-panel">
+                    <div class="editor-panel-header">
+                        <input type="text" id="bundleNameInput" class="panel-title-input"
+                            placeholder="Name der Zusammenstellung...">
+                        <button class="close-editor-btn" onclick="switchView('bundles')">&times;</button>
+                    </div>
+
+                    <div class="editor-scroll-area">
+                        <div id="bundleDraftList" class="draft-list">
+                            <!-- Added Items -->
+                        </div>
+                    </div>
+
+                    <div class="editor-panel-footer">
+                        <div class="bundle-summary">
+                            <div class="summary-line">
+                                <span>Gesamtpreis:</span>
+                                <span id="bundleTotal" class="total-price-large">0,00 €</span>
+                            </div>
+                        </div>
+                        <button class="main-btn save-bundle-btn" onclick="saveBundle()">Zusammenstellung
+                            speichern</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- BUDGET & ANALYTICS VIEW -->
+        <div id="viewAnalytics" class="view-section">
+            <div class="content-wrapper">
+                <div class="analytics-header">
+                    <h1 class="view-title-large">Budget & Analytics</h1>
+                    <div class="analytics-control-bar" id="analyticsControlBar">
+                        <div class="range-segmented-control">
+                            <button class="range-pill-btn active" onclick="setAnalyticsFilter('7d', this)">7
+                                Tage</button>
+                            <button class="range-pill-btn" onclick="setAnalyticsFilter('month', this)">Dieser
+                                Monat</button>
+                            <button class="range-pill-btn" onclick="setAnalyticsFilter('all', this)">Gesamt</button>
+                            <button class="range-pill-btn"
+                                onclick="setAnalyticsFilter('custom', this)">Benutzerdefiniert</button>
+                        </div>
+
+                        <!-- Animated Custom Date Drawer -->
+                        <div class="custom-date-drawer" id="customRangePicker">
+                            <div class="drawer-separator"></div>
+                            <div class="drawer-inputs">
+                                <input type="date" id="analyticsStart" class="drawer-input" onchange="renderAnalytics()"
+                                    onkeydown="return false" title="Von">
+                                <span class="drawer-dash">-</span>
+                                <input type="date" id="analyticsEnd" class="drawer-input" onchange="renderAnalytics()"
+                                    onkeydown="return false" title="Bis">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- KPI Grid -->
+                <div class="kpi-grid" id="analyticsKPIs">
+                    <div class="kpi-card">
+                        <div class="kpi-label" id="labelTotalSpent">Gesamtausgaben</div>
+                        <div class="kpi-value" id="kpiTotalSpent">0,00 €</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-label" id="labelPurchaseCount">Anzahl Käufe</div>
+                        <div class="kpi-value" id="kpiPurchaseCount">0</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-label" id="labelAveragePrice">Durchschnitt</div>
+                        <div class="kpi-value" id="kpiAveragePrice">0,00 €</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-label" id="labelMostExpensive">Teuerstes Item</div>
+                        <div class="kpi-value" id="kpiMostExpensive"
+                            style="font-size:14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">-</div>
+                    </div>
+                </div>
+
+                <div class="analytics-main-layout">
+                    <!-- Chart Container -->
+                    <div class="chart-section-card">
+                        <div class="chart-header-row">
+                            <h3>Ausgabenverlauf</h3>
+                            <div class="chart-legend">
+                                <span class="dot-indicator"></span> Ausgaben (€)
+                            </div>
+                        </div>
+                        <div class="chart-canvas-container" id="analyticsChartCanvas">
+                            <!-- SVG Chart rendered here -->
+                        </div>
+                    </div>
+
+                    <!-- Unified Budget Widget -->
+                    <div class="budget-widget-card" id="analyticsBudgetCard">
+                        <div class="budget-header">
+                            <h3 style="margin:0;">Budget Tracker</h3>
+                        </div>
+
+                        <div class="budget-widget-unified">
+                            <div class="budget-amount-large" id="budgetSpentLabel">0 €</div>
+                            <div class="budget-limit-small" onclick="triggerBudgetEdit(event, 'main')">
+                                von <strong id="budgetLimitLabel">2.000 €</strong> Budget
+                            </div>
+
+                            <div class="progress-container-unified" id="budgetMainProgress">
+                                <div id="budgetBarGreen" class="progress-bar-segment green"></div>
+                                <div id="budgetBarRed" class="progress-bar-segment red"></div>
+                                <div id="budgetOverflowBadge" class="overflow-badge"></div>
+                            </div>
+
+                            <div id="budgetStatusText" class="budget-status-tip">Lädt...</div>
+
+                            <!-- Overflow Date Indicator -->
+                            <div id="budgetOverflowDateContainer" style="display:none; margin-top: 10px;"></div>
+                        </div>
+
+                        <!-- Shared Hidden Input for Inline Editing -->
+                        <div id="budgetEditOverlay" class="budget-edit-overlay" style="display:none;">
+                            <input type="number" id="budgetGlobalInput" class="budget-inline-input"
+                                onblur="finalizeBudgetEdit()" onkeydown="if(event.key==='Enter') finalizeBudgetEdit()">
+                        </div>
+                    </div>
+                </div>
+                <div id="chart-rich-tooltip"></div>
+
+                <!-- Transaction List -->
+                <div class="transactions-section">
+                    <h3>Transaktionen</h3>
+                    <div class="transactions-list" id="transactionList">
+                        <!-- Items rendered here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- DEALS VIEW -->
+        <div id="viewDeals" class="view-section">
+            <div class="content-wrapper">
+                <div class="deals-header">
+                    <h1 class="view-title-large">Price Alerts</h1>
+                    <p class="view-subtitle">Aktuelle Preissenkungen in deiner Liste.</p>
+                </div>
+                <div id="dealsGrid" class="grid-container">
+                    <!-- Deal Cards -->
+                </div>
+                <div id="dealsEmptyState" class="empty-state"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODALS (Alle Popups) -->
+
+    <!-- Lightbox -->
+    <div class="lightbox-overlay" id="lightboxOverlay">
+        <div class="lightbox-close" onclick="closeLightbox()">×</div>
+        <div class="lightbox-nav lightbox-prev" id="lbPrev" onclick="navigateLightbox(-1)">&#10094;</div>
+        <img src="" class="lightbox-img" id="lightboxImg" alt="Detail">
+        <div class="lightbox-nav lightbox-next" id="lbNext" onclick="navigateLightbox(1)">&#10095;</div>
+    </div>
+
+    <!-- Add Website Modal -->
+    <div class="modal-overlay" id="addWebsiteModal">
+        <div class="modal-window" style="height:auto; max-width:400px;">
+            <div class="modal-header">
+                <h2>Website hinzufügen</h2><button class="close-modal"
+                    onclick="closePopup('addWebsiteModal')">&times;</button>
+            </div>
+            <div style="padding:20px; display:flex; flex-direction:column; gap:15px;">
+                <div class="form-group"><label>Name</label><input type="text" id="newWebName" class="form-input"
+                        placeholder="z.B. MyShop"></div>
+                <div class="form-group"><label>URL</label><input type="text" id="newWebUrl" class="form-input"
+                        placeholder="https://..."></div>
+                <div class="form-group"><label>Kategorie</label>
+                    <div class="chip-container" id="newWebCatContainer"></div><input type="hidden"
+                        id="newWebCatSelected">
+                </div>
+                <button class="btn-save" onclick="confirmAddWebsite()"
+                    style="width:100%; margin-top:10px;">Hinzufügen</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Product Modal -->
+    <div class="modal-overlay" id="productModal">
+        <div class="modal-window">
+            <div class="modal-header">
+                <h2 style="font-family: 'Playfair Display', serif;">Neues Produkt</h2>
+                <button class="close-modal" onclick="closePopup('productModal')">&times;</button>
+            </div>
+
+            <!-- Removed Smart Add Top Section as redundant -->
+
+            <div class="modal-content-split">
+                <!-- LINKE SPALTE: BILDER -->
+                <div class="image-column">
+                    <div class="form-section-title">Vorschau</div>
+                    <div class="main-preview" id="imgPreviewBox">
+                        <div class="skeleton-image" id="skeletonImage"></div>
+                    </div>
+
+                    <div class="gallery-thumbs" id="galleryThumbs"></div>
+
+                    <div class="manual-upload-trigger">
+                        <span style="font-size:12px; color:var(--text-grey);">Bild via URL:</span>
+                        <div style="display:flex; gap:5px; margin-bottom:10px;">
+                            <input type="text" id="inpImgUrl" placeholder="https://..."
+                                style="flex:1; padding:5px; border-radius:5px; border:1px solid var(--input-border); background:var(--card-bg); color:var(--text-dark);"
+                                onkeydown="if(event.key==='Enter') addImageFromUrlInput()">
+                            <button onclick="addImageFromUrlInput()"
+                                style="background:var(--text-dark); color:var(--bg-color); border:none; border-radius:5px; cursor:pointer; width:30px;">+</button>
+                        </div>
+                        <span style="font-size:12px; color:var(--text-grey);">Oder Datei:</span>
+                        <button class="btn-text-only" onclick="document.getElementById('fileUploadInput').click()">Bild
+                            hochladen</button>
+                        <input type="file" id="fileUploadInput" style="display:none" accept="image/*"
+                            onchange="handleImageUpload(this)">
+                    </div>
+                </div>
+                <!-- RECHTE SPALTE: DATEN -->
+                <div class="form-column">
+                    <div>
+                        <div class="form-section-title">Einordnung</div>
+                        <div class="form-group">
+                            <label>Hauptkategorie</label>
+                            <div class="chip-container" id="editMainCatContainer"></div>
+                        </div>
+                        <div class="form-group">
+                            <label>Unterkategorie</label>
+                            <div class="chip-container" id="editSubCatContainer"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="form-section-title">Details</div>
+                        <div class="form-group">
+                            <label>Name des Artikels</label>
+                            <input type="text" id="inpName" class="form-input bold" placeholder="z.B. Weißes T-Shirt">
+                        </div>
+                        <div class="form-group" style="display:grid; grid-template-columns: 1fr 1fr; gap:15px;">
+                            <div>
+                                <label>Shop / Marke</label>
+                                <input type="text" id="inpShop" class="form-input" placeholder="z.B. Zara">
+                            </div>
+                            <div>
+                                <label>Produkt-Link</label>
+                                <input type="text" id="inpUrl" class="form-input" placeholder="https://...">
+                            </div>
+                        </div>
+                        <div class="price-box"
+                            style="display: flex; gap: 15px; align-items: center; background: var(--bg-color); padding: 15px; border-radius: 12px; border: 1px solid var(--input-border); margin-top: 15px;">
+                            <div style="flex: 1;">
+                                <label
+                                    style="font-size: 11px; font-weight: 600; text-transform: uppercase; color: var(--text-grey); display: block; margin-bottom: 4px;">Preis
+                                    (€)</label>
+                                <input type="number" id="inpPrice" class="form-input"
+                                    style="border:none; border-bottom: 1px solid var(--input-border); border-radius: 0; background:transparent; font-weight:700; padding:5px 0; width: 100%;"
+                                    placeholder="0.00" oninput="calculateTotal()">
+                            </div>
+                            <div style="flex: 1;">
+                                <label
+                                    style="font-size: 11px; font-weight: 600; text-transform: uppercase; color: var(--text-grey); display: block; margin-bottom: 4px;">Rabatt
+                                    (%)</label>
+                                <input type="number" id="inpDiscount" class="form-input"
+                                    style="border:none; border-bottom: 1px solid var(--input-border); border-radius: 0; background:transparent; font-weight:700; padding:5px 0; color:var(--heart-color); width: 100%;"
+                                    placeholder="0" oninput="calculateTotal()">
+                            </div>
+                            <div style="flex: 1; text-align: right;">
+                                <label
+                                    style="font-size: 11px; font-weight: 600; text-transform: uppercase; color: var(--text-grey); display: block; margin-bottom: 4px;">Endpreis</label>
+                                <div id="displayFinalPrice"
+                                    style="font-size: 20px; font-weight: 700; color: var(--text-dark);">0,00 €</div>
+                            </div>
+                        </div>
+                        <div class="form-group" style="margin-top:20px;">
+                            <label>Bewertung (<span id="modalRatingVal">0</span> / 10)</label>
+                            <input type="range" id="inpRating" min="0" max="10" step="1" value="0"
+                                style="width:100%; margin-top:10px; accent-color: var(--text-dark);"
+                                oninput="document.getElementById('modalRatingVal').innerText = this.value">
+                        </div>
+                        <div class="form-group" style="margin-top:20px;">
+                            <label>Notizen & Details</label>
+                            <textarea id="inpDetails" class="form-textarea" rows="3"
+                                placeholder="Größe, Material, Passform..."></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="closePopup('productModal')">Abbrechen</button>
+                <button class="btn-save" onclick="saveProduct()">Speichern</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Menu Drawer (Sidebar) -->
+    <div class="sidebar-overlay" id="mainMenuSidebar" onclick="if(event.target === this) closePopup('mainMenuSidebar')">
+        <div class="sidebar-drawer" style="width: 320px;">
+            <div class="sidebar-header">
+                <h2>Menü</h2>
+                <button class="close-sidebar" onclick="closePopup('mainMenuSidebar')">&times;</button>
+            </div>
+            <div class="sidebar-content" style="padding: 24px; gap: 14px;">
+                <button class="menu-item" onclick="openThemeManager(); toggleMainMenu()">
+                    <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path>
+                    </svg>
+                    Design & Themes
+                </button>
+
+                <button class="menu-item" onclick="toggleDemoMode(); toggleMainMenu()">
+                    <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                    </svg>
+                    <span id="menuDemoLabel">Demo Modus</span>
+                </button>
+
+                <button class="menu-item" onclick="exportData(); toggleMainMenu()">
+                    <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="17 8 12 3 7 8"></polyline>
+                        <line x1="12" y1="3" x2="12" y2="15"></line>
+                    </svg>
+                    Exportieren
+                </button>
+
+                <button class="menu-item" onclick="openImportModal(); toggleMainMenu()">
+                    <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="7 10 12 15 17 10"></polyline>
+                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                    </svg>
+                    Importieren
+                </button>
+
+                <button class="menu-item" onclick="openInfoModal(); toggleMainMenu()">
+                    <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="16" x2="12" y2="12"></line>
+                        <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                    </svg>
+                    Info / Version
+                </button>
+
+                <button class="menu-item destructive" onclick="openResetModal(); toggleMainMenu()">
+                    <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="3 6 5 6 21 6"></polyline>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2">
+                        </path>
+                    </svg>
+                    Reset / Löschen
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Theme Drawer (Sidebar) -->
+    <div class="sidebar-overlay" id="settingsModal" onclick="if(event.target === this) closePopup('settingsModal')">
+        <div class="sidebar-drawer">
+            <div class="sidebar-header">
+                <h2>Design & Themes</h2>
+                <button class="close-sidebar" onclick="closePopup('settingsModal')">&times;</button>
+            </div>
+            <div class="sidebar-content" id="themeManagerContent"></div>
+        </div>
+    </div>
+
+    <!-- View Modal -->
+    <div class="modal-overlay" id="viewModal">
+        <div class="modal-window">
+            <div class="modal-header">
+                <h2>Details</h2><button class="close-modal" onclick="closePopup('viewModal')">&times;</button>
+            </div>
+            <div class="modal-content-split">
+                <div class="image-column">
+                    <div class="main-preview" id="viewImgBox"></div>
+                    <div class="gallery-thumbs" id="viewGalleryThumbs"></div>
+                </div>
+                <div class="form-column">
+                    <div style="min-width: 0;">
+                        <div id="viewCatLabel" style="font-size:12px; color:var(--text-grey); margin-bottom:5px;"></div>
+                        <h1 id="viewName"
+                            style="font-family:'Playfair Display'; font-size:28px; word-wrap: break-word; overflow-wrap: break-word; word-break: break-word; hyphens: auto; line-height: 1.2;">
+                        </h1>
+                    </div>
+                    <div
+                        style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
+                        <div style="font-size:24px; font-weight:700;" id="viewPrice"></div>
+                        <div id="viewRatingBadge" class="rating-badge" style="background: var(--input-border);"></div>
+                    </div>
+                    <a id="viewLink" href="#" target="_blank"
+                        style="display:inline-block; padding:8px 16px; background:var(--input-border); border-radius:20px; text-decoration:none; color:var(--text-dark); font-size:14px;">Zum
+                        Shop ↗</a>
+                    <div id="viewDetailsText" style="white-space:pre-wrap; color:var(--text-grey);"></div>
+                </div>
+            </div>
+            <div class="modal-footer"><button class="btn-cancel"
+                    onclick="closePopup('viewModal')">Schließen</button><button class="btn-save"
+                    id="btnEditFromView">Bearbeiten</button></div>
+        </div>
+    </div>
+
+    <!-- Import Modal -->
+    <div class="modal-overlay" id="importModal">
+        <div class="modal-window" style="height: auto; max-width: 500px;">
+            <div class="modal-header">
+                <h2>Daten importieren</h2><button class="close-modal"
+                    onclick="closePopup('importModal')">&times;</button>
+            </div>
+            <div style="padding: 40px;">
+                <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
+                    <div style="font-size:40px;color:#ccc">↓</div>
+                    <div style="margin-top:10px;color:var(--text-grey)">Datei hierher ziehen oder klicken</div><input
+                        type="file" id="fileInput" style="display:none" accept=".json">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- THEME CREATOR MODAL -->
+    <div class="modal-overlay" id="themeCreatorModal" style="z-index: 10010 !important;">
+        <div class="modal-window theme-creator-window">
+            <div class="modal-header">
+                <h2>Neues Design</h2>
+                <div>
+                    <!-- The Save button will be injected or placed here via JS hook if needed, for now just the close button -->
+                    <button class="close-modal" onclick="closePopup('themeCreatorModal')">&times;</button>
+                </div>
+            </div>
+            <div class="theme-creator-layout" id="themeCreatorContent">
+                <!-- Injected via JS (theme.js) -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Info Modal -->
+    <div class="modal-overlay" id="infoModal">
+        <div class="modal-window" style="height: auto; max-width: 400px;">
+            <div class="modal-header">
+                <h2>Info</h2><button class="close-modal" onclick="closePopup('infoModal')">&times;</button>
+            </div>
+            <div style="padding:40px;text-align:center;">
+                <div style="font-size:18px;margin-bottom:10px;">Shop Manager v5.0</div>
+                <div style="color:var(--text-grey);">Mit Outfit Mixer</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- RESET DATA MODAL (Multi-step) -->
+    <div class="modal-overlay" id="resetModal">
+        <div class="modal-window" style="height: auto; max-width: 500px;">
+            <div class="modal-header">
+                <h2>Daten zurücksetzen</h2>
+                <button class="close-modal" onclick="closePopup('resetModal')">&times;</button>
+            </div>
+
+            <!-- Step 1: Selection -->
+            <div id="resetStepSelection" style="padding: 24px;">
+                <p style="color:var(--text-grey); margin-bottom:20px;">Wähle eine Option aus:</p>
+
+                <div class="reset-option-card selected" onclick="selectResetOption('shop_only', this)">
+                    <div class="reset-icon-box">📦</div>
+                    <div>
+                        <div class="reset-title">Shop-Daten löschen</div>
+                        <div class="reset-desc">Löscht alle Produkte, Kategorien und Shops. Deine Themes und
+                            Einstellungen bleiben erhalten.</div>
+                    </div>
+                    <div class="check-circle"></div>
+                </div>
+
+                <div class="reset-option-card" onclick="selectResetOption('factory_reset', this)">
+                    <div class="reset-icon-box danger">⚠️</div>
+                    <div>
+                        <div class="reset-title">Kompletter Factory Reset</div>
+                        <div class="reset-desc">Löscht ALLES. Produkte, Einstellungen, Custom Themes. Die App wird wie
+                            neu installiert.</div>
+                    </div>
+                    <div class="check-circle"></div>
+                </div>
+
+                <button class="btn-save full-width mt-20" onclick="proceedResetStep()">Weiter</button>
+            </div>
+
+            <!-- Step 2: Confirmation -->
+            <div id="resetStepConfirm" style="padding: 30px; display:none; text-align:center;">
+                <div style="font-size:40px; margin-bottom:15px;">🗑️</div>
+                <h3 style="margin-bottom:10px;">Bist du sicher?</h3>
+                <p style="color:var(--text-grey); margin-bottom:30px;" id="resetConfirmText">Dies kann nicht rückgängig
+                    gemacht werden.</p>
+
+                <div style="display:flex; gap:10px; justify-content:center;">
+                    <button class="btn-cancel" onclick="closePopup('resetModal')">Abbrechen</button>
+                    <button class="btn-save destructive" onclick="executeReset()">Ja, alles löschen</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CONFIRMATION MODAL -->
+    <div class="modal-overlay" id="confirmModal">
+        <div class="modal-window" style="height: auto; max-width: 400px; text-align: center; padding: 30px;">
+            <div style="font-size:40px; margin-bottom:15px;" id="confirmIcon">⚠️</div>
+            <h3 id="confirmTitle" style="margin-bottom:10px;">Bestätigen</h3>
+            <p id="confirmMessage" style="color:var(--text-grey); margin-bottom:30px;">Bist du sicher?</p>
+            <div style="display:flex; gap:10px; justify-content:center;">
+                <button class="btn-cancel" onclick="closePopup('confirmModal')">Abbrechen</button>
+                <button class="btn-save destructive" id="btnConfirmAction">Löschen</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Verknüpfung -->
+    <script src="demoData.js"></script>
+    <script type="module" src="main.js"></script>
+</body>
+
+</html>

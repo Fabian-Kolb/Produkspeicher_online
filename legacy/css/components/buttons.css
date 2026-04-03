@@ -1,0 +1,349 @@
+/* --- BUTTONS --- */
+
+/* Main Button (e.g. Add Product) */
+.main-btn {
+    background-color: var(--text-dark);
+    color: var(--bg-color);
+    border: none;
+    padding: 0 30px;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 15px;
+    min-height: var(--touch-target, 44px);
+    cursor: pointer;
+    transition: opacity 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.main-btn:hover {
+    opacity: 0.9;
+}
+
+/* Tool Button (Settings, Filter Icons) */
+.tool-btn {
+    width: var(--touch-target, 44px);
+    height: var(--touch-target, 44px);
+    border-radius: 50%;
+    border: 1px solid var(--input-border);
+    background: var(--card-bg);
+    color: var(--text-grey);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: 0.2s;
+    font-size: 18px;
+}
+
+.tool-btn:hover {
+    background: var(--input-border);
+    color: var(--text-dark);
+    transform: translateY(-2px);
+}
+
+
+
+/* Category Action Button (Nav) */
+.cat-action-btn {
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 15px;
+    color: var(--text-dark);
+    background: transparent;
+    border: none;
+    padding: 10px 0;
+    border-radius: 20px;
+    cursor: pointer;
+    white-space: nowrap;
+    width: auto;
+    min-width: unset;
+    padding-left: 12px;
+    padding-right: 12px;
+    min-height: 36px;
+    text-align: center;
+    transition: background 0.2s;
+    display: inline-grid !important;
+    justify-items: center;
+    align-items: center;
+    grid-template-columns: 1fr;
+    transition: none !important;
+    animation: none !important;
+    transform: none !important;
+}
+
+.cat-action-btn:hover {
+    background: rgba(0, 0, 0, 0.05);
+}
+
+.cat-action-btn.active {
+    background: var(--text-dark);
+    color: var(--bg-color);
+    padding-left: 0;
+}
+
+.cat-action-btn>* {
+    grid-area: 1 / 1;
+    white-space: nowrap;
+}
+
+/* Plus Circle (Add Section) */
+.plus-circle {
+    width: 70px;
+    height: 70px;
+    background: var(--bg-color);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+    box-shadow: 0 6px 25px rgba(0, 0, 0, 0.08);
+    font-size: 32px;
+    color: var(--text-dark);
+    cursor: pointer;
+    transition: transform 0.3s;
+    border: 1px solid var(--input-border);
+}
+
+
+
+.plus-circle:hover {
+    transform: scale(1.1);
+}
+
+/* Action Pill (Card Menu) */
+.btn-action-pill {
+    width: var(--touch-target, 44px);
+    height: var(--touch-target, 44px);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    background: var(--card-bg);
+    color: var(--text-grey);
+    border: 1px solid var(--input-border);
+    transition: all 0.2s;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.btn-action-pill:hover {
+    background: var(--text-dark);
+    color: white;
+    border-color: var(--text-dark);
+    transform: scale(1.1);
+}
+
+/* Status Buttons */
+.btn-status {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: var(--text-grey);
+    padding: 0;
+    transition: all 0.2s;
+    display: flex;
+}
+
+.btn-status svg {
+    width: 22px;
+    height: 22px;
+}
+
+.btn-status:hover {
+    transform: scale(1.1);
+}
+
+.btn-status.active.btn-bought,
+.btn-bought-xs.active {
+    color: var(--bought-color);
+    background: transparent !important;
+}
+
+.btn-status.active,
+.btn-bookmark-xs.active {
+    color: var(--bookmark-color);
+    background: transparent !important;
+}
+
+.btn-status.btn-wishlist.active,
+.btn-status.btn-wishlist.active:hover {
+    color: var(--bookmark-color);
+}
+
+/* Menu Trigger (Card) */
+.btn-menu-trigger {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    color: var(--text-dark);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 11;
+    transition: all 0.2s ease, opacity 0.2s ease;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    opacity: 0;
+    pointer-events: auto;
+}
+
+.btn-menu-trigger:hover {
+    background: rgba(255, 255, 255, 0.4);
+    transform: scale(1.1);
+}
+
+/* Heart Button Modern */
+.btn-heart-modern {
+    background: transparent;
+    border: none;
+    color: var(--text-grey);
+    cursor: pointer;
+    padding: 0;
+    transition: all 0.2s;
+    display: flex;
+    flex-shrink: 0;
+}
+
+.btn-heart-modern svg {
+    width: 20px;
+    height: 20px;
+}
+
+.btn-heart-modern:hover {
+    color: var(--heart-color);
+    transform: scale(1.1);
+}
+
+.btn-heart-modern.active {
+    color: var(--heart-color);
+}
+
+.btn-heart-modern.active svg {
+    fill: var(--heart-color);
+}
+
+/* Fetch Button */
+.btn-fetch {
+    background: var(--text-dark);
+    color: var(--bg-color);
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: opacity 0.2s;
+}
+
+.btn-fetch:hover {
+    opacity: 0.9;
+}
+
+.btn-fetch.loading .spinner {
+    display: block;
+}
+
+.btn-fetch.loading span {
+    display: none;
+}
+
+/* Modal Buttons */
+.btn-cancel {
+    padding: 12px 24px;
+    min-height: var(--touch-target, 44px);
+    border: 1px solid var(--input-border);
+    background: var(--card-bg);
+    border-radius: 6px;
+    cursor: pointer;
+    color: var(--text-grey);
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-save {
+    padding: 12px 30px;
+    min-height: var(--touch-target, 44px);
+    border: none;
+    background: var(--text-dark);
+    border-radius: 6px;
+    cursor: pointer;
+    color: var(--card-bg);
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* text-transform: uppercase; Removed */
+}
+
+/* Text Only Button */
+.btn-text-only {
+    background: none;
+    border: none;
+    color: var(--text-dark);
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: underline;
+    font-size: 13px;
+}
+
+/* Settings Dots (Trigger) */
+.settings-dots {
+    font-size: 24px;
+    cursor: pointer;
+    color: var(--text-grey);
+    padding: 5px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+
+
+.btn-add-theme {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border: 2px dashed var(--input-border) !important;
+    background: transparent;
+    color: var(--text-grey);
+    height: 70px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.btn-add-theme:hover {
+    border-color: var(--text-dark) !important;
+    color: var(--text-dark);
+}
+
+.back-btn {
+    width: var(--touch-target, 44px);
+    height: var(--touch-target, 44px);
+    border-radius: 50%;
+    background: var(--card-bg);
+    border: 1px solid var(--input-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-dark);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.back-btn svg {
+    width: 20px;
+    height: 20px;
+}

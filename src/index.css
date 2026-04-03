@@ -1,0 +1,91 @@
+@import "tailwindcss";
+
+@theme {
+  --font-playfair: 'Playfair Display', Georgia, serif;
+  --color-brand-light: #f4f4f5;
+  --color-brand-dark: #121212;
+
+  --color-accent-light: #3b82f6;
+  --color-accent-dark: #60a5fa;
+
+  --color-bg-primary: var(--bg-color);
+  --color-bg-card: var(--card-bg);
+  --color-text-primary: var(--text-dark);
+  --color-text-secondary: var(--text-grey);
+  --color-border-primary: var(--input-border);
+  --color-heart: var(--heart-color);
+
+  --animate-wiggle: wiggle 0.3s ease-in-out infinite;
+  
+  @keyframes wiggle {
+    0%, 100% { transform: rotate(-3deg); }
+    50% { transform: rotate(3deg); }
+  }
+}
+
+@layer base {
+  :root {
+    --bg-color: #1a1a1a;
+    --card-bg: #2a2a2a;
+    --text-dark: #ffffff;
+    --text-grey: #a0a0a0;
+    --input-border: #404040;
+    --heart-color: #ef4444;
+    --theme-glass-bg: rgba(42, 42, 42, 0.7);
+    --theme-glass-border: rgba(255, 255, 255, 0.1);
+  }
+
+  /* We keep the dynamic theme variables here, the Live Theme Creator will overwrite them on :root via JS */
+  html, body {
+    @apply min-h-screen w-full bg-[var(--bg-color)] text-[var(--text-dark)] antialiased;
+    font-family: 'Inter', sans-serif;
+    scrollbar-gutter: stable;
+    transition: background-color 0.5s ease;
+  }
+
+  html.glass-enabled {
+    --scrollbar-thumb: var(--scrollbar-glass-thumb, var(--theme-glass-bg));
+    --scrollbar-thumb-hover: var(--scrollbar-glass-hover, rgba(255, 255, 255, 0.3));
+    --scrollbar-border: 1px solid var(--theme-glass-border);
+  }
+
+  html.not-scrollable {
+    --scrollbar-track: var(--scrollbar-thumb, var(--text-grey));
+    --scrollbar-track-border: var(--scrollbar-border, none);
+  }
+
+  body.glass-enabled {
+    /* Gradients are now handled purely via animated React Blobs in AppContainer */
+  }
+
+  /* Custom Scrollbar - Modern & Clean */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: var(--scrollbar-track, transparent);
+    border: var(--scrollbar-track-border, none);
+    border-radius: 10px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--scrollbar-thumb, var(--text-grey));
+    border: var(--scrollbar-border, none);
+    border-radius: 10px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--scrollbar-thumb-hover, var(--text-dark));
+  }
+}
+
+@layer utilities {
+  .glass-panel {
+    @apply bg-[var(--theme-glass-bg)] border border-[var(--theme-glass-border)] backdrop-blur-xl rounded-3xl shadow-[0_8px_32px_rgba(0,0,0,0.05)];
+  }
+  .focus-ring {
+    @apply focus:outline-none focus:ring-2 focus:ring-accent-dark focus:border-transparent;
+  }
+}

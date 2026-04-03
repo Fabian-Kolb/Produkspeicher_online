@@ -1,0 +1,62 @@
+/* --- CORE VARIABLES --- */
+:root {
+    --bg-color: #fcfbf9;
+    --card-bg: #ffffff;
+    --glass-bg: rgba(255, 255, 255, 0.35);
+    /* Tinted darker/greyer for better contrast without losing transparency */
+    --glass-border: rgba(255, 255, 255, 0.4);
+
+    --glass-blur: 25px;
+    --blob-color-1: #3b82f6;
+    --blob-color-2: #8b5cf6;
+    --nav-bg: #e0e0e0;
+    --text-dark: #1a1a1a;
+    --text-grey: #3a3a3a;
+    /* Very dark grey for high contrast on glass */
+    --input-border: #e0e0e0;
+    --header-bg: #fcfbf9;
+    --active-gradient: linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%);
+    --img-bg-gradient: linear-gradient(180deg, #e3f2fd 0%, #f3e5f5 100%);
+    --heart-color: #e74c3c;
+    --bookmark-color: #f39c12;
+    --bought-color: #27ae60;
+    --slider-track: #e0e0e0;
+    --slider-fill: #1a1a1a;
+
+    /* --- TYPOGRAPHY & SPACING (Mobile Optimized) --- */
+    --font-size-xs: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
+    /* 12px -> 14px */
+    --font-size-sm: clamp(0.875rem, 0.8rem + 0.375vw, 1rem);
+    /* 14px -> 16px */
+    --font-size-base: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+    /* 16px -> 18px */
+    --font-size-lg: clamp(1.125rem, 1.05rem + 0.375vw, 1.25rem);
+    /* 18px -> 20px */
+    --font-size-xl: clamp(1.25rem, 1.15rem + 0.5vw, 1.5rem);
+    /* 20px -> 24px */
+    --font-size-xxl: clamp(1.5rem, 1.3rem + 1vw, 2.25rem);
+    /* 24px -> 36px */
+
+    --spacing-1: 8px;
+    --spacing-2: 16px;
+    --spacing-3: 24px;
+    --spacing-4: 32px;
+    --spacing-5: 48px;
+
+    --touch-target: 44px;
+    /* Default minimum for touch */
+}
+
+body.dark-mode {
+    --bg-color: #09090b;
+    --card-bg: #18181b;
+    --glass-bg: rgba(25, 25, 30, 0.4);
+    --glass-border: rgba(255, 255, 255, 0.06);
+    --text-dark: #fafafa;
+    --text-grey: #a1a1aa;
+    --header-bg: #09090b;
+    --input-border: #27272a;
+    --nav-bg: #18181b;
+    --active-gradient: linear-gradient(135deg, #18181b 0%, #27272a 100%);
+    color: var(--text-dark);
+}

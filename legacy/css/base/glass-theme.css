@@ -1,0 +1,478 @@
+/* --- GLOBAL GLASS THEME --- */
+
+/* Applying Glass to Elements when .glass-mode is active */
+html.glass-mode,
+body.glass-mode {
+    background: transparent !important;
+}
+
+body.glass-mode .container,
+body.glass-mode .content-wrapper,
+body.glass-mode .view-section,
+body.glass-mode #mainContent {
+    background: transparent !important;
+}
+
+/* Applying Glass to Main Containers only */
+body.glass-mode .modal-overlay {
+    background: rgba(0, 0, 0, 0.2) !important;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+body.glass-mode header,
+body.glass-mode .secondary-nav-bar,
+body.glass-mode .modal-window,
+body.glass-mode .sidebar-drawer,
+body.glass-mode .card,
+body.glass-mode .shop-card-modern,
+body.glass-mode .main-menu-dropdown,
+body.glass-mode .menu-item,
+body.glass-mode .theme-option-box,
+/* body.glass-mode .secondary-nav-container removed to prevent rectangle background */
+body.glass-mode .search-input-wrapper,
+body.glass-mode .modern-select,
+body.glass-mode .date-picker-container,
+body.glass-mode .dashboard-hero,
+body.glass-mode .stat-card,
+body.glass-mode .budget-widget-card,
+body.glass-mode .chart-section-card,
+body.glass-mode .transaction-item,
+body.glass-mode .draft-item,
+body.glass-mode .deal-card,
+body.glass-mode .glass-panel,
+body.glass-mode .top-nav,
+body.glass-mode .nav-glider,
+body.glass-mode .filter-chip,
+body.glass-mode .nav-bottom-panel,
+body.glass-mode .cat-confirm-btn,
+body.glass-mode .analytics-control-bar,
+body.glass-mode .form-input,
+body.glass-mode .drawer-input,
+body.glass-mode .budget-inline-input,
+body.glass-mode .kpi-card,
+body.glass-mode .add-section,
+body.glass-mode .main-input-group,
+body.glass-mode .dropdown-content,
+body.glass-mode .select-chip {
+    background: var(--glass-bg) !important;
+    backdrop-filter: blur(25px) saturate(120%) !important;
+    -webkit-backdrop-filter: blur(25px) saturate(120%) !important;
+    border: 1px solid var(--glass-border) !important;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.15);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Glass Mode Separator Visibility */
+body.glass-mode .nav-separator {
+    background: rgba(255, 255, 255, 0.4) !important;
+    width: 2px;
+}
+
+body.glass-mode .menu-separator {
+    background: rgba(255, 255, 255, 0.3) !important;
+    height: 1px;
+}
+
+body.glass-mode.dark-mode .nav-separator {
+    background: rgba(255, 255, 255, 0.2) !important;
+}
+
+body.glass-mode.dark-mode .menu-separator {
+    display: none !important;
+}
+
+body.dark-mode .menu-separator {
+    display: none !important;
+}
+
+/* Specific Modal Glass Inputs (Notes & Image URL) */
+body.glass-mode #inpDetails,
+body.glass-mode #inpImgUrl {
+    background: rgba(255, 255, 255, 0.45) !important;
+    backdrop-filter: blur(15px) !important;
+    -webkit-backdrop-filter: blur(15px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+}
+
+body.glass-mode.dark-mode #inpDetails,
+body.glass-mode.dark-mode #inpImgUrl {
+    background: rgba(0, 0, 0, 0.5) !important;
+    /* Matching Dark Mode Glass */
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+}
+
+/* Modal Action Buttons Glass Styling */
+body.glass-mode .btn-save,
+body.glass-mode .btn-cancel {
+    backdrop-filter: blur(10px) !important;
+    -webkit-backdrop-filter: blur(10px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease;
+}
+
+body.glass-mode .btn-save {
+    background: rgba(255, 255, 255, 0.25) !important;
+    /* Light glass for save */
+    color: #000000 !important;
+}
+
+body.glass-mode .btn-cancel {
+    background: rgba(255, 255, 255, 0.1) !important;
+    /* Subtle glass for cancel */
+    color: #333333 !important;
+}
+
+body.glass-mode.dark-mode .btn-save {
+    background: rgba(255, 255, 255, 0.2) !important;
+    color: #ffffff !important;
+    border-color: rgba(255, 255, 255, 0.4) !important;
+}
+
+body.glass-mode.dark-mode .btn-cancel {
+    background: rgba(0, 0, 0, 0.3) !important;
+    color: #cccccc !important;
+    border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+body.glass-mode .btn-save:hover,
+body.glass-mode .btn-cancel:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    border-color: rgba(255, 255, 255, 0.6) !important;
+}
+
+
+/* 2. Fix: Kontrast in der Navigation & Filter (Dark Mode) */
+
+/* FORCE WHITE TEXT for all pills in Dark Mode (Active OR Inactive, Glass OR Solid) */
+body.dark-mode .cat-link,
+body.dark-mode .cat-action-btn,
+body.dark-mode .filter-chip,
+body.dark-mode .range-pill-btn,
+body.dark-mode .deal-badge,
+body.dark-mode .overflow-badge,
+body.dark-mode .btn-text-visible,
+body.dark-mode .nav-text,
+body.dark-mode .top-nav-btn,
+body.dark-mode .search-matched,
+body.dark-mode .search-matched::placeholder,
+body.dark-mode .search-input,
+body.dark-mode .search-input::placeholder {
+    color: #ffffff !important;
+}
+
+/* Ensure hover also stays white */
+body.dark-mode .cat-link:hover,
+body.dark-mode .cat-action-btn:hover,
+body.dark-mode .filter-chip:hover,
+body.dark-mode .range-pill-btn:hover,
+body.dark-mode .btn-text-visible:hover,
+body.dark-mode .nav-text:hover,
+body.dark-mode .top-nav-btn:hover {
+    color: #ffffff !important;
+}
+
+/* Active State Text Clor (Force visibility in Glass Mode) */
+body.glass-mode.dark-mode .cat-link.active,
+body.glass-mode.dark-mode .cat-action-btn.active,
+body.glass-mode.dark-mode .filter-chip.active,
+body.glass-mode.dark-mode .range-pill-btn.active,
+body.glass-mode.dark-mode .top-nav-btn.active,
+body.glass-mode.dark-mode .cat-link.active .btn-text-visible,
+body.glass-mode.dark-mode .cat-action-btn.active .btn-text-visible,
+body.glass-mode.dark-mode .top-nav-btn.active .btn-text-visible {
+    color: #ffffff !important;
+}
+
+/* Active State Styling (PILLED HIGHLIGHTS - Solid Dark Mode) */
+body.dark-mode:not(.glass-mode) .cat-link.active,
+body.dark-mode:not(.glass-mode) .cat-action-btn.active,
+body.dark-mode:not(.glass-mode) .filter-chip.active,
+body.dark-mode:not(.glass-mode) .range-pill-btn.active {
+    background: #ffffff !important;
+    color: #000000 !important;
+    border: 1px solid #ffffff !important;
+}
+
+/* Solid Mode Active Text Overrides (Inherit black color) */
+body.dark-mode:not(.glass-mode) .cat-link.active .btn-text-visible,
+body.dark-mode:not(.glass-mode) .cat-action-btn.active .btn-text-visible,
+body.dark-mode:not(.glass-mode) .top-nav-btn.active,
+body.dark-mode:not(.glass-mode) .top-nav-btn.active .btn-text-visible {
+    color: #000000 !important;
+    background: transparent !important;
+    border: none !important;
+}
+
+/* Match the Glider for Solid Dark Mode */
+body.dark-mode:not(.glass-mode) .nav-glider {
+    background: #ffffff !important;
+}
+
+/* Active State Styling (GLASS HIGHLIGHTS - Glass Dark Mode) */
+/* ONLY apply background to the actual pills, NOT the top nav buttons (they use glider) */
+body.glass-mode.dark-mode .cat-link.active,
+body.glass-mode.dark-mode .cat-action-btn.active,
+body.glass-mode.dark-mode .filter-chip.active,
+body.glass-mode.dark-mode .range-pill-btn.active {
+    background: rgba(255, 255, 255, 0.18) !important;
+    border: none !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Match the Glider for Glass Dark Mode */
+body.glass-mode.dark-mode .nav-glider {
+    background: rgba(255, 255, 255, 0.15) !important;
+    border: 1px solid rgba(255, 255, 255, 0.25) !important;
+}
+
+/* Ensure Top Nav Button remains transparent base (Glider is behind) */
+body.dark-mode .top-nav-btn.active {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+/* --- FONT WEIGHT RULES --- */
+
+/* 1. All Navigation & Filter elements: Normal/Thin by default */
+body.dark-mode .cat-action-btn,
+body.dark-mode .cat-link,
+body.dark-mode .filter-chip,
+body.dark-mode .range-pill-btn,
+body.dark-mode .top-nav-btn {
+    font-weight: 100 !important;
+}
+
+/* 1. Active states: Keep it 100 (Thin) as requested */
+body.dark-mode .cat-action-btn.active,
+body.dark-mode .cat-link.active,
+body.dark-mode .filter-chip.active,
+body.dark-mode .range-pill-btn.active,
+body.dark-mode .top-nav-btn.active {
+    font-weight: 100 !important;
+    transform: none !important;
+}
+
+/* --- END FONT WEIGHT RULES --- */
+
+/* Override for Dark Mode (Both Solid & Glass) - Bold Text for Pills */
+body.dark-mode .range-pill-btn {
+    font-weight: 600 !important;
+}
+
+/* Force "Grey" text & Icons to White in Dark Mode */
+body.dark-mode .card-vendor,
+body.dark-mode .text-grey,
+body.dark-mode .btn-status,
+body.dark-mode .card-shop,
+body.dark-mode .mini-card-vendor,
+body.dark-mode .icon-svg,
+body.dark-mode .search-icon,
+body.dark-mode .modern-select,
+body.dark-mode .search-input::placeholder,
+body.dark-mode .top-nav-btn,
+body.dark-mode .tool-btn svg,
+body.dark-mode .menu-trigger svg {
+    color: #ffffff !important;
+    stroke: #ffffff !important;
+    opacity: 1 !important;
+}
+
+body.dark-mode .icon-svg line,
+body.dark-mode .icon-svg circle,
+body.dark-mode .icon-svg path,
+body.dark-mode .search-icon line,
+body.dark-mode .search-icon circle,
+body.dark-mode .tool-btn svg path,
+body.dark-mode .tool-btn svg line,
+body.dark-mode .tool-btn svg circle,
+body.dark-mode .menu-trigger svg path,
+body.dark-mode .menu-trigger svg line {
+    stroke: #ffffff !important;
+}
+
+/* Base Select Chip (Unselected) in Modals */
+body.glass-mode .select-chip {
+    background: rgba(230, 230, 235, 0.35) !important;
+    color: #111111 !important;
+    font-weight: 600;
+    border: 1px solid rgba(255, 255, 255, 0.4) !important;
+    /* Ensure border transition works */
+    transition: all 0.3s ease, border-width 0.2s ease, border-color 0.2s ease !important;
+}
+
+/* Glass Style for 'Zum Shop' Link in Detail Modal */
+body.glass-mode #viewLink {
+    background: rgba(255, 255, 255, 0.25) !important;
+    backdrop-filter: blur(10px) !important;
+    -webkit-backdrop-filter: blur(10px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+    color: #000000 !important;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+body.glass-mode.dark-mode #viewLink {
+    background: rgba(255, 255, 255, 0.1) !important;
+    color: #ffffff !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+body.glass-mode.dark-mode .select-chip {
+    background: rgba(0, 0, 0, 0.4) !important;
+    /* Darker, more solid background */
+    color: #ffffff !important;
+    /* Lighter text for readability */
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+/* Selected Chip in Modals - "Intense Glass" effect, no glow, Thick Border */
+body.glass-mode .select-chip.selected {
+    background: rgba(215, 215, 225, 0.85) !important;
+    border: 2px solid #333333 !important;
+    /* Thicker, Dark Grey Border for Light Mode */
+    box-shadow: none !important;
+    color: #000000 !important;
+    font-weight: 700;
+}
+
+body.glass-mode.dark-mode .select-chip.selected {
+    background: rgba(255, 255, 255, 0.25) !important;
+    border: 2px solid #ffffff !important;
+    /* Thicker, White Border for Dark Mode */
+    color: #ffffff !important;
+}
+
+
+
+
+/* Ensure text color for all inputs and active links in Dark Mode explicitly white */
+body.glass-mode.dark-mode input,
+body.glass-mode.dark-mode textarea,
+body.glass-mode.dark-mode select,
+body.glass-mode.dark-mode .form-input,
+body.glass-mode.dark-mode .search-input {
+    color: #ffffff !important;
+}
+
+/* Ensure ALL children of glass elements are transparent and have NO extra blur, EXCEPT inputs */
+body.glass-mode .deal-card *:not(input):not(button):not(textarea):not(select):not(.progress-container-unified):not(.progress-bar-segment):not(.deal-badge):not(.overflow-badge):not(.btn-action-pill):not(.plus-circle):not(.mini-card-qty-badge),
+body.glass-mode .card *:not(input):not(button):not(textarea):not(select):not(.progress-container-unified):not(.progress-bar-segment):not(.deal-badge):not(.overflow-badge):not(.btn-action-pill):not(.plus-circle):not(.mini-card-qty-badge),
+body.glass-mode .shop-card-modern *:not(input):not(button):not(textarea):not(select):not(.progress-container-unified):not(.progress-bar-segment):not(.deal-badge):not(.overflow-badge):not(.btn-action-pill):not(.plus-circle):not(.mini-card-qty-badge),
+body.glass-mode .glass-panel *:not(input):not(button):not(textarea):not(select):not(.progress-container-unified):not(.progress-bar-segment):not(.deal-badge):not(.overflow-badge):not(.btn-action-pill):not(.plus-circle):not(.mini-card-qty-badge),
+body.glass-mode .modal-window:not(.theme-creator-window) *:not(input):not(button):not(textarea):not(select):not(.progress-container-unified):not(.progress-bar-segment):not(.deal-badge):not(.overflow-badge):not(.btn-action-pill):not(.plus-circle):not(.mini-card-qty-badge),
+body.glass-mode .sidebar-drawer *:not(input):not(button):not(textarea):not(select):not(.progress-container-unified):not(.progress-bar-segment):not(.deal-badge):not(.overflow-badge):not(.btn-action-pill):not(.plus-circle):not(.mini-card-qty-badge),
+body.glass-mode .stat-card *:not(input):not(button):not(textarea):not(select):not(.progress-container-unified):not(.progress-bar-segment):not(.deal-badge):not(.overflow-badge):not(.btn-action-pill):not(.plus-circle):not(.mini-card-qty-badge),
+body.glass-mode .dashboard-hero *:not(input):not(button):not(textarea):not(select):not(.progress-container-unified):not(.progress-bar-segment):not(.deal-badge):not(.overflow-badge):not(.btn-action-pill):not(.plus-circle):not(.mini-card-qty-badge),
+body.glass-mode .editor-left-panel *:not(input):not(button):not(textarea):not(select):not(.progress-container-unified):not(.progress-bar-segment):not(.deal-badge):not(.overflow-badge):not(.btn-action-pill):not(.plus-circle):not(.mini-card-qty-badge),
+body.glass-mode .editor-right-panel *:not(input):not(button):not(textarea):not(select):not(.progress-container-unified):not(.progress-bar-segment):not(.deal-badge):not(.overflow-badge):not(.btn-action-pill):not(.plus-circle):not(.mini-card-qty-badge),
+body.glass-mode .kpi-card *:not(input):not(button):not(textarea):not(select):not(.progress-container-unified):not(.progress-bar-segment):not(.deal-badge):not(.overflow-badge):not(.btn-action-pill):not(.plus-circle):not(.mini-card-qty-badge),
+body.glass-mode .add-section *:not(input):not(button):not(textarea):not(select):not(.progress-container-unified):not(.progress-bar-segment):not(.deal-badge):not(.overflow-badge):not(.btn-action-pill):not(.plus-circle):not(.mini-card-qty-badge),
+body.glass-mode .budget-widget-card *:not(input):not(button):not(textarea):not(select):not(.progress-container-unified):not(.progress-bar-segment):not(.deal-badge):not(.overflow-badge):not(.btn-action-pill):not(.plus-circle):not(.mini-card-qty-badge),
+body.glass-mode .chart-section-card *:not(input):not(button):not(textarea):not(select):not(.progress-container-unified):not(.progress-bar-segment):not(.deal-badge):not(.overflow-badge):not(.btn-action-pill):not(.plus-circle):not(.mini-card-qty-badge) {
+    background-color: transparent !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
+/* Explicitly allow images to be visible and sharp */
+body.glass-mode .logo-icon {
+    opacity: 1 !important;
+}
+
+/* Ensure background stage is visible when in glass mode */
+#glass-stage {
+    display: none;
+}
+
+body.glass-mode #glass-stage {
+    display: block;
+}
+
+/* Special Case: Inputs need to handle focus and text color */
+body.glass-mode .form-input,
+body.glass-mode .search-input {
+    color: var(--text-dark);
+}
+
+body.glass-mode .form-input::placeholder,
+body.glass-mode .search-input::placeholder {
+    color: var(--text-grey);
+    opacity: 0.7;
+}
+
+body.glass-mode .search-input {
+    background: transparent !important;
+}
+
+/* Remove solid backgrounds from nested items when glass is on */
+body.glass-mode .card .card-content,
+body.glass-mode .modal-window .modal-content-split,
+body.glass-mode .modal-window .image-column,
+body.glass-mode .modal-window .form-column,
+body.glass-mode .modal-window .modal-header,
+body.glass-mode .modal-window .modal-footer,
+body.glass-mode .sidebar-drawer .sidebar-header,
+body.glass-mode .sidebar-drawer .sidebar-content {
+    background: transparent !important;
+}
+
+/* Fallback for browsers that don't support backdrop-filter */
+@supports not (backdrop-filter: blur(5px)) {
+
+    body.glass-mode header,
+    body.glass-mode .secondary-nav-bar,
+    body.glass-mode .modal-window,
+    body.glass-mode .card,
+    body.glass-mode .stat-card {
+        background: var(--card-bg) !important;
+        opacity: 0.95;
+    }
+}
+
+/* Light Mode Glass Specific Text Fixes */
+body.glass-mode:not(.dark-mode) .form-section-title,
+body.glass-mode:not(.dark-mode) .viewCatLabel,
+body.glass-mode:not(.dark-mode) #viewDetailsText,
+body.glass-mode:not(.dark-mode) .modal-content-split .form-column label {
+    color: #333333 !important;
+    /* Very dark grey for high contrast */
+    font-weight: 600;
+}
+
+body.glass-mode:not(.dark-mode) .modal-window,
+body.glass-mode:not(.dark-mode) .sidebar-drawer {
+    background: rgba(255, 255, 255, 0.45) !important;
+    /* Lighter grey/white tint for the modal surface */
+}
+
+
+/* Glass Mode Hover-Effekte für Karten */
+body.glass-mode .stat-card:hover,
+body.glass-mode .kpi-card:hover,
+body.glass-mode .card:hover,
+body.glass-mode .menu-item:hover,
+body.glass-mode .theme-option-box:hover,
+body.glass-mode .shop-card-modern:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15) !important;
+    border-color: rgba(255, 255, 255, 0.6) !important;
+}
+
+body.glass-mode.dark-mode .stat-card:hover,
+body.glass-mode.dark-mode .kpi-card:hover,
+body.glass-mode.dark-mode .card:hover,
+body.glass-mode.dark-mode .menu-item:hover,
+body.glass-mode.dark-mode .theme-option-box:hover,
+body.glass-mode.dark-mode .shop-card-modern:hover {
+    border-color: rgba(255, 255, 255, 0.4) !important;
+    background: rgba(255, 255, 255, 0.1) !important;
+}
+
+body.glass-mode .select-chip:hover,
+body.glass-mode .filter-chip:hover {
+    background: rgba(255, 255, 255, 0.2) !important;
+    transform: translateY(-2px);
+}

@@ -1,0 +1,328 @@
+/* --- PRODUCT & GENERAL FEATURES --- */
+
+/* ADD SECTION */
+.add-section {
+    background: var(--active-gradient);
+    border-radius: 20px;
+    margin-bottom: 40px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.04);
+    overflow: hidden;
+    border: 1px solid var(--input-border);
+    display: none;
+    transition: all 0.3s ease;
+}
+
+/* Add Section Glass Removed */
+
+.add-section.visible {
+    display: block;
+    animation: fadeIn 0.4s ease-out;
+}
+
+.add-section-inner {
+    padding: 60px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.add-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 32px;
+    margin: 0 0 15px 0;
+    color: var(--text-dark);
+}
+
+/* SHARED FILTER SECTION */
+#sharedFilterSection {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+
+    /* Animation matching secondaryNavContainer */
+    margin-top: -120px;
+    opacity: 0;
+    pointer-events: none;
+    transition: margin-top 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease, margin-bottom 0.5s ease;
+    overflow: visible;
+    position: relative;
+    z-index: 1;
+}
+
+#sharedFilterSection.visible {
+    display: flex;
+    /* Added to ensure column layout */
+    align-items: center;
+    /* PERFECT CENTERING OF ALL ROWS */
+    opacity: 1;
+    pointer-events: all;
+    margin-top: 0;
+    margin-bottom: 50px;
+}
+
+#sharedFilterSection.pill-exit {
+    opacity: 0;
+    pointer-events: none;
+    margin-top: -120px;
+    margin-bottom: 0;
+}
+
+.primary-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    background: transparent;
+    padding: 10px;
+    width: 100%;
+    /* Ensure it spans full width to center effectively */
+}
+
+/* Unifying Search & Sort into Sleek Pills */
+#sharedFilterSection .search-input-wrapper,
+#sharedFilterSection .modern-select {
+    height: 44px;
+    display: flex;
+    align-items: center;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+#sharedFilterSection .search-input {
+    height: 100%;
+    width: 240px;
+    font-size: 14px;
+    border-color: var(--input-border);
+}
+
+#sharedFilterSection .modern-select {
+    padding-right: 40px;
+    font-size: 14px;
+    font-weight: 500;
+    border-color: var(--input-border);
+}
+
+/* Status Chips Group Positioning */
+.status-chip-group {
+    display: flex;
+    gap: 8px;
+}
+
+/* Glass Refinements for Primary Controls */
+body.glass-mode #sharedFilterSection .search-input,
+body.glass-mode #sharedFilterSection .modern-select {
+    background: var(--glass-bg) !important;
+    backdrop-filter: blur(20px) saturate(140%) !important;
+    -webkit-backdrop-filter: blur(20px) saturate(140%) !important;
+    border: 1px solid var(--glass-border) !important;
+    box-shadow:
+        inset 0 1px 1px rgba(255, 255, 255, 0.4),
+        0 4px 15px rgba(0, 0, 0, 0.05) !important;
+}
+
+body.glass-mode.dark-mode #sharedFilterSection .search-input,
+body.glass-mode.dark-mode #sharedFilterSection .modern-select {
+    background: rgba(25, 25, 30, 0.45) !important;
+    color: #ffffff !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    box-shadow:
+        inset 0 1px 1px rgba(255, 255, 255, 0.1),
+        0 8px 25px rgba(0, 0, 0, 0.2) !important;
+}
+
+body.glass-mode.dark-mode #sharedFilterSection .search-input::placeholder {
+    color: rgba(255, 255, 255, 0.4) !important;
+}
+
+/* PRODUCT GRID */
+.grid-container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    /* 2x on Mobile */
+    gap: 8px;
+    /* Further reduced from 12px */
+    padding-bottom: 40px;
+}
+
+@media (min-width: 640px) {
+    #btnToggleGrid {
+        display: none !important;
+    }
+}
+
+@media (max-width: 639px) {
+    body.mobile-grid-single .grid-container {
+        grid-template-columns: repeat(1, 1fr) !important;
+    }
+}
+
+@media (min-width: 640px) {
+    .grid-container {
+        gap: 20px;
+        grid-template-columns: repeat(3, 1fr);
+        /* Bump up for tablet */
+    }
+}
+
+@media (min-width: 768px) {
+    .grid-container {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (min-width: 1024px) {
+    .grid-container {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+@media (min-width: 1280px) {
+    .grid-container {
+        grid-template-columns: repeat(5, 1fr);
+    }
+}
+
+@media (min-width: 1536px) {
+    .grid-container {
+        grid-template-columns: repeat(6, 1fr);
+    }
+}
+
+/* THEME MANAGER / LIST */
+.theme-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap: 15px;
+}
+
+.theme-item {
+    cursor: pointer;
+    text-align: center;
+    position: relative;
+    padding: 5px;
+    border-radius: 8px;
+    transition: transform 0.2s;
+    border: 2px solid transparent;
+}
+
+.theme-item:hover {
+    transform: translateY(-2px);
+}
+
+.theme-item.active {
+    font-weight: 700;
+    border-color: var(--text-dark);
+}
+
+.theme-name {
+    margin-top: 5px;
+    font-size: 12px;
+}
+
+.theme-item.active>div:first-child {
+    border-color: var(--text-dark) !important;
+}
+
+.theme-controls {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding-right: 20px;
+    border-right: 1px solid var(--input-border);
+}
+
+/* MANUAL UPLOAD & OTHERS */
+.manual-upload-trigger {
+    margin-top: 15px;
+    width: 100%;
+    text-align: center;
+    border-top: 1px solid var(--input-border);
+    padding-top: 15px;
+}
+
+/* SPACER HELPERS */
+.btn-text-spacer {
+    font-weight: 700;
+    visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
+    user-select: none;
+}
+
+.btn-text-visible {
+    z-index: 1;
+    font-weight: 500;
+}
+
+.cat-link.active .btn-text-visible,
+.top-nav-btn.active .btn-text-visible,
+.cat-action-btn.active .btn-text-visible {
+    font-weight: 600;
+}
+
+/* WEBSITES GRID MODERN (Shop Grid) */
+.websites-grid-modern {
+    display: grid;
+    grid-template-columns: repeat(1, 1fr);
+    gap: 20px;
+}
+
+@media (min-width: 640px) {
+    .websites-grid-modern {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (min-width: 768px) {
+    .websites-grid-modern {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (min-width: 1024px) {
+    .websites-grid-modern {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+@media (min-width: 1280px) {
+    .websites-grid-modern {
+        grid-template-columns: repeat(5, 1fr);
+    }
+}
+
+@media (min-width: 1536px) {
+    .websites-grid-modern {
+        grid-template-columns: repeat(6, 1fr);
+    }
+}
+
+.modules-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+/* Icons */
+.icon-svg {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+/* Glass Enabled Features REMOVED */
+
+/* Ensure inner elements don't block blur */
+.sub-filter-panel>*,
+.nav-bottom-panel>*,
+.budget-widget-card>*,
+.chart-section-card>* {
+    z-index: 1;
+    position: relative;
+}

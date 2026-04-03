@@ -1,0 +1,1295 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;500;600&display=swap');
+
+/* --- NAVIGATION --- */
+
+header {
+    background: var(--header-bg);
+    min-height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    /* Enforce wrapping */
+    padding: 0 16px;
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 9000;
+    border-bottom: 1px solid var(--input-border);
+    box-sizing: border-box;
+}
+
+@media (min-width: 768px) {
+    header {
+        padding: 0 32px;
+        flex-wrap: nowrap;
+        height: 80px;
+    }
+}
+
+@media (max-width: 767px) {
+    header {
+        padding: 10px 16px;
+        height: auto;
+    }
+
+    .top-nav {
+        order: 3;
+        width: 100%;
+        margin-top: 10px;
+        justify-content: flex-start;
+        padding-bottom: 8px;
+        /* Extra padding for scrollbar visibility */
+    }
+
+    .logo {
+        font-size: 20px;
+        gap: 10px;
+    }
+
+    .logo-icon {
+        width: 28px;
+        height: 28px;
+        font-size: 14px;
+    }
+
+    .menu-trigger {
+        width: 36px !important;
+        height: 36px !important;
+        min-height: 36px !important;
+        font-size: 16px !important;
+    }
+}
+
+
+
+.logo {
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    font-size: 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--text-dark);
+    flex: 1;
+}
+
+.logo-icon {
+    background: var(--text-dark);
+    color: var(--bg-color);
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+}
+
+.top-nav {
+    display: flex;
+    gap: 8px;
+    background: var(--nav-bg);
+    padding: 6px;
+    border-radius: 50px;
+    position: relative;
+    align-items: center;
+    max-width: 100%;
+    overflow-x: auto;
+    scrollbar-width: none;
+    /* Firefox */
+}
+
+.top-nav::-webkit-scrollbar {
+    display: none;
+    /* Safari and Chrome */
+}
+
+
+
+.nav-glider {
+    position: absolute;
+    height: calc(100% - 12px);
+    top: 6px;
+    left: 0;
+    width: 0;
+    background: var(--card-bg);
+    border-radius: 40px;
+    z-index: 1;
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: none;
+    opacity: 0;
+    pointer-events: none;
+    /* Styles for solid mode fallback */
+    background: #ffffff;
+}
+
+body.dark-mode .nav-glider {
+    background: #000000;
+}
+
+/* Erzwingt die weiche Animation auch im Glass Mode */
+body.glass-mode .nav-glider {
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    opacity: 1 !important;
+    background: rgba(255, 255, 255, 0.6) !important;
+    backdrop-filter: blur(15px) !important;
+    -webkit-backdrop-filter: blur(15px) !important;
+    box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.2) !important;
+    border: 2px solid rgba(255, 255, 255, 0.65) !important;
+}
+
+body.glass-mode.dark-mode .nav-glider {
+    background: rgba(255, 255, 255, 0.18) !important;
+    border: none !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2) !important;
+    backdrop-filter: blur(25px) saturate(120%) !important;
+    -webkit-backdrop-filter: blur(25px) saturate(120%) !important;
+}
+
+
+
+.top-nav-btn {
+    padding: 10px 24px;
+    border: none;
+    background: transparent !important;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-grey);
+    cursor: pointer;
+    border-radius: 40px;
+    position: relative;
+    z-index: 2;
+    transition: color 0.4s ease;
+    user-select: none;
+    box-shadow: none !important;
+    display: inline-grid !important;
+    justify-items: center;
+    align-items: center;
+    grid-template-columns: 1fr;
+    width: auto;
+    min-width: unset;
+    min-height: 36px;
+    text-align: center;
+}
+
+.top-nav-btn:hover {
+    color: var(--text-dark);
+}
+
+.top-nav-btn.active {
+    color: var(--text-dark);
+    font-weight: 600;
+}
+
+
+
+.top-nav-btn>* {
+    grid-area: 1 / 1;
+    white-space: nowrap;
+}
+
+.header-right-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 0 0 auto;
+    /* Prevent shrinking */
+    justify-content: flex-end;
+}
+
+.header-tools {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+/* SECONDARY NAV (THE PILL) */
+.secondary-nav-container {
+    /* Container muss unsichtbar sein, nur der Inhalt darf wirken */
+    background: transparent !important;
+
+    box-shadow: none !important;
+
+    /* Layout-Werte beibehalten */
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    position: relative;
+    z-index: 1000 !important;
+    height: 90px;
+    padding: 20px 0;
+    margin-top: -90px;
+    opacity: 0;
+    pointer-events: none;
+    transition: margin-top 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease;
+    overflow: visible !important;
+}
+
+.secondary-nav-container.visible {
+    margin-top: 0;
+    opacity: 1;
+    pointer-events: all;
+    transform: none;
+    /* Reset transform scale from previous css if present, or keep simple */
+}
+
+.secondary-nav-container.pill-exit {
+    margin-top: -90px;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.secondary-nav-bar {
+    display: flex;
+    flex-direction: column;
+    /* Zentriert die Kind-Elemente (Rows) horizontal */
+    background: var(--card-bg);
+    border-radius: 24px;
+    /* MATCHES 48px HEIGHT */
+    border: 1px solid var(--input-border);
+    box-shadow: none;
+
+    /* Breite anpassen: Nicht starr, sondern flexibel */
+    width: auto;
+    min-width: 350px;
+    max-width: 100%;
+    /* Force it to bound within the screen */
+
+    margin: 0 auto;
+    /* Pille selbst zentrieren */
+    position: relative;
+    overflow: hidden !important;
+    /* Changed from visible so it clips children properly on small screens */
+}
+
+
+
+.nav-top-row {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 0 10px;
+    min-height: 48px;
+    /* Changed from fixed height */
+    /* Compact height */
+}
+
+/* MOBILE PILL SPLIT (2 Rows) */
+@media (max-width: 768px) {
+    .secondary-nav-container {
+        height: auto;
+        min-height: 120px;
+        padding: 10px 16px;
+        /* Added matching 16px padding */
+        margin-top: -150px;
+        box-sizing: border-box;
+        /* To ensure padding does not break layout */
+    }
+
+    .secondary-nav-container.pill-exit {
+        margin-top: -150px;
+    }
+
+    .secondary-nav-bar {
+        border-radius: 20px;
+        width: 100%;
+        min-width: unset;
+    }
+
+    .nav-top-row {
+        flex-wrap: wrap;
+        height: auto;
+        padding: 8px;
+        gap: 6px;
+        position: relative;
+        /* Anchor for absolute gear icon */
+        justify-content: center;
+        /* Center row 1 elements */
+    }
+
+    /* Row 1 Elements */
+    .nav-top-row .cat-action-btn {
+        order: 1;
+        flex-grow: 0;
+        margin: 0 auto;
+        /* True center */
+    }
+
+    .nav-top-row .nav-tools-btn {
+        order: 2;
+        position: absolute;
+        right: 8px;
+        top: 8px;
+        margin-left: 0;
+        /* Remove auto push */
+    }
+
+    /* Hide separators to save space */
+    .nav-top-row .nav-separator {
+        display: none;
+    }
+
+    /* Row 2 Elements: The slider */
+    .nav-top-row .nav-scroll-area {
+        order: 3;
+        width: 100%;
+        flex: 1 1 100%;
+        /* Force onto a new line */
+        padding-top: 6px;
+        border-top: 1px solid var(--input-border);
+        /* Divider between action and categories */
+        height: auto;
+        min-height: 48px;
+    }
+}
+
+.nav-separator {
+    width: 1px;
+    height: 30px;
+    background: var(--input-border);
+    margin: 0 10px;
+}
+
+
+
+.nav-scroll-area {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    /* Start on left to allow scrolling */
+    gap: 5px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+    white-space: nowrap;
+    width: auto;
+    max-width: 800px;
+    min-width: 150px;
+    flex-grow: 1;
+    height: 100%;
+    scrollbar-gutter: stable;
+    cursor: grab;
+    user-select: none;
+    transition: none !important;
+    animation: none !important;
+    transform: none !important;
+    scroll-behavior: auto !important;
+}
+
+.nav-scroll-area::-webkit-scrollbar {
+    display: none;
+}
+
+.nav-scroll-area.active {
+    cursor: grabbing;
+}
+
+.nav-scroll-area.dragging .cat-link {
+    pointer-events: none;
+}
+
+.cat-link {
+    font-family: 'Inter', sans-serif;
+    padding: 8px 12px;
+    border: none;
+    background: transparent;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-grey);
+    cursor: pointer;
+    border-radius: 30px;
+    white-space: nowrap;
+    display: inline-grid !important;
+    justify-items: center;
+    align-items: center;
+    grid-template-columns: 1fr;
+    min-height: 36px;
+}
+
+.cat-link.active {
+    background: var(--text-dark);
+    color: var(--bg-color);
+    font-weight: 600;
+    box-shadow: none;
+    transition: all 0.3s ease;
+}
+
+/* Fix: Dark Solid Mode - Ensure text is dark on the white pill */
+/* Hintergrund ist --text-dark (weiß im Dark Mode), also muss Text dunkel sein */
+body.dark-mode:not(.glass-mode) .cat-link.active {
+    color: var(--bg-color);
+}
+
+/* Fix: Light Glass Mode - Glass Fill Highlight */
+body.glass-mode .cat-link.active,
+body.glass-mode .cat-action-btn.active {
+    background: rgba(255, 255, 255, 0.6) !important;
+    color: #000000 !important;
+    /* Always black text on light glass active links */
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.2);
+    border: 2px solid rgba(255, 255, 255, 0.65) !important;
+}
+
+/* Dark Glass Mode Adjustment (Inherited logic or specific tweak if needed to maintain contrast) */
+body.glass-mode.dark-mode .cat-link.active,
+body.glass-mode.dark-mode .cat-action-btn.active {
+    background: rgba(255, 255, 255, 0.15) !important;
+    color: #ffffff !important;
+    /* Back to white text for Dark Mode as requested */
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+
+
+.cat-link>* {
+    grid-area: 1 / 1;
+    white-space: nowrap;
+}
+
+.cat-link.editable {
+    border: 1px dashed var(--text-grey);
+    opacity: 1;
+    background: transparent !important;
+    color: var(--text-dark) !important;
+    font-weight: 500;
+    box-shadow: none;
+    cursor: grab;
+    transform: scale(0.95);
+}
+
+.cat-link.dragging {
+    opacity: 0.5 !important;
+    cursor: grabbing !important;
+    transition: none !important;
+    animation: none !important;
+}
+
+.cat-link.drag-over {
+    background: rgba(0, 0, 0, 0.05) !important;
+    border: 1px dashed var(--text-dark) !important;
+    transform: scale(1.05);
+}
+
+.cat-link.editable.shaking {
+    animation: shake 0.3s infinite ease-in-out !important;
+    border-color: #ff4d4d;
+    color: #ff4d4d !important;
+    cursor: pointer;
+}
+
+/* --- ZAHNRAD-MENÜ (Pill-Right Strategy) --- */
+
+.nav-bottom-panel {
+    /* Positioned to the right of the pill */
+    position: absolute !important;
+    top: 50% !important;
+    left: 100% !important;
+    /* Move movement to transform for guaranteed animation */
+    transform: translate(-20px, -50%) scale(0.8);
+    z-index: 99999 !important;
+
+    /* Removed isolation to ensure it can stack above elements outside its parent */
+
+    /* 2. Basis-Layout */
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    border-radius: 24px;
+    padding: 0 12px !important;
+    height: 48px !important;
+    /* MATCHES 48px EXACTLY */
+
+    /* 3. Animation */
+    transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease;
+    opacity: 0;
+    pointer-events: none;
+    white-space: nowrap;
+
+    /* 4. SOLID MODE (Default) - Helle Pille */
+    background: var(--card-bg) !important;
+    border: 1px solid var(--input-border) !important;
+    box-shadow:
+        0 15px 50px rgba(0, 0, 0, 0.08),
+        inset 0 1px 1px rgba(255, 255, 255, 0.6) !important;
+}
+
+.nav-bottom-panel .cat-input {
+    background: rgba(0, 0, 0, 0.06) !important;
+    border: none !important;
+    border-radius: 20px !important;
+    padding: 0 14px !important;
+    width: 180px !important;
+    height: 32px !important;
+    /* Scaled to 32px */
+    line-height: 32px;
+    box-sizing: border-box !important;
+    margin: 0 !important;
+    color: var(--text-dark);
+    font-size: 14px !important;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1) !important;
+    outline: none !important;
+}
+
+body.dark-mode .nav-bottom-panel .cat-input {
+    background: rgba(255, 255, 255, 0.08) !important;
+    color: #ffffff;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Glass Mode Input Refinement - No extra blur allowed */
+body.glass-mode .nav-bottom-panel .cat-input {
+    background: rgba(0, 0, 0, 0.04) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
+/* Consolidate: Dark mode logic is already handled above in the dark-mode override */
+
+
+/* OFFENER ZUSTAND */
+.nav-bottom-panel.show {
+    opacity: 1;
+    /* Slide out to the right via transform */
+    transform: translate(15px, -50%) scale(1);
+    pointer-events: auto;
+}
+
+
+
+/* Spezifische Styling für Trash & Plus in den Nav-Menüs (Unifiziert) */
+
+/* 1. Mülleimer (in BEIDEN Menüs) */
+.sub-filter-panel .nav-tools-btn,
+.nav-bottom-panel .nav-tools-btn {
+    transform: none !important;
+    /* Rotation & Scale stoppen */
+    transition: all 0.2s ease !important;
+    border: 1px solid var(--input-border) !important;
+    background: transparent !important;
+}
+
+.sub-filter-panel .nav-tools-btn:hover,
+.nav-bottom-panel .nav-tools-btn:hover {
+    transform: none !important;
+    background: rgba(0, 0, 0, 0.05) !important;
+    color: var(--text-dark) !important;
+}
+
+body.dark-mode .sub-filter-panel .nav-tools-btn:hover,
+body.dark-mode .nav-bottom-panel .nav-tools-btn:hover {
+    background: rgba(255, 255, 255, 0.1) !important;
+    color: #ffffff !important;
+}
+
+/* 2. Plus-Button (in BEIDEN Menüs) */
+.sub-filter-panel .cat-confirm-btn,
+.nav-bottom-panel .cat-confirm-btn {
+    width: 36px !important;
+    height: 36px !important;
+    border-radius: 50% !important;
+    border: 1px solid var(--input-border) !important;
+    background: var(--card-bg) !important;
+    color: var(--text-dark) !important;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05) !important;
+    cursor: pointer;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+    margin-left: 5px;
+}
+
+/* Hover im Solid Mode (Subtile Hervorhebung) */
+.sub-filter-panel .cat-confirm-btn:hover,
+.nav-bottom-panel .cat-confirm-btn:hover {
+    transform: none !important;
+    /* Kein Zoom */
+    background: var(--input-border) !important;
+    /* Leicht dunkler/gefüllter */
+    color: var(--text-dark) !important;
+    /* Farbe bleibt gleich */
+    border-color: var(--text-grey) !important;
+}
+
+/* Glass Mode Basis-Zustand */
+body.glass-mode .sub-filter-panel .cat-confirm-btn,
+body.glass-mode .nav-bottom-panel .cat-confirm-btn {
+    background: var(--glass-bg) !important;
+    backdrop-filter: blur(10px) !important;
+    border: 1px solid var(--glass-border) !important;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Hover im Glass Mode (Milchiger Effekt) */
+body.glass-mode .sub-filter-panel .cat-confirm-btn:hover,
+body.glass-mode .nav-bottom-panel .cat-confirm-btn:hover {
+    background: rgba(255, 255, 255, 0.5) !important;
+    /* Stärkeres Glas */
+    backdrop-filter: blur(15px) !important;
+}
+
+
+/* Basis-Styling für Tool-Buttons (Zahnrad) - Transparent by default */
+.nav-tools-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: none;
+    background: transparent;
+    color: var(--text-grey);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* Langsame, federnde Rotation (0.6s) */
+    transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.2s, color 0.2s, border-color 0.2s;
+    margin-left: 5px;
+    flex-shrink: 0;
+}
+
+/* 2. Aktiver Zustand (Menü ist offen): Zahnrad dreht sich */
+.nav-top-row .nav-tools-btn.active,
+.sub-filter-tools .nav-tools-btn.active {
+    /* 90 Grad Drehung im Uhrzeigersinn */
+    transform: rotate(90deg) !important;
+
+    /* WICHTIG: Keine Box, nur Icon-Farbe */
+    background: transparent !important;
+    color: var(--text-dark) !important;
+    border: none !important;
+}
+
+/* 3. Hover-Effekt: Mode-specific Neutral Highlights */
+.nav-top-row .nav-tools-btn:hover,
+.sub-filter-tools .nav-tools-btn:hover {
+    transform: rotate(45deg);
+    background: rgba(0, 0, 0, 0.05) !important;
+    color: var(--text-dark) !important;
+}
+
+/* Dark Mode Hover */
+body.dark-mode .nav-top-row .nav-tools-btn:hover,
+body.dark-mode .sub-filter-tools .nav-tools-btn:hover {
+    background: rgba(255, 255, 255, 0.1) !important;
+    color: #ffffff !important;
+}
+
+/* Glass Mode Hover (Frosted effect) */
+body.glass-mode .nav-top-row .nav-tools-btn:hover,
+body.glass-mode .sub-filter-tools .nav-tools-btn:hover {
+    background: rgba(255, 255, 255, 0.25) !important;
+    backdrop-filter: blur(10px) !important;
+    -webkit-backdrop-filter: blur(10px) !important;
+    color: var(--text-dark) !important;
+}
+
+body.glass-mode.dark-mode .nav-top-row .nav-tools-btn:hover,
+body.glass-mode.dark-mode .sub-filter-tools .nav-tools-btn:hover {
+    background: rgba(255, 255, 255, 0.15) !important;
+    color: #ffffff !important;
+}
+
+/* Glass Mode Anpassung - Keep transparent */
+body.glass-mode .nav-tools-btn {
+    background: transparent;
+    backdrop-filter: none;
+    border: none;
+    box-shadow: none;
+}
+
+/* 2. SUB-FILTER MENU (Targeted Glass Rebuild) */
+
+/* 1. Der Container: Jetzt ein Pill-Shape Hintergrund, wie beim nav-bottom-panel */
+.sub-filter-panel {
+    display: flex !important;
+    align-items: center;
+    gap: 8px;
+    border-radius: 100px;
+
+    /* Animation state: Hidden */
+    width: 0;
+    max-width: 0;
+    opacity: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    /* CRITICAL for smooth width animation */
+    height: 40px;
+
+    /* Base state: No border, no padding to allow smooth expansion */
+    border-width: 0;
+    padding: 0 !important;
+    margin: 0 !important;
+    border-style: solid;
+
+    transition: max-width 0.8s ease, min-width 0.8s ease, padding 0.4s ease, opacity 0.3s ease, border-width 0.3s ease;
+
+    pointer-events: none;
+
+    /* SOLID MODE (Default) */
+    background: var(--card-bg);
+    border-color: var(--input-border);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.05);
+
+    /* Layering */
+    z-index: 9999 !important;
+}
+
+/* SOLID DARK MODE */
+body.dark-mode .sub-filter-panel {
+    background: #18181b;
+    border-color: #27272a;
+}
+
+body.glass-mode .sub-filter-panel {
+    background: var(--glass-bg) !important;
+    backdrop-filter: blur(25px) saturate(120%) !important;
+    -webkit-backdrop-filter: blur(25px) saturate(120%) !important;
+    border-color: rgba(255, 255, 255, 0.5) !important;
+    box-shadow:
+        inset 0 1px 1px rgba(255, 255, 255, 0.4),
+        0 10px 30px rgba(0, 0, 0, 0.1) !important;
+}
+
+body.glass-mode.dark-mode .sub-filter-panel {
+    background: rgba(25, 25, 30, 0.45) !important;
+    border-color: rgba(255, 255, 255, 0.1) !important;
+    box-shadow:
+        inset 0 1px 1px rgba(255, 255, 255, 0.1),
+        0 10px 40px rgba(0, 0, 0, 0.4) !important;
+}
+
+/* 2. Geöffneter Zustand - Glassy Pill matching nav-bottom-panel */
+/* 2. Geöffneter Zustand - Glassy Pill matching nav-bottom-panel */
+.sub-filter-panel.show {
+    opacity: 1;
+    max-width: 600px;
+    /* Restore width behavior */
+    width: auto !important;
+    min-width: 250px;
+
+    background: var(--card-bg) !important;
+    border-width: 1px;
+    /* Animate to 1px */
+    border-style: solid;
+    border-color: var(--input-border) !important;
+
+    border-radius: 50px !important;
+    padding: 4px 10px !important;
+    /* Animate to padding */
+
+    pointer-events: auto;
+    box-shadow:
+        0 10px 30px rgba(0, 0, 0, 0.05),
+        inset 0 1px 1px rgba(255, 255, 255, 0.6) !important;
+}
+
+/* Glass Mode Restoration - Light Glassy Pill */
+body.glass-mode .sub-filter-panel.show {
+    background: rgba(255, 255, 255, 0.45) !important;
+    /* Less bright, more transparent */
+    backdrop-filter: blur(20px) saturate(160%) !important;
+    -webkit-backdrop-filter: blur(20px) saturate(160%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.5) !important;
+    box-shadow:
+        inset 0 1px 1px rgba(255, 255, 255, 0.4),
+        0 10px 30px rgba(0, 0, 0, 0.08) !important;
+}
+
+body.glass-mode.dark-mode .sub-filter-panel.show {
+    background: rgba(25, 25, 30, 0.5) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    box-shadow:
+        inset 0 1px 1px rgba(255, 255, 255, 0.05),
+        0 20px 50px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* 3. Input Refinement - Subtler Embedded Rille */
+.sub-filter-panel .cat-input {
+    background: rgba(0, 0, 0, 0.04) !important;
+    /* Even subtler to let glass through */
+    border: none !important;
+    border-radius: 20px !important;
+    padding: 0 14px !important;
+    width: 160px !important;
+    height: 28px !important;
+    line-height: 28px;
+    box-sizing: border-box !important;
+    margin: 0 !important;
+    color: var(--text-dark);
+    font-size: 13.5px !important;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.06) !important;
+    outline: none !important;
+}
+
+body.dark-mode .sub-filter-panel .cat-input {
+    background: rgba(255, 255, 255, 0.05) !important;
+    color: #ffffff;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* 4. Icons & Buttons - Compact & Embedded Circles (Global for both Editor Panels) */
+.sub-filter-panel .nav-tools-btn,
+.nav-bottom-panel .nav-tools-btn {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    width: 28px !important;
+    height: 28px !important;
+    border-radius: 50% !important;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0 !important;
+    margin: 0 !important;
+    font-size: 14px !important;
+    transition: background 0.2s ease !important;
+}
+
+.sub-filter-panel .nav-tools-btn:hover,
+.nav-bottom-panel .nav-tools-btn:hover {
+    background: rgba(0, 0, 0, 0.05) !important;
+}
+
+body.dark-mode .sub-filter-panel .nav-tools-btn:hover,
+body.dark-mode .nav-bottom-panel .nav-tools-btn:hover {
+    background: rgba(255, 255, 255, 0.1) !important;
+}
+
+.sub-filter-panel .cat-confirm-btn,
+.nav-bottom-panel .cat-confirm-btn {
+    background: rgba(0, 0, 0, 0.05) !important;
+    /* Subtle ghost look for light mode */
+    color: #18181b !important;
+    /* Black Plus in light mode as requested */
+    border: 1px solid rgba(0, 0, 0, 0.1) !important;
+    box-shadow: none !important;
+    width: 28px !important;
+    height: 28px !important;
+    border-radius: 50% !important;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0 !important;
+    margin: 0 !important;
+    font-size: 14px !important;
+    transition: all 0.3s ease !important;
+}
+
+.sub-filter-panel .cat-confirm-btn:hover,
+.nav-bottom-panel .cat-confirm-btn:hover {
+    background: rgba(0, 0, 0, 0.1) !important;
+    border-color: rgba(0, 0, 0, 0.2) !important;
+    transform: scale(1.1);
+}
+
+/* Dark Mode Override for Confirm Button (Both Panels) */
+body.dark-mode .sub-filter-panel .cat-confirm-btn,
+body.dark-mode .nav-bottom-panel .cat-confirm-btn {
+    background: rgba(255, 255, 255, 0.1) !important;
+    color: #ffffff !important;
+    /* White Plus in dark mode */
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+}
+
+/* Specific Scale for Nav-Bottom-Panel (Matches 48px pill height) */
+.nav-bottom-panel .nav-tools-btn,
+.nav-bottom-panel .cat-confirm-btn,
+.nav-top-row .nav-tools-btn {
+    width: 32px !important;
+    height: 32px !important;
+    font-size: 15px !important;
+}
+
+body.dark-mode .sub-filter-panel .cat-confirm-btn:hover,
+body.dark-mode .nav-bottom-panel .cat-confirm-btn:hover {
+    background: rgba(255, 255, 255, 0.2) !important;
+    border-color: rgba(255, 255, 255, 0.3) !important;
+}
+
+
+
+/* 5. Tool Bar Layout */
+body.glass-mode.dark-mode #sharedFilterSection .search-input::placeholder {
+    color: rgba(255, 255, 255, 0.4) !important;
+}
+
+/* 6. Chips Container spacing - Flex Centering */
+#sharedSubFilterContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    width: 100%;
+    margin: 0 auto;
+}
+
+.sub-filter-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    /* Allow chips to wrap */
+    gap: 8px;
+    /* Spacing between wrapped chips */
+    width: 100%;
+    min-height: 50px;
+    /* Instead of locked height */
+    height: auto;
+    overflow: visible;
+    box-sizing: border-box;
+}
+
+.sub-filter-tools {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin: 0;
+    /* Reset for centering */
+    flex-shrink: 0;
+    /* Ensure visibility and stacking - HIGHER z-index */
+    position: relative;
+    z-index: 100;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    overflow: visible !important;
+}
+
+/* Position sub-filter-panel absolute relative to the tools container */
+.sub-filter-panel {
+    /* Absolute Positioning to the right of the gear */
+    position: absolute !important;
+    left: 100% !important;
+    top: 50% !important;
+    transform: translateY(-50%);
+    /* Vertical Center */
+    margin-left: 12px !important;
+    /* Spacing from gear */
+
+    /* Reset others */
+    display: flex !important;
+    align-items: center;
+    gap: 8px;
+
+    /* Animation state: Hidden */
+    max-width: 0;
+    opacity: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    height: 40px;
+    border-width: 0;
+    padding: 0 !important;
+    border-style: solid;
+
+    transition: max-width 0.8s ease, min-width 0.8s ease, padding 0.4s ease, opacity 0.3s ease, border-width 0.3s ease;
+
+    pointer-events: none;
+    background: var(--card-bg);
+    border-color: var(--input-border);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.05);
+    z-index: 9999 !important;
+}
+
+/* EXPANDED STATE FOR SUB-FILTER PANEL */
+.sub-filter-panel.show {
+    max-width: 500px;
+    /* Allow enough space for content */
+    min-width: 200px;
+    opacity: 1;
+    overflow: visible;
+    padding: 0 12px !important;
+    border-width: 1px;
+    pointer-events: auto;
+}
+
+/* Force visibility for the tools button specifically in this container */
+.sub-filter-tools .nav-tools-btn {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    width: 32px !important;
+    height: 32px !important;
+    color: var(--text-grey);
+    flex-shrink: 0 !important;
+}
+
+/* 3. Restart Hover Animation (Target ONLY Gear Icon) */
+.gear-icon-btn:hover {
+    transform: rotate(45deg) !important;
+    background: rgba(0, 0, 0, 0.05) !important;
+    color: var(--text-dark) !important;
+}
+
+/* Ensure Trashcan (share-btn) does NOT rotate */
+.share-btn:hover {
+    transform: none !important;
+    background: rgba(220, 38, 38, 0.1) !important;
+    /* Slight red tint for trash */
+    color: #dc2626 !important;
+}
+
+/* Dark Mode Hover */
+body.dark-mode .gear-icon-btn:hover {
+    background: rgba(255, 255, 255, 0.1) !important;
+    color: #ffffff !important;
+}
+
+/* --- 1. STANDARD ZUSTAND (Gilt immer) --- */
+.filter-chip {
+    padding: 10px 24px;
+    /* Increased padding */
+    font-size: 15px;
+    /* Increased font size */
+    border: 1px solid var(--input-border);
+    border-radius: 50px;
+    background: var(--card-bg);
+    color: var(--text-grey);
+    cursor: pointer;
+    margin: 4px;
+    /* Balanced margin for centering */
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+    flex-shrink: 0;
+    /* Prevent squishing into circles */
+    white-space: nowrap;
+    /* Keep text on one line per chip */
+
+    /* Animation für Text, Rand und Skalierung */
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+        color 0.3s ease, border-color 0.3s ease,
+        box-shadow 0.3s ease, background-color 0.3s ease;
+}
+
+/* Der "Farbklecks" Effekt (Der Splash-Layer) */
+.filter-chip::before {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50% 50% 0 0;
+    transform: translateX(-50%);
+    transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1), height 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    z-index: -1;
+}
+
+/* Hover-Logik: Scale and Splash */
+.filter-chip:not(.editable):hover {
+    transform: translateY(-2px) scale(1.05);
+    color: var(--text-dark);
+    border-color: var(--text-grey);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08);
+}
+
+.filter-chip:not(.editable):hover::before {
+    width: 200%;
+    height: 250%;
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.filter-chip.active {
+    background: var(--text-dark) !important;
+    color: var(--bg-color) !important;
+    border-color: var(--text-dark) !important;
+    transform: scale(1);
+}
+
+/* Edit Mode for Chips */
+.filter-chip.editable {
+    border-style: dashed !important;
+    border-color: var(--text-grey) !important;
+    cursor: grab;
+    background: rgba(0, 0, 0, 0.02);
+}
+
+.filter-chip.editable:hover {
+    background: rgba(0, 0, 0, 0.05);
+    transform: scale(1.02);
+    /* Slight scale for feedback */
+    box-shadow: none;
+}
+
+.filter-chip.shaking {
+    animation: shake 0.3s ease-in-out infinite;
+    border-color: #dc2626 !important;
+    color: #dc2626 !important;
+    background: rgba(220, 38, 38, 0.1) !important;
+    cursor: pointer;
+}
+
+/* Globalize Edit Styles for Catalog/Favorites (cat-link) */
+.cat-link.editable {
+    border: 2px dashed var(--text-grey) !important;
+    border-style: dashed !important;
+    border-color: var(--text-grey) !important;
+    cursor: grab;
+    background: rgba(0, 0, 0, 0.05) !important;
+}
+
+.filter-chip.editable {
+    border: 2px dashed var(--text-grey) !important;
+    border-style: dashed !important;
+    border-color: var(--text-grey) !important;
+    cursor: grab;
+    background: rgba(0, 0, 0, 0.05) !important;
+}
+
+.cat-link.editable:hover {
+    background: rgba(0, 0, 0, 0.05);
+    transform: scale(1.02);
+    box-shadow: none;
+}
+
+.cat-link.shaking {
+    animation: shake 0.3s ease-in-out infinite;
+    border-color: #dc2626 !important;
+    color: #dc2626 !important;
+    background: rgba(220, 38, 38, 0.1) !important;
+    cursor: pointer;
+}
+
+/* Fix: Glass Mode Filters - Physical Glass Box */
+body.glass-mode:not(.dark-mode) .filter-chip {
+    border: 1px solid rgba(255, 255, 255, 0.4) !important;
+    /* Subtle outer and crisp inner highlights */
+    box-shadow:
+        inset 0 1px 1px rgba(255, 255, 255, 0.5),
+        0 4px 12px rgba(0, 0, 0, 0.05) !important;
+}
+
+body.glass-mode.dark-mode .filter-chip {
+    border: 1px solid rgba(255, 255, 255, 0.06) !important;
+    /* Ultra-subtle dark glass edges */
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.05),
+        0 4px 15px rgba(0, 0, 0, 0.2) !important;
+}
+
+body.glass-mode:not(.dark-mode) .filter-chip.active {
+    background: rgba(0, 0, 0, 0.35) !important;
+    backdrop-filter: blur(25px) saturate(200%);
+    -webkit-backdrop-filter: blur(25px) saturate(200%);
+    /* Structure Match: Standard border and simpler shadow */
+    border: 1px solid rgba(255, 255, 255, 0.4) !important;
+    box-shadow:
+        inset 0 1px 1px rgba(255, 255, 255, 0.5),
+        0 4px 12px rgba(0, 0, 0, 0.05) !important;
+    color: #ffffff !important;
+}
+
+/* Dark Glass Mode Filters override */
+body.glass-mode.dark-mode .filter-chip.active,
+body.glass-mode.dark-mode .cat-link.active {
+    background: rgba(255, 255, 255, 0.18) !important;
+    color: #ffffff !important;
+    font-weight: 500 !important;
+    /* Structure Match: Add border back and standard shadow */
+    border: 1px solid rgba(255, 255, 255, 0.06) !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.05),
+        0 4px 15px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Status Chips Exact Sizing & Pill Style */
+#chipStatBought,
+#chipStatReduced {
+    height: 44px !important;
+    min-height: 44px !important;
+    border-radius: 50px !important;
+    padding: 0 24px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-weight: 100 !important;
+    font-size: 15px !important;
+    margin: 0 !important;
+    box-sizing: border-box !important;
+    white-space: nowrap;
+}
+
+/* --- 2. EDIT-MODUS (Zahnrad ist offen) --- */
+/* Sobald die Klasse .editable gesetzt ist, sehen die Chips SOFORT anders aus */
+.filter-chip.editable {
+    /* Visueller Hinweis: Statisch hervorgehoben (Erhöhte Deckkraft) */
+    background: rgba(0, 0, 0, 0.15) !important;
+    border: 1px dashed var(--text-grey) !important;
+    opacity: 1;
+    cursor: grab !important;
+    transform: none !important;
+    transition: background-color 0.2s, border-color 0.2s, color 0.2s !important;
+}
+
+/* Dark Mode Anpassung für Edit-Modus */
+body.dark-mode .filter-chip.editable {
+    background: rgba(255, 255, 255, 0.22) !important;
+}
+
+/* --- 3. DRAG & DROP FIX (Das technische Problem) --- */
+/* Wenn ein Element gerade gezogen wird (.sortable-drag / .dragging / .gu-mirror) */
+.filter-chip.sortable-drag,
+.filter-chip.dragging,
+.filter-chip.gu-mirror {
+    /* WICHTIG: Transition AUS, sonst "schwimmt" es und Drag geht kaputt */
+    transition: none !important;
+    transform: scale(1.05) !important;
+
+    /* Styling beim Ziehen */
+    opacity: 0.9 !important;
+    background: var(--text-dark) !important;
+    color: var(--bg-color) !important;
+    border: none !important;
+    cursor: grabbing !important;
+    /* Greifende Hand */
+    z-index: 9999;
+}
+
+/* Ghost (Der leere Platzhalter an der Zielposition) */
+.filter-chip.sortable-ghost {
+    opacity: 0.3;
+    background: var(--input-border) !important;
+    border: 1px dashed var(--text-grey) !important;
+    box-shadow: none !important;
+}
+
+.filter-chip.editable.shaking {
+    animation: shake 0.3s infinite ease-in-out;
+    cursor: pointer;
+    border-color: #ff4d4d !important;
+    color: #ff4d4d !important;
+}
+
+/* Mülleimer-Fix: Absolute Rotations-Sperre für BEIDE Menüs */
+.sub-filter-panel .nav-tools-btn,
+.nav-bottom-panel .nav-tools-btn {
+    transform: none !important;
+    /* Verhindert jegliche Drehung */
+    transition: background-color 0.2s, color 0.2s, border-color 0.2s !important;
+    /* Keine Bewegungs-Animation */
+}
+
+/* Neutral Hover for trash icons */
+.sub-filter-panel .nav-tools-btn:hover,
+.nav-bottom-panel .nav-tools-btn:hover {
+    background: rgba(0, 0, 0, 0.05) !important;
+}
+
+body.dark-mode .sub-filter-panel .nav-tools-btn:hover,
+body.dark-mode .nav-bottom-panel .nav-tools-btn:hover {
+    background: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Status: Aktiv (Ausgewählt) -> Bleibt ROT, aber ohne zusätzliche Drehung */
+.sub-filter-panel .nav-tools-btn.active,
+.nav-bottom-panel .nav-tools-btn.active {
+    transform: none !important;
+    background: rgba(239, 68, 68, 0.15) !important;
+    color: #ef4444 !important;
+    border: 1px solid #ef4444 !important;
+    box-shadow: none !important;
+}

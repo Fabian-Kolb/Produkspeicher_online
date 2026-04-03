@@ -1,0 +1,761 @@
+/* --- THEME CREATOR PREMIUM UI --- */
+
+.theme-creator-window {
+    width: 1200px !important;
+    max-width: 95vw !important;
+    height: 85vh !important;
+    max-height: 900px !important;
+}
+
+.theme-creator-layout {
+    display: grid;
+    grid-template-columns: 350px 1fr;
+    height: 100%;
+    min-height: 0;
+}
+
+/* Sidebar Controls */
+.creator-sidebar {
+    background: var(--bg-color);
+    border-right: 1px solid var(--input-border);
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
+}
+
+.creator-tabs {
+    display: flex;
+    padding: 20px 25px 0 25px;
+    gap: 8px;
+    border-bottom: 1px solid var(--input-border);
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+
+.creator-tabs::-webkit-scrollbar {
+    display: none;
+}
+
+.tab-btn {
+    background: transparent;
+    border: none;
+    padding: 10px 16px;
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-grey);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+    border-bottom: 2px solid transparent;
+}
+
+.tab-btn.active {
+    color: var(--text-dark);
+    border-bottom-color: var(--primary-color);
+}
+
+.tab-content-area {
+    padding: 30px 25px;
+    overflow-y: auto;
+    flex-grow: 1;
+}
+
+.creator-section {
+    display: none;
+    flex-direction: column;
+    gap: 20px;
+    animation: slide-up 0.3s ease;
+}
+
+.creator-section.active {
+    display: flex;
+}
+
+/* Form Elements */
+.creator-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.creator-group label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-dark);
+    opacity: 0.8;
+}
+
+.color-input-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    background: var(--card-bg);
+    padding: 10px 15px;
+    border-radius: 12px;
+    border: 1px solid var(--input-border);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.02);
+    transition: border-color 0.2s;
+}
+
+.color-input-wrapper:hover {
+    border-color: var(--text-grey);
+}
+
+.color-input-wrapper input[type="color"] {
+    -webkit-appearance: none;
+    appearance: none;
+    border: none;
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    cursor: pointer;
+    background: none;
+}
+
+.color-input-wrapper input[type="color"]::-webkit-color-swatch-wrapper {
+    padding: 0;
+}
+
+.color-input-wrapper input[type="color"]::-webkit-color-swatch {
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 6px;
+}
+
+.color-hex {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-dark);
+    text-transform: uppercase;
+}
+
+.slider-group {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 15px;
+    background: var(--card-bg);
+    border-radius: 12px;
+    border: 1px solid var(--input-border);
+}
+
+.slider-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.slider-val {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--primary-color);
+    background: rgba(59, 130, 246, 0.1);
+    padding: 2px 8px;
+    border-radius: 10px;
+}
+
+/* Preview Panel */
+.creator-preview-panel {
+    background: #0f172a;
+    /* Deep techy background to contrast the glass canvas */
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 60px;
+}
+
+/* Preview Canvas (Simulates the app) */
+.preview-canvas {
+    width: 100%;
+    max-width: 650px;
+    height: 100%;
+    background: var(--bg-color);
+    border-radius: 24px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 40px 100px rgba(0, 0, 0, 0.4), 0 0 0 2px rgba(255, 255, 255, 0.05);
+    display: flex;
+    flex-direction: column;
+}
+
+.preview-nav {
+    height: 65px;
+    background: var(--header-bg);
+    border-bottom: 1px solid var(--input-border);
+    display: flex;
+    align-items: center;
+    padding: 0 30px;
+    gap: 15px;
+    z-index: 10;
+}
+
+.preview-pill {
+    width: 90px;
+    height: 32px;
+    background: var(--primary-color);
+    border-radius: 16px;
+    box-shadow: 0 4px 12px rgba(var(--primary-color-rgb, 59, 130, 246), 0.3);
+}
+
+.preview-scroll {
+    flex-grow: 1;
+    padding: 40px 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    z-index: 10;
+}
+
+.preview-card {
+    background: var(--card-bg);
+    border: 1px solid var(--input-border);
+    border-radius: 20px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05);
+}
+
+.preview-img-box {
+    width: 56px;
+    height: 56px;
+    background: var(--bg-color);
+    border-radius: 12px;
+}
+
+.preview-line {
+    height: 10px;
+    background: var(--text-main);
+    opacity: 0.15;
+    border-radius: 5px;
+}
+
+.preview-btn {
+    height: 36px;
+    background: var(--primary-color);
+    border-radius: 10px;
+    width: 110px;
+}
+
+/* Preset Grids */
+.preset-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+}
+
+.preset-card {
+    background: var(--card-bg);
+    border: 1px solid var(--input-border);
+    border-radius: 12px;
+    padding: 10px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    transition: all 0.2s ease;
+}
+
+.preset-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--text-dark);
+}
+
+.preset-preview {
+    height: 40px;
+    border-radius: 8px;
+    display: flex;
+    overflow: hidden;
+}
+
+.p-col {
+    flex: 1;
+}
+
+.preset-name {
+    font-size: 11px;
+    font-weight: 600;
+    text-align: center;
+}
+
+/* Animations */
+@keyframes slide-up {
+    from {
+        transform: translateY(10px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* PREVIEW GLASS STAGE (Miniature) */
+.preview-glass-stage {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1;
+    overflow: hidden;
+    pointer-events: none;
+    transition: opacity 0.4s ease;
+}
+
+.preview-glass-stage .blob {
+    position: absolute;
+    filter: blur(20px);
+    opacity: 0.6;
+    border-radius: 50%;
+    animation: preview-float 10s infinite alternate ease-in-out;
+}
+
+.preview-glass-stage .b1 {
+    width: 120px;
+    height: 120px;
+    top: -20px;
+    left: -20px;
+    background: var(--blob-color-1, #6366f1);
+}
+
+.preview-glass-stage .b2 {
+    width: 100px;
+    height: 100px;
+    bottom: -20px;
+    right: -20px;
+    background: var(--blob-color-2, #a855f7);
+    animation-delay: -5s;
+}
+
+/* Switches & Controls */
+.switch-small {
+    position: relative;
+    display: inline-block;
+    width: 36px;
+    height: 20px;
+}
+
+.switch-small input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.switch-small .slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--input-border);
+    transition: .3s;
+    border-radius: 20px;
+}
+
+.switch-small .slider:before {
+    position: absolute;
+    content: "";
+    height: 14px;
+    width: 14px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: .3s;
+    border-radius: 50%;
+}
+
+.switch-small input:checked+.slider {
+    background-color: var(--primary-color);
+}
+
+.switch-small input:checked+.slider:before {
+    transform: translateX(16px);
+}
+
+.modern-select {
+    padding: 10px 15px;
+    border-radius: 12px;
+    border: 1px solid var(--input-border);
+    background: var(--card-bg);
+    color: var(--text-dark);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: border-color 0.2s;
+}
+
+.modern-select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+/* Shape Types inside Preview */
+.preview-glass-stage.use-circles .blob {
+    border-radius: 50%;
+    filter: blur(10px);
+}
+
+.preview-glass-stage.use-blobs .blob {
+    border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
+}
+
+@keyframes preview-float {
+    0% {
+        transform: translate(0, 0) scale(1);
+    }
+
+    100% {
+        transform: translate(20px, 20px) scale(1.1);
+    }
+}
+
+/* --------------------------------------------------------------------------
+   REALISTIC PREVIEW LAYOUT STYLES
+   -------------------------------------------------------------------------- */
+
+.preview-canvas {
+    font-size: 10px;
+    /* Base for miniature */
+    border-radius: 20px;
+}
+
+/* Header */
+.prev-header {
+    height: 48px;
+    background: var(--card-bg);
+    border-bottom: 1px solid var(--input-border);
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    justify-content: space-between;
+    z-index: 10;
+    position: relative;
+    backdrop-filter: var(--preview-backdrop);
+    -webkit-backdrop-filter: var(--preview-backdrop);
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+}
+
+.prev-logo {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 700;
+}
+
+.prev-logo-icon {
+    width: 20px;
+    height: 20px;
+    background: var(--text-dark);
+    border-radius: 4px;
+}
+
+.prev-nav-glider {
+    display: flex;
+    background: var(--input-border);
+    padding: 3px;
+    border-radius: 20px;
+    gap: 2px;
+}
+
+.prev-nav-pill {
+    padding: 6px 12px;
+    border-radius: 16px;
+    font-weight: 600;
+    color: var(--text-grey);
+}
+
+.prev-nav-pill.active {
+    background: var(--card-bg);
+    color: var(--text-dark);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.prev-tools .prev-circle {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--input-border);
+}
+
+/* Secondary Nav */
+.prev-secondary-nav {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 16px;
+    z-index: 10;
+    position: relative;
+}
+
+.prev-chip {
+    padding: 6px 12px;
+    border-radius: 16px;
+    background: var(--card-bg);
+    border: 1px solid var(--input-border);
+    color: var(--text-grey);
+    font-weight: 500;
+    backdrop-filter: var(--preview-backdrop);
+    -webkit-backdrop-filter: var(--preview-backdrop);
+}
+
+.prev-chip.active {
+    background: var(--text-dark);
+    color: var(--bg-color);
+    border-color: var(--text-dark);
+}
+
+/* Content Area */
+.preview-scroll {
+    flex-grow: 1;
+    padding: 16px 24px 32px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    z-index: 10;
+    position: relative;
+    overflow-y: auto;
+}
+
+/* Filter Bar */
+.prev-filter-bar {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    justify-content: center;
+}
+
+.prev-search-box {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--card-bg);
+    border: 1px solid var(--input-border);
+    padding: 6px 12px;
+    border-radius: 16px;
+    color: var(--text-grey);
+    min-width: 140px;
+    backdrop-filter: var(--preview-backdrop);
+    -webkit-backdrop-filter: var(--preview-backdrop);
+}
+
+.prev-search-icon {
+    width: 10px;
+    height: 10px;
+    border: 1px solid var(--text-grey);
+    border-radius: 50%;
+}
+
+.prev-chip-box {
+    padding: 6px 12px;
+    background: var(--card-bg);
+    border: 1px solid var(--input-border);
+    border-radius: 16px;
+    color: var(--text-grey);
+    backdrop-filter: var(--preview-backdrop);
+    -webkit-backdrop-filter: var(--preview-backdrop);
+}
+
+/* Grid & Cards */
+.prev-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+}
+
+/* Preview Card Style override for miniature view */
+.preview-canvas .preview-card {
+    padding: 0;
+    gap: 0;
+    border-radius: 16px;
+    overflow: hidden;
+    backdrop-filter: var(--preview-backdrop);
+    -webkit-backdrop-filter: var(--preview-backdrop);
+    display: flex;
+    flex-direction: column;
+}
+
+.prev-card-img-container {
+    padding: 6px;
+    width: 100%;
+    aspect-ratio: 1/1;
+}
+
+.prev-card-img {
+    width: 100%;
+    height: 100%;
+    background: var(--input-border);
+    border-radius: 14px;
+    opacity: 0.5;
+}
+
+.prev-card-body {
+    padding: 4px 10px 10px 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex-grow: 1;
+}
+
+.prev-card-content-split {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.prev-info-left {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.prev-status-right {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    align-items: center;
+}
+
+/* Legacy Mock Icons Removed */
+
+.prev-card-vendor {
+    font-size: 8px;
+    color: var(--text-grey);
+    letter-spacing: 0.5px;
+    font-weight: 700;
+}
+
+.prev-card-title {
+    font-size: 11px;
+    font-weight: 800;
+    color: var(--text-dark);
+    margin-top: 1px;
+}
+
+.prev-card-price {
+    font-size: 11px;
+    font-weight: 800;
+    color: var(--text-dark);
+    margin-top: 2px;
+}
+
+.prev-currency {
+    font-size: 8px;
+    opacity: 0.7;
+}
+
+/* Footer Slider Mock */
+.prev-card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid var(--input-border);
+    padding-top: 6px;
+    margin-top: auto;
+}
+
+.prev-slider-track {
+    flex-grow: 1;
+    height: 2px;
+    background: var(--input-border);
+    border-radius: 1px;
+    position: relative;
+    margin-right: 8px;
+}
+
+.prev-slider-thumb {
+    width: 8px;
+    height: 8px;
+    background: var(--text-dark);
+    border-radius: 50%;
+    position: absolute;
+    top: -3px;
+    left: 0;
+    box-shadow: 0 0 0 1.5px var(--card-bg);
+}
+
+.prev-rating-val {
+    font-size: 8px;
+    font-weight: 800;
+    color: var(--text-dark);
+}
+
+/* PREVIEW GLASS STAGE (SCALED FOR REALISM) */
+.preview-glass-stage {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1;
+    overflow: hidden;
+    pointer-events: none;
+    transition: opacity 0.4s ease;
+}
+
+.preview-glass-stage .blob {
+    position: absolute;
+    /* Scale blobs proportionally to mimic 1000px genuine blobs */
+    width: 500px;
+    height: 500px;
+    filter: blur(60px) !important;
+    opacity: 0.8 !important;
+    animation: preview-float 15s infinite alternate ease-in-out;
+    mix-blend-mode: multiply;
+    /* Will be overwritten by JS for dark mode */
+}
+
+.preview-glass-stage .b1 {
+    top: -20%;
+    left: -20%;
+    background: var(--blob-color-1, #6366f1);
+}
+
+.preview-glass-stage .b2 {
+    bottom: -20%;
+    right: -20%;
+    background: var(--blob-color-2, #a855f7);
+    animation-delay: -5s;
+}
+
+.preview-glass-stage .b3 {
+    top: 30%;
+    left: 30%;
+    width: 200px;
+    height: 200px;
+    background: var(--blob-color-1, #6366f1);
+    opacity: 0.2 !important;
+    animation-delay: -3s;
+}
+
+/* Shape Types inside Preview */
+.preview-glass-stage.use-circles .blob {
+    border-radius: 50%;
+}
+
+.preview-glass-stage.use-blobs .blob {
+    border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
+}
+
+@keyframes slide-in-right {
+    from {
+        transform: translateX(20px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}

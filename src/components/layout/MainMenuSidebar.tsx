@@ -1,0 +1,104 @@
+import React from 'react';
+import { Settings, Play, Download, Upload, Info, Trash2, X, Sparkles } from 'lucide-react';
+import { cn } from '../../utils/cn';
+import { useUIStore } from '../../store/useUIStore';
+import { useAppStore } from '../../store/useAppStore';
+import { createDemoData } from '../../utils/demoData';
+
+export const MainMenuSidebar: React.FC = () => {
+  const { isMainMenuOpen, toggleMainMenu, toggleThemeManager, openProductModal } = useUIStore();
+  const { setProducts, setBundles } = useAppStore();
+  
+  // Dummy functions for now
+  const handleExport = () => console.log('Export triggered');
+  const handleImport = () => console.log('Import triggered');
+  const handleInfo = () => console.log('Info Modal');
+  const handleReset = () => console.log('Reset Modal');
+
+  const handleDemoMode = () => {
+    const demoData = createDemoData();
+    setProducts(demoData.products);
+    setBundles(demoData.bundles);
+    toggleMainMenu();
+  };
+
+  return (
+    <>
+      <div 
+        className={cn(
+          'fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] transition-opacity duration-300',
+          isMainMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+        )}
+        onClick={toggleMainMenu}
+      />
+      <div 
+        className={cn(
+          'fixed top-0 right-0 h-full w-[320px] bg-bg-card border-l border-border-primary z-[101] shadow-2xl transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]',
+          isMainMenuOpen ? 'translate-x-0' : 'translate-x-full'
+        )}
+      >
+        <div className="flex items-center justify-between p-6 border-b border-border-primary">
+          <h2 className="text-xl font-bold font-playfair">Menü</h2>
+          <button 
+            onClick={toggleMainMenu}
+            className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-border-primary transition-colors text-text-secondary hover:text-text-primary"
+          >
+            <X size={20} />
+          </button>
+        </div>
+        <div className="p-6 flex flex-col gap-3 relative overflow-y-auto max-h-[calc(100vh-80px)]">
+          <MenuButton icon={<Settings size={18} />} onClick={() => { toggleMainMenu(); toggleThemeManager(); }}>
+            Design & Themes
+          </MenuButton>
+          <MenuButton icon={<Play size={18} />} onClick={() => { toggleMainMenu(); openProductModal(); }}>
+            + Neues Produkt
+          </MenuButton>
+          <MenuButton icon={<Sparkles size={18} />} onClick={handleDemoMode}>
+            Demo-Inhalte (Dummy Data)
+          </MenuButton>
+          <MenuButton icon={<Download size={18} />} onClick={handleExport}>
+            Exportieren
+          </MenuButton>
+          <MenuButton icon={<Upload size={18} />} onClick={handleImport}>
+            Importieren
+          </MenuButton>
+          <MenuButton icon={<Info size={18} />} onClick={handleInfo}>
+            Info / Version
+          </MenuButton>
+          <MenuButton icon={<Trash2 size={18} />} onClick={handleReset} isDestructive>
+            Reset / Löschen
+          </MenuButton>
+        </div>
+      </div>
+    </>
+  );
+};
+
+interface MenuButtonProps {
+  icon: React.ReactNode;
+  children: React.ReactNode;
+  onClick: () => void;
+  isDestructive?: boolean;
+}
+
+const MenuButton: React.FC<MenuButtonProps> = ({ icon, children, onClick, isDestructive }) => {
+  return (
+    <button
+      onClick={onClick}
+      className={cn(
+        'w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-200 group text-left font-medium',
+        isDestructive 
+          ? 'text-heart hover:bg-heart/10' 
+          : 'text-text-primary hover:bg-border-primary'
+      )}
+    >
+      <span className={cn(
+        'transition-transform duration-200 group-hover:scale-110',
+        isDestructive ? 'text-heart' : 'text-text-secondary group-hover:text-text-primary'
+      )}>
+        {icon}
+      </span>
+      {children}
+    </button>
+  );
+};

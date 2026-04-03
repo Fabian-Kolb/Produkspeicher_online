@@ -1,0 +1,207 @@
+/* --- ANIMATIONS --- */
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(50px);
+        filter: blur(5px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+        filter: blur(0);
+    }
+}
+
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-50px);
+        filter: blur(5px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+        filter: blur(0);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes popIn {
+    0% {
+        transform: translateY(10px);
+        /* Strictly vertical */
+        opacity: 0;
+    }
+
+    100% {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes wheelFlip {
+    0% {
+        transform: rotateX(-90deg);
+        opacity: 0;
+    }
+
+    100% {
+        transform: rotateX(0deg);
+        opacity: 1;
+    }
+}
+
+@keyframes shake {
+
+    0%,
+    100% {
+        transform: rotate(0deg);
+    }
+
+    25% {
+        transform: rotate(1deg);
+    }
+
+    75% {
+        transform: rotate(-1deg);
+    }
+}
+
+@keyframes slideRight {
+    from {
+        opacity: 0;
+        transform: translateX(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes marquee {
+    0% {
+        transform: translateX(0);
+    }
+
+    100% {
+        transform: translateX(-50%);
+        /* Only move half because content is doubled */
+    }
+}
+
+@keyframes marquee-scroll-fixed {
+    0% {
+        transform: translateX(0);
+    }
+
+    100% {
+        transform: translateX(-100%);
+    }
+}
+
+
+
+@keyframes skeleton-loading {
+    0% {
+        background: #e0e0e0;
+    }
+
+    50% {
+        background: #f0f0f0;
+    }
+
+    100% {
+        background: #e0e0e0;
+    }
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.anim-right {
+    animation: slideInRight 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+.anim-left {
+    animation: slideInLeft 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+.anim-up {
+    animation: fadeIn 0.4s ease-out forwards;
+}
+
+.btn-flip-anim {
+    display: inline-block;
+    animation: wheelFlip 0.5s ease-out forwards;
+    transform-origin: center;
+}
+
+.pill-enter {
+    animation: popIn 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+    /* Smooth cubic-bezier */
+}
+
+.shaking {
+    animation: shake 0.3s ease-in-out infinite;
+}
+
+.skeleton-image {
+    width: 100%;
+    height: 100%;
+    min-height: 250px;
+    background: #e0e0e0;
+    border-radius: 8px;
+    animation: skeleton-loading 1.5s infinite ease-in-out;
+    display: none;
+}
+
+.spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: #fff;
+    animation: spin 1s ease-in-out infinite;
+    display: none;
+}

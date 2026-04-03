@@ -1,0 +1,27 @@
+/* 1. BASIS */
+@import 'css/base/variables.css';
+@import 'css/base/reset.css';
+@import 'css/base/menu-reset.css';
+/* NEU */
+@import 'css/base/animations.css';
+@import 'css/base/glass-stage.css';
+@import 'css/base/glass-theme.css';
+
+/* 2. KOMPONENTEN */
+@import 'css/components/buttons.css';
+@import 'css/components/inputs.css';
+@import 'css/components/cards.css';
+@import 'css/components/empty-state.css';
+@import 'css/components/notifications.css';
+/* NEU */
+@import 'css/components/modals.css';
+@import 'css/components/navigation.css';
+
+/* 3. FEATURES */
+@import 'css/features/dashboard.css';
+@import 'css/features/products.css';
+@import 'css/features/analytics.css';
+@import 'css/features/deals.css';
+@import 'css/features/bundles.css';
+@import 'css/features/theme-creator.css';
+/* Aktualisiert */

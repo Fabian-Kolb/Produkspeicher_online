@@ -1,0 +1,1334 @@
+/* --- BUNDLES OVERVIEW --- */
+.bundle-overview-card {
+    grid-column: 1 / -1 !important;
+    padding: 30px !important;
+    overflow: hidden;
+    position: relative;
+    min-width: 100%;
+}
+
+.bundle-overview-card:hover {
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+/* Bundle Title Marquee */
+.bundle-header-info {
+    flex: 1;
+    overflow: hidden;
+    min-width: 0;
+    margin-right: 20px;
+}
+
+.bundle-title-marquee {
+    width: 100%;
+    overflow: hidden;
+    white-space: nowrap;
+    position: relative;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    mask-image: linear-gradient(to right, black 92%, transparent);
+    -webkit-mask-image: linear-gradient(to right, black 92%, transparent);
+}
+
+.bundle-title-text {
+    margin: 0;
+    font-family: 'Playfair Display', serif;
+    font-size: 32px;
+    line-height: 1.2;
+    display: inline-block;
+    color: var(--text-dark);
+    position: relative;
+}
+
+/* Only animate if the class is added via JS (overflow detection) */
+.bundle-title-text.animate-marquee {
+    animation: bundle-title-marquee 40s linear infinite;
+    will-change: transform;
+}
+
+.bundle-title-text.animate-marquee:hover {
+    animation-play-state: paused !important;
+}
+
+.bundle-title-text.animate-marquee::after {
+    content: attr(data-text);
+    padding-left: 60px;
+    display: inline-block;
+}
+
+@keyframes bundle-title-marquee {
+
+    0%,
+    2.5% {
+        transform: translateX(0);
+    }
+
+    100% {
+        transform: translateX(var(--title-scroll-dist));
+    }
+}
+
+.bundle-marquee-viewport {
+    width: 100%;
+    overflow: hidden;
+    padding: 20px 0;
+    position: relative;
+}
+
+/* Only apply fade mask when marquee is active */
+.bundle-marquee-viewport.has-marquee {
+    mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
+    -webkit-mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
+}
+
+.bundle-marquee-viewport.is-static .bundle-marquee-track {
+    justify-content: center;
+    width: 100%;
+    margin: 0 auto;
+}
+
+.bundle-marquee-track {
+    display: flex;
+    gap: 20px;
+    width: max-content;
+    padding: 10px 60px;
+}
+
+.animate-bundle-marquee {
+    animation: bundle-marquee-pendulum 25s linear infinite;
+}
+
+.animate-bundle-marquee:hover,
+body.bundle-marquee-paused .animate-bundle-marquee {
+    animation-play-state: paused;
+}
+
+@keyframes bundle-marquee-pendulum {
+
+    0%,
+    5% {
+        transform: translateX(0);
+    }
+
+    45%,
+    55% {
+        transform: translateX(var(--scroll-dist));
+    }
+
+    95%,
+    100% {
+        transform: translateX(0);
+    }
+}
+
+.bundle-mini-card {
+    width: 240px;
+    height: 330px;
+    background: var(--card-bg);
+    border: 1px solid var(--input-border);
+    border-radius: 28px;
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+    position: relative;
+    cursor: default;
+}
+
+.mini-card-qty-badge {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: var(--text-dark);
+    color: white;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 800;
+    z-index: 10;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    pointer-events: none;
+}
+
+body.glass-mode .mini-card-qty-badge {
+    background: rgba(255, 255, 255, 0.8) !important;
+    backdrop-filter: blur(10px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(10px) saturate(180%) !important;
+    color: var(--text-dark) !important;
+    border: 0.5px solid rgba(255, 255, 255, 0.5) !important;
+}
+
+body.glass-mode.dark-mode .mini-card-qty-badge {
+    background: rgba(255, 255, 255, 0.4) !important;
+    color: #000000 !important;
+    border: 0.5px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+body.dark-mode .mini-card-qty-badge {
+    color: #000000 !important;
+}
+
+.bundle-mini-card:hover {
+    transform: translateY(-8px) scale(1.01);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12);
+}
+
+.mini-card-img-container {
+    padding: 12px;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+}
+
+.mini-card-img-box {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    position: relative;
+}
+
+.mini-card-img-box img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 22px;
+}
+
+.mini-card-body {
+    padding: 0 18px 18px 18px;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    gap: 2px;
+}
+
+.mini-card-vendor {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--text-grey);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 2px;
+}
+
+.mini-card-name {
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--text-dark);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 5px;
+}
+
+.mini-card-price {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--text-dark);
+}
+
+/* LOOP SEPARATOR */
+.bundle-loop-separator {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 0 60px;
+    height: 330px;
+    flex-shrink: 0;
+    gap: 15px;
+}
+
+.separator-line {
+    width: 2px;
+    flex: 1;
+    max-height: 80px;
+    background: linear-gradient(to bottom, transparent, var(--text-grey), transparent);
+    opacity: 0.3;
+}
+
+.separator-label {
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 3px;
+    color: var(--text-grey);
+    padding: 8px 16px;
+    border: 1px solid var(--input-border);
+    border-radius: 20px;
+    background: var(--card-bg);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    text-transform: uppercase;
+}
+
+body.glass-mode .separator-label {
+    background: rgba(255, 255, 255, 0.15) !important;
+    backdrop-filter: blur(10px) !important;
+    border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+.bundle-marquee-viewport.is-static .bundle-loop-separator {
+    display: none;
+}
+
+body.glass-mode .bundle-mini-card {
+    background: rgba(255, 255, 255, 0.2) !important;
+    backdrop-filter: blur(20px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+    border: 0.5px solid rgba(255, 255, 255, 0.4) !important;
+}
+
+body.glass-mode.dark-mode .bundle-mini-card {
+    background: rgba(255, 255, 255, 0.08) !important;
+    border: 0.5px solid rgba(255, 255, 255, 0.15) !important;
+    color: #ffffff;
+}
+
+.view-header-flex {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.bundle-price-action-box {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    background: var(--card-bg);
+    border: 1px solid var(--input-border);
+    padding: 18px 25px;
+    border-radius: 32px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.04);
+    transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+    min-width: 260px;
+    /* Increased for the button row */
+    /* Move more into the corner */
+    margin-top: -10px;
+    margin-right: -10px;
+}
+
+.bundle-action-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    justify-content: center;
+}
+
+.bundle-delete-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 1px solid var(--input-border);
+    background: var(--card-bg);
+    color: var(--text-grey);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+.bundle-delete-btn:hover {
+    background: #ff4d4d;
+    color: white;
+    border-color: #ff4d4d;
+    transform: scale(1.1);
+}
+
+/* Glass Mode Delete Button */
+body.glass-mode .bundle-delete-btn {
+    background: rgba(255, 255, 255, 0.3) !important;
+    backdrop-filter: blur(10px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(10px) saturate(180%) !important;
+    border: 0.5px solid rgba(255, 255, 255, 0.4) !important;
+    color: var(--text-dark) !important;
+}
+
+body.glass-mode.dark-mode .bundle-delete-btn {
+    background: rgba(255, 255, 255, 0.08) !important;
+    border: 0.5px solid rgba(255, 255, 255, 0.15) !important;
+    color: #ffffff !important;
+}
+
+body.glass-mode .bundle-delete-btn:hover {
+    background: #ff4d4d !important;
+    color: white !important;
+    border-color: #ff4d4d !important;
+}
+
+.bundle-total-price {
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--text-dark);
+    letter-spacing: -0.5px;
+    line-height: 1;
+}
+
+/* Glass Mode Variations for the Box */
+body.glass-mode .bundle-price-action-box {
+    background: rgba(255, 255, 255, 0.35) !important;
+    backdrop-filter: blur(25px) saturate(200%) !important;
+    -webkit-backdrop-filter: blur(25px) saturate(200%) !important;
+    border: 0.5px solid rgba(255, 255, 255, 0.4) !important;
+    box-shadow: 0 10px 35px rgba(0, 0, 0, 0.08) !important;
+}
+
+body.glass-mode.dark-mode .bundle-price-action-box {
+    background: rgba(255, 255, 255, 0.08) !important;
+    border: 0.5px solid rgba(255, 255, 255, 0.15) !important;
+    color: #ffffff !important;
+}
+
+.glass-btn {
+    padding: 10px 22px;
+    border-radius: 40px;
+    /* Real Pill Shape */
+    font-weight: 500;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+    border: 1px solid transparent;
+    white-space: nowrap;
+}
+
+/* Glass Mode Variations */
+body.glass-mode .glass-btn {
+    background: rgba(255, 255, 255, 0.4) !important;
+    backdrop-filter: blur(15px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(15px) saturate(180%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.5) !important;
+    color: var(--text-dark) !important;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05) !important;
+}
+
+body.glass-mode.dark-mode .glass-btn {
+    background: rgba(255, 255, 255, 0.12) !important;
+    border: 1px solid rgba(255, 255, 255, 0.18) !important;
+    color: #ffffff !important;
+}
+
+.glass-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+}
+
+body.glass-mode .glass-btn:hover {
+    background: rgba(255, 255, 255, 0.55) !important;
+    border-color: var(--text-dark) !important;
+}
+
+body.glass-mode.dark-mode .glass-btn:hover {
+    background: rgba(255, 255, 255, 0.22) !important;
+    border-color: #ffffff !important;
+}
+
+/* --- EDITOR SPLIT LAYOUT --- */
+.editor-split-layout {
+    display: flex;
+    height: calc(100vh - 100px);
+    overflow: hidden !important;
+    /* Force no scroll on main container */
+    gap: 20px;
+    padding: 20px;
+    background: transparent;
+    box-sizing: border-box;
+    /* Crucial for calc correctness */
+}
+
+.editor-left-panel {
+    flex: 2.2;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--input-border);
+    background: var(--card-bg);
+    padding-top: 0;
+    border-radius: 24px;
+    /* Separate rounded panel */
+    overflow: hidden;
+    /* Ensure content respects radius */
+}
+
+.editor-right-panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: var(--card-bg);
+    border: 1px solid var(--input-border);
+    border-radius: 24px;
+    /* Separate rounded panel */
+    overflow: hidden;
+}
+
+/* Glass Styles Removed for Editor Panels */
+
+.editor-panel-header {
+    padding: 20px;
+    border-bottom: none;
+    /* Sichtbare Linie entfernt */
+    background: transparent;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+/* Glass Styles Removed for Header */
+
+.editor-right-panel .editor-panel-header {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.editor-scroll-area {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+    /* Soft Fade Out at Top - Content "slowly becomes invisible" */
+    mask-image: linear-gradient(to bottom, transparent 0%, black 40px, black 100%);
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 40px, black 100%);
+    /* Custom Scrollbar Width */
+    scrollbar-width: thin;
+    scrollbar-color: var(--text-grey) transparent;
+}
+
+/* Custom Scrollbar Styling */
+.editor-scroll-area::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+.editor-scroll-area::-webkit-scrollbar-track {
+    background: transparent;
+    margin: 10px 0;
+}
+
+.editor-scroll-area::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+}
+
+.editor-scroll-area::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.4);
+    background-clip: content-box;
+}
+
+/* Glass Mode Scrollbar */
+body.glass-mode .editor-scroll-area::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background-clip: padding-box;
+    /* Fill entirely for glass feel */
+    border-radius: 10px;
+}
+
+body.glass-mode .editor-scroll-area::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.6);
+}
+
+/* Dark Mode Scrollbars */
+body.dark-mode .editor-scroll-area::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    background-clip: content-box;
+}
+
+body.dark-mode .editor-scroll-area::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.4);
+    background-clip: content-box;
+}
+
+/* Dark Glass Mode Scrollbar */
+body.glass-mode.dark-mode .editor-scroll-area::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background-clip: padding-box;
+}
+
+body.glass-mode.dark-mode .editor-scroll-area::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.25);
+}
+
+/* --- COMPACT GRID --- */
+.compact-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 15px;
+}
+
+/* --- COMPACT CARD --- */
+.compact-card {
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.compact-card:hover {
+    transform: translateY(-4px);
+}
+
+/* --- DRAFT LIST --- */
+.draft-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.draft-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 12px;
+    background: var(--bg-color);
+    border-radius: 16px;
+    border: 1px solid var(--input-border);
+    transition: all 0.3s ease;
+}
+
+/* Glass Styles Removed for Draft Items */
+
+.draft-img {
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    object-fit: contain;
+    background: white;
+    padding: 5px;
+}
+
+.draft-info {
+    flex: 1;
+}
+
+.draft-name {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.draft-price {
+    font-size: 13px;
+    opacity: 0.7;
+}
+
+.draft-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.qty-btn {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: 1px solid var(--input-border);
+    background: var(--card-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 22px;
+    font-weight: 600;
+    line-height: 1;
+    transition: all 0.25s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+.qty-btn:hover {
+    background: var(--text-dark);
+    color: white;
+    transform: scale(1.1) translateY(-1px);
+}
+
+/* Premium Glass Mode for Qty Buttons */
+body.glass-mode .qty-btn {
+    background: rgba(255, 255, 255, 0.5) !important;
+    backdrop-filter: blur(15px) saturate(200%) !important;
+    -webkit-backdrop-filter: blur(15px) saturate(200%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.6) !important;
+    color: var(--text-dark) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06) !important;
+}
+
+body.glass-mode.dark-mode .qty-btn {
+    background: rgba(255, 255, 255, 0.18) !important;
+    border: 1px solid rgba(255, 255, 255, 0.25) !important;
+    color: #ffffff !important;
+}
+
+body.glass-mode .qty-btn:hover {
+    background: rgba(255, 255, 255, 0.7) !important;
+    border-color: var(--text-dark) !important;
+}
+
+body.glass-mode.dark-mode .qty-btn:hover {
+    background: rgba(255, 255, 255, 0.28) !important;
+    border-color: #ffffff !important;
+}
+
+/* --- FOOTER --- */
+.editor-panel-footer {
+    padding: 24px;
+    border-top: 1px solid var(--input-border);
+    background: var(--card-bg);
+}
+
+/* Glass Styles Removed for Footer */
+
+.bundle-summary {
+    margin-bottom: 20px;
+}
+
+.summary-line {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.total-price-large {
+    font-size: 24px;
+    font-weight: 700;
+}
+
+.save-bundle-btn {
+    width: 100%;
+    padding: 18px;
+    font-size: 16px;
+    border-radius: 18px;
+    font-weight: 500;
+    transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+body.glass-mode .save-bundle-btn {
+    background: rgba(255, 255, 255, 0.45) !important;
+    backdrop-filter: blur(15px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(15px) saturate(180%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.5) !important;
+    color: var(--text-dark) !important;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05) !important;
+}
+
+body.glass-mode.dark-mode .save-bundle-btn {
+    background: rgba(255, 255, 255, 0.12) !important;
+    border: 1px solid rgba(255, 255, 255, 0.18) !important;
+    color: #ffffff !important;
+}
+
+body.glass-mode .save-bundle-btn:hover {
+    transform: translateY(-3px);
+    background: rgba(255, 255, 255, 0.6) !important;
+    border-color: var(--text-dark) !important;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12) !important;
+}
+
+body.glass-mode.dark-mode .save-bundle-btn:hover {
+    background: rgba(255, 255, 255, 0.22) !important;
+    border-color: #ffffff !important;
+}
+
+/* --- NEW HEADER LAYOUT --- */
+.editor-panel-header.custom-grid-layout {
+    display: flex !important;
+    flex-direction: row !important;
+    gap: 20px;
+    align-items: stretch;
+    justify-content: flex-start;
+    padding: 10px 20px !important;
+    /* FIXED HEIGHT Reduced to 140px as requested */
+    height: 140px !important;
+    box-sizing: border-box;
+}
+
+.header-col-left {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    flex-shrink: 0;
+    width: 220px;
+    justify-content: flex-start !important;
+    padding-top: 15px !important;
+}
+
+.header-col-right {
+    display: grid !important;
+    grid-template-rows: 50px 50px !important;
+    /* Adjusted for better fit */
+    gap: 0 !important;
+    flex: 1;
+    min-width: 0;
+    justify-content: stretch !important;
+    align-items: center !important;
+    padding: 0 20px;
+}
+
+.search-matched {
+    width: 100%;
+    height: 38px;
+    padding: 0 12px 0 38px;
+    font-size: 14px;
+    border: 1px solid var(--input-border);
+    border-radius: 50px;
+    background: var(--card-bg);
+    color: var(--text-dark);
+    outline: none;
+    transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+.search-matched:focus {
+    border-color: var(--text-dark);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    background: var(--bg-color);
+}
+
+/* Glass Mode for Bundle Search */
+body.glass-mode .search-matched {
+    background: rgba(255, 255, 255, 0.3) !important;
+    backdrop-filter: blur(10px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(10px) saturate(180%) !important;
+    border: 0.5px solid rgba(255, 255, 255, 0.4) !important;
+}
+
+body.glass-mode.dark-mode .search-matched {
+    background: rgba(255, 255, 255, 0.08) !important;
+    border: 0.5px solid rgba(255, 255, 255, 0.15) !important;
+    color: #ffffff !important;
+}
+
+.status-group-matched {
+    display: flex;
+    gap: 8px;
+    width: 100%;
+}
+
+.status-group-matched .bundle-status-item {
+    flex: 1;
+    /* Both buttons take 50% of the space minus the gap */
+    justify-content: center;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.header-row-top,
+.header-row-bottom {
+    width: 100%;
+}
+
+/* RESTORED: Header Row Bottom */
+.header-row-bottom {
+    width: 100%;
+    min-height: 32px;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.header-row-bottom.empty {
+    opacity: 0;
+    transform: translateY(-8px);
+    pointer-events: none;
+}
+
+/* --- EMPTY STATE --- */
+.empty-state-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 80px 20px;
+    text-align: center;
+    color: var(--text-grey);
+}
+
+.empty-icon-circle {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: var(--card-bg);
+    border: 1px solid var(--input-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 24px;
+    color: var(--text-dark);
+}
+
+.empty-icon-circle svg {
+    width: 32px;
+    height: 32px;
+    opacity: 0.6;
+}
+
+.empty-state-container h3 {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin-bottom: 10px;
+}
+
+.empty-state-container p {
+    font-size: 15px;
+    max-width: 400px;
+    line-height: 1.5;
+    margin-bottom: 24px;
+}
+
+/* Delete Item Button (Draft) */
+.delete-item-btn {
+    color: #ef4444;
+    /* Default red tint */
+    border-color: rgba(239, 68, 68, 0.3);
+}
+
+.delete-item-btn:hover {
+    background: #ef4444 !important;
+    color: white !important;
+    border-color: #ef4444 !important;
+}
+
+.delete-item-btn svg {
+    width: 18px;
+    height: 18px;
+}
+
+/* Glass Mode Draft Item */
+body.glass-mode .draft-item {
+    background: rgba(255, 255, 255, 0.25) !important;
+    backdrop-filter: blur(15px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(15px) saturate(180%) !important;
+    border: 0.5px solid rgba(255, 255, 255, 0.4) !important;
+}
+
+body.glass-mode.dark-mode .draft-item {
+    background: rgba(255, 255, 255, 0.08) !important;
+    border: 0.5px solid rgba(255, 255, 255, 0.15) !important;
+    color: #ffffff;
+}
+
+/* Original compact classes overrides */
+.nav-scroll-area.compact {
+    padding-bottom: 0;
+    margin-bottom: 0;
+}
+
+.sub-filter-container.compact {
+    padding: 0;
+}
+
+/* --- COMPACT CONTROLS --- */
+.editor-controls-layout {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    width: 100%;
+    /* Ensure whole row fits */
+    height: 40px;
+}
+
+.filter-section {
+    display: flex;
+    align-items: center;
+}
+
+.filter-section.left {
+    gap: 12px;
+    flex-shrink: 0;
+    border-right: 1px solid var(--input-border);
+    padding-right: 20px;
+}
+
+.filter-section.middle {
+    flex: 1;
+    overflow: hidden;
+    min-width: 0;
+    /* Important for nested scroll */
+}
+
+.filter-section.right {
+    flex-shrink: 0;
+    border-left: 1px solid var(--input-border);
+    padding-left: 20px;
+    /* Initially hidden by JS if empty */
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.search-small {
+    width: 120px;
+    height: 34px;
+    padding: 0 12px;
+    border-radius: 10px;
+    border: 1px solid var(--input-border);
+    background: var(--card-bg);
+    color: var(--text-dark);
+    font-size: 13px;
+}
+
+.status-group {
+    display: flex;
+    gap: 6px;
+}
+
+/* --- BUNDLE EDITOR FILTERS (Isolated) --- */
+
+.bundle-scroll-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    width: 100%;
+    overflow-x: auto;
+    white-space: nowrap;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    justify-content: flex-start;
+    padding: 40px 0 !important;
+    /* Massive vertical room for ultra-soft glass shadows to bloom */
+    height: 80px !important;
+    /* Matches grid slot */
+    box-sizing: border-box !important;
+    scroll-behavior: smooth;
+    /* Clean slate: Absolutely no decoration */
+    background: transparent !important;
+    background-color: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
+.bundle-scroll-row::-webkit-scrollbar {
+    display: none;
+}
+
+/* Centering trick using margin:auto on pseudo elements */
+.bundle-scroll-row::before,
+.bundle-scroll-row::after {
+    content: '';
+    margin: auto;
+    display: block;
+    width: 0;
+}
+
+/* Items Styles */
+.bundle-cat-item,
+.bundle-sub-item,
+.bundle-status-item {
+    height: 32px;
+    padding: 0 16px;
+    border-radius: 16px;
+    font-size: 14px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    flex-shrink: 0;
+    background: var(--card-bg);
+    border: 1px solid var(--input-border);
+    color: var(--text-grey);
+    box-shadow: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    outline: none !important;
+}
+
+.bundle-cat-item.active,
+.bundle-sub-item.active,
+.bundle-status-item.active {
+    background: var(--text-dark) !important;
+    border-color: var(--text-dark) !important;
+    color: var(--bg-color) !important;
+    font-weight: 500 !important;
+    outline: none !important;
+    box-shadow: none;
+    appearance: none;
+    -webkit-appearance: none;
+}
+
+.bundle-cat-item:focus,
+.bundle-sub-item:focus,
+.bundle-status-item:focus,
+.bundle-cat-item:active,
+.bundle-sub-item:active,
+.bundle-status-item:active,
+.bundle-cat-item:focus-visible,
+.bundle-sub-item:focus-visible,
+.bundle-status-item:focus-visible {
+    outline: none !important;
+    box-shadow: none !important;
+    -webkit-tap-highlight-color: transparent !important;
+}
+
+/* Specific item overrides in Glass Mode */
+/* ... existing styles ... */
+
+/* Glass Mode Fix: Absolute Nuke for any inherited glass boxes */
+body.glass-mode .bundle-scroll-row,
+body.glass-mode .header-col-right,
+body.glass-mode .editor-panel-header.custom-grid-layout,
+body.glass-mode .status-group-matched,
+body.glass-mode .editor-left-panel,
+body.glass-mode .editor-right-panel {
+    background: transparent !important;
+    background-color: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
+/* Panel Backgrounds for Glass Mode (Soft fill instead of hard border) */
+body.glass-mode .editor-left-panel,
+body.glass-mode .editor-right-panel {
+    background: rgba(255, 255, 255, 0.25) !important;
+    backdrop-filter: blur(25px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(25px) saturate(180%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+}
+
+body.glass-mode.dark-mode .editor-left-panel,
+body.glass-mode.dark-mode .editor-right-panel {
+    background: rgba(0, 0, 0, 0.4) !important;
+    backdrop-filter: blur(25px) saturate(160%) !important;
+    -webkit-backdrop-filter: blur(25px) saturate(160%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Specific item overrides in Glass Mode */
+body.glass-mode .bundle-cat-item,
+body.glass-mode .bundle-status-item,
+body.glass-mode .bundle-sub-item {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0.2) 100%) !important;
+    backdrop-filter: blur(20px) saturate(160%) !important;
+    -webkit-backdrop-filter: blur(20px) saturate(160%) !important;
+    border: none !important;
+    box-shadow:
+        inset 0 1px 1px rgba(255, 255, 255, 0.5),
+        0 4px 15px rgba(0, 0, 0, 0.05) !important;
+    color: var(--text-dark);
+}
+
+body.glass-mode.dark-mode .bundle-cat-item,
+body.glass-mode.dark-mode .bundle-status-item,
+body.glass-mode.dark-mode .bundle-sub-item {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.04) 100%) !important;
+    backdrop-filter: blur(20px) saturate(120%) !important;
+    -webkit-backdrop-filter: blur(20px) saturate(120%) !important;
+    border: none !important;
+    box-shadow:
+        inset 0 0.5px 0.5px rgba(255, 255, 255, 0.1),
+        0 4px 10px rgba(0, 0, 0, 0.1) !important;
+    color: rgba(255, 255, 255, 0.85);
+}
+
+body.glass-mode:not(.dark-mode) .bundle-cat-item.active,
+body.glass-mode:not(.dark-mode) .bundle-sub-item.active,
+body.glass-mode:not(.dark-mode) .bundle-status-item.active {
+    /* 1. Dunkle Tönung (nicht zu deckend, damit der Blur wirkt) */
+    background: rgba(0, 0, 0, 0.4) !important;
+    /* 2. Der Weichzeichner für den Hintergrund hinter der Pille */
+    backdrop-filter: blur(20px) saturate(160%) !important;
+    -webkit-backdrop-filter: blur(20px) saturate(160%) !important;
+    /* 3. Text Styling: Weiß aber NICHT fett */
+    color: #ffffff !important;
+    font-weight: 400 !important;
+    /* 4. Feine Umrandung für die Form */
+    border: none !important;
+    box-shadow:
+        inset 0 1px 1px rgba(255, 255, 255, 0.5),
+        0 4px 15px rgba(0, 0, 0, 0.05) !important;
+}
+
+body.glass-mode.dark-mode .bundle-cat-item.active,
+body.glass-mode.dark-mode .bundle-sub-item.active,
+body.glass-mode.dark-mode .bundle-status-item.active {
+    /* Slightly lighter glass for dark mode visibility */
+    background: rgba(255, 255, 255, 0.15) !important;
+    backdrop-filter: blur(20px) saturate(120%) !important;
+    -webkit-backdrop-filter: blur(20px) saturate(120%) !important;
+    color: #ffffff !important;
+    font-weight: 400 !important;
+    border: none !important;
+    box-shadow:
+        inset 0 0.5px 0.5px rgba(255, 255, 255, 0.1),
+        0 4px 10px rgba(0, 0, 0, 0.1) !important;
+    outline: none !important;
+}
+
+/* Utility to ensure the right column itself has no ghost background */
+.header-col-right {
+    background: none !important;
+    background-color: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+/* Cleanup */
+.bundle-scroll-row.header-row-top {
+    min-height: 38px;
+}
+
+.bundle-scroll-row.header-row-bottom {
+    min-height: 32px;
+    display: flex !important;
+}
+
+.bundle-cat-item,
+.bundle-sub-item {
+    color: var(--text-dark) !important;
+}
+
+.close-editor-btn {
+    background: transparent;
+    border: none;
+    font-size: 32px;
+    cursor: pointer;
+}
+
+.panel-title-input {
+    background: transparent;
+    border: none;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text-dark);
+    width: 80%;
+}
+
+.panel-title-input:focus {
+    outline: none;
+}
+
+/* --- FORCE GLASS FOR FEATURES --- */
+/* Glass Force Block Removed */
+
+/* --- END FEATURES --- */
+
+/* Bought Button State */
+.btn-bought-active {
+    background: #27ae60 !important;
+    color: white !important;
+    border-color: #27ae60 !important;
+    box-shadow: 0 4px 15px rgba(39, 174, 96, 0.3) !important;
+}
+
+body.glass-mode .btn-bought-active {
+    background: rgba(39, 174, 96, 0.5) !important;
+    backdrop-filter: blur(15px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(15px) saturate(180%) !important;
+    border: 1px solid rgba(39, 174, 96, 0.6) !important;
+    box-shadow: 0 4px 15px rgba(39, 174, 96, 0.2) !important;
+}
+
+body.glass-mode.dark-mode .btn-bought-active {
+    background: rgba(39, 174, 96, 0.3) !important;
+    border: 1px solid rgba(39, 174, 96, 0.5) !important;
+    color: #4ade80 !important;
+}
+
+body.glass-mode .btn-bought-active:hover {
+    background: rgba(39, 174, 96, 0.7) !important;
+    transform: translateY(-2px);
+}
+
+/* Bundle Footer Actions */
+.bundle-footer-actions {
+    display: flex;
+    justify-content: flex-end;
+    padding: 0 20px 20px 20px;
+    margin-top: 10px;
+}
+
+.bundle-footer-actions .main-btn {
+    border-radius: 40px;
+    padding: 10px 30px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+/* --- ANIMATIONS --- */
+@keyframes bundleFadeUp {
+    from {
+        opacity: 0;
+        transform: translateY(15px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+#bundleSourceGrid {
+    transition: opacity 0.15s ease-out;
+    opacity: 1;
+}
+
+#bundleSourceGrid.grid-loading {
+    opacity: 0;
+}
+
+#bundleSourceGrid.animate-render {
+    animation: bundleFadeUp 0.3s ease-out forwards;
+}
+
+/* Micro-interactions for chips */
+.bundle-cat-item:active,
+.bundle-sub-item:active,
+.bundle-status-item:active {
+    transform: scale(0.96);
+}
+
+.bundle-cat-item,
+.bundle-sub-item,
+.bundle-status-item {
+    transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+/* --- EMPTY STATE --- */
+.bundle-empty-state {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+    text-align: center;
+    color: var(--text-grey);
+}
+
+.bundle-empty-icon {
+    font-size: 40px;
+    margin-bottom: 16px;
+    opacity: 0.5;
+}
+
+.bundle-empty-state h3 {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-dark);
+    margin-bottom: 8px;
+}
+
+body.dark-mode .bundle-empty-state h3 {
+    color: #ffffff;
+}
+
+.bundle-empty-state p {
+    font-size: 14px;
+    opacity: 0.8;
+}

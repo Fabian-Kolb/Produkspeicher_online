@@ -1,0 +1,200 @@
+/* --- DASHBOARD FEATURE --- */
+
+.dashboard-page-header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    margin-bottom: 40px;
+    padding: 0 10px;
+}
+
+.welcome-text-centered h1 {
+    font-size: 46px;
+    font-weight: 600;
+    font-family: 'Playfair Display', serif;
+    margin: 0 0 8px 0;
+    color: var(--text-dark);
+    letter-spacing: -1px;
+    line-height: 1.1;
+}
+
+.welcome-text-centered p {
+    color: var(--text-grey);
+    margin: 0;
+    font-size: 16px;
+    opacity: 0.8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.inline-date-picker {
+    background: transparent;
+    border: none;
+    color: var(--text-dark);
+    font-family: inherit;
+    font-size: 16px;
+    font-weight: 600;
+    outline: none;
+    cursor: pointer;
+    padding: 0;
+}
+
+.inline-date-picker::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    opacity: 0.6;
+}
+
+.inline-date-picker:hover {
+    color: var(--blob-color-1);
+}
+
+.stats-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    margin-bottom: 40px;
+}
+
+@media (max-width: 900px) {
+    .stats-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+.stat-card {
+    padding: 24px;
+    border-radius: 24px;
+    background: var(--card-bg);
+    border: 1px solid var(--input-border);
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+}
+
+.stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, transparent 100%);
+    pointer-events: none;
+    border-radius: inherit;
+}
+
+.stat-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    position: relative;
+    z-index: 1;
+}
+
+.stat-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-dark);
+    opacity: 0.8;
+}
+
+.stat-icon {
+    font-size: 16px;
+    color: var(--text-grey);
+    opacity: 0.5;
+}
+
+.stat-content-large {
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--text-dark);
+    line-height: 1;
+    margin-bottom: 5px;
+}
+
+.stat-content-large.red {
+    color: #e74c3c;
+}
+
+.stat-sub {
+    font-size: 12px;
+    color: var(--text-grey);
+}
+
+.progress-bar-container {
+    height: 8px;
+    background: var(--slider-track);
+    border-radius: 4px;
+    margin-bottom: 10px;
+    overflow: hidden;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    background: var(--text-dark);
+    border-radius: 4px;
+}
+
+.stat-footer {
+    display: flex;
+    justify-content: flex-end;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.stat-current {
+    color: var(--text-dark);
+    font-weight: 600;
+}
+
+.stat-max {
+    color: var(--text-grey);
+}
+
+.notification-indicator {
+    width: 8px;
+    height: 8px;
+    background: #e74c3c;
+    border-radius: 50%;
+    box-shadow: 0 0 0 2px var(--card-bg);
+}
+
+
+
+/* Welcome Section (Simple) */
+.welcome-section {
+    background: var(--active-gradient);
+    border-radius: 20px;
+    padding: 60px 40px;
+    text-align: center;
+    margin-bottom: 40px;
+    border: 1px solid var(--input-border);
+}
+
+.welcome-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 38px;
+    margin-bottom: 10px;
+    color: var(--text-dark);
+}
+
+/* --- DASHBOARD SHOP FILTERS --- */
+.dashboard-shops-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+#websiteFilterContainer {
+    /* Layout is now handled internally by javascript render */
+    width: 100%;
+    margin-top: 10px;
+}

@@ -1,0 +1,508 @@
+/* --- CARDS & PANELS --- */
+
+/* Main Product Card */
+.card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+    /* Ensure full width */
+    background: var(--card-bg);
+    border: 1px solid var(--input-border);
+    border-radius: 32px;
+    overflow: hidden;
+    /* Smooth Transitions for Defrosting Effect */
+    transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+        box-shadow 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+        border-color 0.5s ease-in-out;
+    box-shadow: none;
+    position: relative;
+    /* Force GPU acceleration */
+    will-change: transform, box-shadow;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+}
+
+.card:hover {
+    /* Lift the entire card up */
+    transform: translateY(-4px) translateZ(0);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+}
+
+
+
+/* 1. Grundzustand: Exakte Kopie des Dashboard-Hero Stils / Header Style */
+/* 1. Grundzustand: Heavier Glass for Cards */
+/* 1. Grundzustand: Heavier Glass for Cards  REMOVED */
+
+/* Hover Effekt: Nur leichtes Anheben, keine Farbänderung ins Dunkle */
+
+
+.card-img-container {
+    position: relative;
+    width: calc(100% - 24px);
+    aspect-ratio: 1 / 1;
+    background-color: transparent;
+    /* Remove background to prevent color bleed */
+    overflow: hidden;
+    cursor: zoom-in;
+    border-radius: 32px;
+    /* Increased: standardizing to 32px */
+    margin: 12px;
+    /* Force GPU layer and isolation */
+    isolation: isolate;
+    transform: translateZ(0);
+}
+
+@media (max-width: 768px) {
+    .card-img-container {
+        margin: 4px;
+        /* Shrunk from 8px for tighter packing */
+        width: calc(100% - 8px);
+        border-radius: 20px;
+        /* Reduced to match smaller gap */
+    }
+
+    .card-img {
+        border-radius: 20px;
+    }
+}
+
+.card-img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    border-radius: 32px;
+
+    /* Base State (Inactive/Outgoing) */
+    opacity: 0;
+    visibility: hidden;
+    z-index: 1;
+    pointer-events: none;
+    transform: scale(1.05);
+    /* Slight zoom on exit */
+
+    /* CROSSFADE LOGIC: 
+       Fade out opacity over 1s. 
+       Hide visibility AFTER 1s (so it stays visible during the fade out). 
+    */
+    transition: opacity 1s ease-in-out, transform 1s ease-in-out, visibility 0s linear 1s;
+}
+
+.card-img.active {
+    /* Active State (Incoming) */
+    opacity: 1;
+    visibility: visible;
+    z-index: 2;
+    transform: scale(1);
+
+    /* Fade in opacity over 1s.
+       Show visibility IMMEDIATELY (delay 0s) so we can see it fade in.
+    */
+    transition: opacity 1s ease-in-out, transform 1s ease-in-out, visibility 0s linear 0s;
+}
+
+.card-actions-overlay {
+    position: absolute;
+    top: 50px;
+    /* Below the trigger button */
+    right: 12px;
+    display: flex;
+    flex-direction: column;
+    /* Stacked vertically */
+    gap: 8px;
+    z-index: 10;
+    opacity: 0;
+    transform: translateY(-10px) scale(0.9);
+    transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+    pointer-events: none;
+    transform-origin: top right;
+}
+
+.card-actions-overlay.open {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    pointer-events: auto;
+}
+
+
+
+.card-menu-layer {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    /* Let clicks pass through except to buttons */
+    z-index: 10;
+}
+
+.card-body {
+    padding: 12px 15px 15px 15px;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+@media (max-width: 768px) {
+    .card-body {
+        padding: 8px 10px 12px 10px;
+    }
+}
+
+.card-body-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    width: 100%;
+}
+
+.card-info-left {
+    flex: 1;
+    min-width: 0;
+}
+
+.card-status-right {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: flex-end;
+    margin-left: 12px;
+}
+
+.card-vendor {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-grey);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 2px;
+}
+
+.card-title {
+    font-size: 17px;
+    font-weight: 800;
+    color: var(--text-dark);
+    margin: 0;
+}
+
+@media (max-width: 768px) {
+    .card-vendor {
+        font-size: 10px;
+    }
+
+    .card-title {
+        font-size: 14px;
+    }
+
+    .card-title-marquee {
+        height: 20px;
+        /* Reduced for smaller text */
+    }
+}
+
+/* MARQUEE CORE FIXED (for card title) */
+.card-title-marquee {
+    margin-bottom: 4px;
+    height: 24px;
+    overflow: hidden;
+    position: relative;
+    width: 100%;
+}
+
+.marquee-content {
+    white-space: nowrap;
+    display: inline-block;
+    position: absolute;
+    left: 0;
+    will-change: transform;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    width: 100%;
+}
+
+.card:hover .marquee-content.animate-marquee {
+    width: auto;
+    overflow: visible;
+    padding-left: 20%;
+    /* Slight offset for better feel */
+    animation: marquee-scroll-fixed 8s linear infinite;
+    animation-delay: 0.3s;
+}
+
+.card-price {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-dark);
+}
+
+.card-price .currency {
+    font-size: 12px;
+    font-weight: 500;
+    opacity: 0.7;
+    margin-left: 2px;
+}
+
+@media (max-width: 768px) {
+    .card-price {
+        font-size: 14px;
+    }
+
+    .card-price .currency {
+        font-size: 10px;
+    }
+}
+
+.card-footer-spacer {
+    flex-grow: 1;
+}
+
+.card-footer-unified {
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px solid var(--input-border);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.rating-value {
+    font-size: 11px;
+    font-weight: 800;
+    color: var(--text-dark);
+    white-space: nowrap;
+    min-width: 42px;
+    text-align: right;
+    flex-shrink: 0;
+    letter-spacing: -0.2px;
+}
+
+.card-rating-slider {
+    -webkit-appearance: none;
+    appearance: none;
+    flex-grow: 1;
+    height: 4px;
+    background: var(--input-border);
+    border-radius: 2px;
+    outline: none;
+    cursor: pointer;
+}
+
+.card-rating-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 14px;
+    height: 14px;
+    background: var(--text-dark);
+    border-radius: 50%;
+    box-shadow: 0 0 0 3px var(--card-bg);
+    border: 1px solid var(--input-border);
+}
+
+.no-image-placeholder {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    color: var(--text-grey);
+    background: var(--bg-color);
+}
+
+.bought-item::before {
+    content: '';
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    width: 10px;
+    height: 10px;
+    background: var(--bought-color);
+    border-radius: 50%;
+    z-index: 5;
+    box-shadow: 0 0 0 4px var(--card-bg);
+}
+
+/* WEBSITE GRID & CARDS */
+.websites-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 20px;
+    width: 100%;
+}
+
+.website-card {
+    background: var(--card-bg);
+    border-radius: 20px;
+    padding: 30px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    text-decoration: none;
+    color: var(--text-dark);
+    border: 1px solid transparent;
+    transition: all 0.3s ease;
+    box-shadow: none;
+    position: relative;
+    z-index: 1;
+    cursor: pointer;
+}
+
+.website-card:hover {
+    transform: translateY(-5px);
+    border-color: var(--input-border);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+    z-index: 2;
+}
+
+/* MODERN SHOP CARD (e.g. from Modules) */
+.shop-card-modern {
+    background: var(--card-bg);
+    border: 1px solid var(--input-border);
+    border-radius: 16px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    text-decoration: none;
+    color: var(--text-dark);
+    transition: all 0.2s;
+    position: relative;
+    aspect-ratio: 1/0.8;
+}
+
+/* 2. Shop-Karten (Glass Mode Fix) */
+
+
+.shop-card-modern:hover {
+    background: var(--hover-bg);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+}
+
+.shop-logo-placeholder {
+    width: 50px;
+    height: 50px;
+    background: var(--bg-color);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text-dark);
+    border: 1px solid var(--input-border);
+}
+
+.shop-name-modern {
+    font-weight: 600;
+    font-size: 16px;
+}
+
+.shop-menu-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: transparent;
+    border: none;
+    color: var(--text-grey);
+    cursor: pointer;
+    font-size: 18px;
+    padding: 5px;
+    border-radius: 50%;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.shop-card-modern:hover .shop-menu-btn {
+    opacity: 1;
+}
+
+.shop-menu-btn:hover {
+    background: var(--input-border);
+    color: var(--text-dark);
+}
+
+.add-shop-card {
+    border: 1px dashed var(--text-grey);
+    background: transparent;
+    cursor: pointer;
+}
+
+.add-shop-card:hover {
+    border-color: var(--text-dark);
+    background: var(--hover-bg);
+}
+
+/* STATS CARD (Dashboard/Analytics) */
+.stat-card {
+    background: var(--card-bg);
+    border: 1px solid var(--input-border);
+    border-radius: 22px;
+    padding: 24px;
+    box-shadow: none;
+    transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1), background 0.3s ease, box-shadow 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+body.dark-mode .stat-card {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.stat-card:hover {
+    transform: translateY(-8px) !important;
+    background: rgba(255, 255, 255, 0.7) !important;
+    box-shadow: 0 15px 45px rgba(0, 0, 0, 0.08) !important;
+}
+
+body.dark-mode .stat-card:hover {
+    background: rgba(255, 255, 255, 0.08) !important;
+    box-shadow: 0 15px 45px rgba(0, 0, 0, 0.25) !important;
+}
+
+/* Heavier Glass for Stats REMOVED */
+
+
+
+/* Duplicates Removed */
+
+/* --- END CARDS --- */
+
+/* Action Button Styles Refinement */
+.btn-status.btn-delete {
+    color: var(--text-grey);
+    transition: color 0.2s ease;
+}
+
+.btn-status.btn-delete:hover {
+    color: #e74c3c !important;
+    background: transparent;
+}
+
+.btn-status.btn-bought {
+    transition: color 0.2s ease;
+}
+
+.btn-status.btn-bought:hover,
+.btn-status.btn-bought.active {
+    color: #00a946 !important;
+}
+
+.btn-status.btn-wishlist {
+    transition: color 0.2s ease;
+}
+
+.btn-status.btn-wishlist.active,
+.btn-status.btn-wishlist.active:hover {
+    color: #e3b500 !important;
+}

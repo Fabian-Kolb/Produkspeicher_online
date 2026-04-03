@@ -2,12 +2,11 @@ import React from 'react';
 import { Settings, Play, Download, Upload, Info, Trash2, X, Sparkles } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { useUIStore } from '../../store/useUIStore';
-import { useAppStore } from '../../store/useAppStore';
-import { createDemoData } from '../../utils/demoData';
+
 
 export const MainMenuSidebar: React.FC = () => {
   const { isMainMenuOpen, toggleMainMenu, toggleThemeManager, openProductModal } = useUIStore();
-  const { setProducts, setBundles } = useAppStore();
+
   
   // Dummy functions for now
   const handleExport = () => console.log('Export triggered');
@@ -16,9 +15,10 @@ export const MainMenuSidebar: React.FC = () => {
   const handleReset = () => console.log('Reset Modal');
 
   const handleDemoMode = () => {
-    const demoData = createDemoData();
-    setProducts(demoData.products);
-    setBundles(demoData.bundles);
+    console.warn("Demo Mode is currently disabled because it requires an update to work with Supabase.");
+    // const demoData = createDemoData();
+    // setProducts(demoData.products);
+    // setBundles(demoData.bundles);
     toggleMainMenu();
   };
 

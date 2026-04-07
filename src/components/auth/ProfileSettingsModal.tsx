@@ -2,7 +2,6 @@ import React, { useEffect, useState, useRef } from 'react';
 import { supabase } from '../../lib/supabase';
 import { useUIStore } from '../../store/useUIStore';
 import { X, ImagePlus, User, Loader2, Save, Trash2 } from 'lucide-react';
-import { cn } from '../../utils/cn';
 
 export const ProfileSettingsModal: React.FC = () => {
   const { isProfileModalOpen, toggleProfileModal } = useUIStore();

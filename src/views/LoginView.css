@@ -1,0 +1,713 @@
+/* ═══════════════════════════════════════════════
+   LoginView · Full Animation System
+   Phases: idle → cart-drive → loading → success/error
+   ═══════════════════════════════════════════════ */
+
+/* ── root ── */
+.login-root {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #0a0a0f;
+  font-family: 'Inter', sans-serif;
+}
+
+/* EXITING OVERLAY: LoginView sits on top of Dashboard and fades out smoothly */
+.login-root--exiting {
+  z-index: 9999;
+  animation: login-root-fadeout 4s ease forwards;
+  animation-delay: 0.5s;
+}
+
+@keyframes login-root-fadeout {
+  0%   { opacity: 1; }
+  25%  { opacity: 0.95; }
+  50%  { opacity: 0.7; }
+  100% { opacity: 0; }
+}
+
+/* ── ambient gradient blobs ── */
+.login-blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(120px);
+  opacity: 0.4;
+  pointer-events: none;
+  will-change: transform, opacity;
+  transition: transform 0.9s cubic-bezier(0.4, 0, 0.2, 1),
+              opacity 0.7s ease;
+}
+
+.login-blob--1 {
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, #6366f1 0%, transparent 70%);
+  top: -10%;
+  left: -5%;
+  animation: login-float-1 18s ease-in-out infinite;
+}
+
+.login-blob--2 {
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, #8b5cf6 0%, transparent 70%);
+  bottom: -10%;
+  right: -5%;
+  animation: login-float-2 22s ease-in-out infinite;
+}
+
+.login-blob--3 {
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, #06b6d4 0%, transparent 70%);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  animation: login-float-3 15s ease-in-out infinite;
+}
+
+/* SUCCESS: blobs expand and glow brighter before root fades */
+.login-root--success .login-blob {
+  opacity: 0.7;
+  animation: none;
+  transition: transform 1.5s cubic-bezier(0.4, 0, 0.2, 1),
+              opacity 1.5s ease;
+  transition-delay: 0.2s;
+}
+.login-root--success .login-blob--1 { transform: translate(-60px, -60px) scale(1.8); }
+.login-root--success .login-blob--2 { transform: translate(60px, 60px) scale(1.8); }
+.login-root--success .login-blob--3 { transform: translate(-50%, -50%) scale(2); }
+
+@keyframes login-float-1 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33%      { transform: translate(40px, 60px) scale(1.1); }
+  66%      { transform: translate(-30px, 30px) scale(0.95); }
+}
+@keyframes login-float-2 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33%      { transform: translate(-50px, -40px) scale(1.05); }
+  66%      { transform: translate(20px, -50px) scale(0.9); }
+}
+@keyframes login-float-3 {
+  0%, 100% { transform: translate(-50%, -50%) scale(1); }
+  50%      { transform: translate(-50%, -50%) scale(1.2); }
+}
+
+/* ═══════════════════════════════════════════════
+   Scrolling Product Columns
+   ═══════════════════════════════════════════════ */
+.login-scroll-column {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 480px;
+  overflow: hidden;
+  z-index: 1;
+  mask-image: linear-gradient(to bottom, transparent 0%, black 10%, black 90%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 10%, black 90%, transparent 100%);
+}
+
+/* Desktop: two side columns — moved slightly more to center */
+.login-scroll-column--left  { left: 20px; }
+.login-scroll-column--right { right: 20px; }
+
+/* Mobile: single centre column — hidden on desktop */
+.login-scroll-column--center {
+  display: none;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 320px;
+  filter: blur(3px);
+  opacity: 0.5;
+  z-index: 0;
+}
+
+.login-scroll-track {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 48px;
+  padding: 48px 24px;
+  will-change: transform;
+}
+
+.login-scroll-track--up   { animation: login-scroll-up 38s linear infinite; }
+.login-scroll-track--down { animation: login-scroll-down 38s linear infinite; }
+
+/* LOADING/SUCCESS: stop scrolling */
+.login-root--loading .login-scroll-track,
+.login-root--success .login-scroll-track {
+  animation-play-state: paused;
+}
+
+@keyframes login-scroll-up {
+  0%   { transform: translateY(0); }
+  100% { transform: translateY(-50%); }
+}
+@keyframes login-scroll-down {
+  0%   { transform: translateY(-50%); }
+  100% { transform: translateY(0); }
+}
+
+/* ═══════════════════════════════════════════════
+   Product Card
+   ═══════════════════════════════════════════════ */
+.login-product-card {
+  position: relative;
+  width: 240px;
+  border-radius: 1.5rem;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  padding: 12px;
+  cursor: default;
+  flex-shrink: 0;
+  transform: rotate(var(--card-rotate, 0deg)) translateX(var(--card-offset, 0px));
+  opacity: var(--card-opacity, 1);
+  filter: brightness(var(--card-brightness, 1));
+  transition: transform 0.5s cubic-bezier(0.23, 1, 0.32, 1),
+              border-color 0.35s ease,
+              box-shadow 0.35s ease,
+              opacity 0.4s ease,
+              filter 0.4s ease;
+}
+
+.login-product-card:hover {
+  transform: rotate(0deg) translateX(var(--card-offset, 0px)) scale(1.08) translateY(-8px);
+  border-color: rgba(255, 255, 255, 0.25);
+  box-shadow: 0 20px 56px rgba(99, 102, 241, 0.25), 0 6px 20px rgba(0, 0, 0, 0.4);
+  opacity: 1 !important;
+  filter: brightness(1) !important;
+}
+
+/* ── LOADING: cards fly out with stagger ── */
+.login-root--loading .login-scroll-column--left .login-product-card,
+.login-root--success .login-scroll-column--left .login-product-card {
+  transform: translateX(-250vw) rotate(calc(var(--card-rotate, 0deg) - 25deg)) translateY(-30px);
+  opacity: 0;
+  transition: transform 0.7s cubic-bezier(0.55, 0, 0.85, 0.36),
+              opacity 0.5s ease;
+  transition-delay: calc(var(--card-index, 0) * 60ms + 50ms);
+}
+.login-root--loading .login-scroll-column--right .login-product-card,
+.login-root--success .login-scroll-column--right .login-product-card {
+  transform: translateX(250vw) rotate(calc(var(--card-rotate, 0deg) + 25deg)) translateY(-30px);
+  opacity: 0;
+  transition: transform 0.7s cubic-bezier(0.55, 0, 0.85, 0.36),
+              opacity 0.5s ease;
+  transition-delay: calc(var(--card-index, 0) * 60ms + 100ms);
+}
+
+/* Mobile centre column: cards fly upward */
+.login-root--loading .login-scroll-column--center .login-product-card,
+.login-root--success .login-scroll-column--center .login-product-card {
+  transform: translateY(-200vh) rotate(calc(var(--card-rotate, 0deg) + 15deg));
+  opacity: 0;
+  transition: transform 0.7s cubic-bezier(0.55, 0, 0.85, 0.36),
+              opacity 0.5s ease;
+  transition-delay: calc(var(--card-index, 0) * 50ms + 50ms);
+}
+
+/* ERROR: cards fly back in (smooth return) */
+.login-root--error .login-product-card {
+  transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+              opacity 0.6s ease;
+  transition-delay: calc(var(--card-index, 0) * 40ms);
+}
+
+/* ── Product card inner elements ── */
+.login-product-card__img-wrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 1rem;
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.25);
+  margin-bottom: 10px;
+}
+
+.login-product-card__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1), filter 0.35s ease;
+}
+.login-product-card:hover .login-product-card__img {
+  transform: scale(1.08);
+  filter: saturate(1.1) brightness(1.05);
+}
+
+.login-product-card__badge {
+  position: absolute;
+  top: 8px; left: 8px;
+  background: #ef4444;
+  color: #fff;
+  font-size: 0.6rem;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4);
+}
+
+.login-product-card__body { padding: 0 4px; margin-bottom: 8px; }
+
+.login-product-card__shop {
+  display: block;
+  font-size: 0.58rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.35);
+  margin-bottom: 3px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.login-product-card__name {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.3;
+  margin: 0 0 5px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.login-product-card__price-row { display: flex; align-items: baseline; gap: 8px; }
+.login-product-card__final   { font-size: 0.82rem; font-weight: 700; color: #fff; }
+.login-product-card__original { font-size: 0.65rem; font-weight: 500; color: rgba(255, 255, 255, 0.3); text-decoration: line-through; }
+
+.login-product-card__rating { display: flex; align-items: center; gap: 10px; padding: 0 4px; }
+.login-product-card__rating-track {
+  flex: 1; height: 5px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 99px;
+  overflow: hidden;
+}
+.login-product-card__rating-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #6366f1, #a78bfa);
+  border-radius: 99px;
+  transition: width 0.4s ease;
+}
+.login-product-card__rating-text {
+  font-size: 0.58rem; font-weight: 700;
+  color: rgba(255, 255, 255, 0.35);
+  white-space: nowrap;
+}
+
+/* ═══════════════════════════════════════════════
+   Centre Login Card
+   ═══════════════════════════════════════════════ */
+.login-card-wrapper {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: login-card-enter 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes login-card-enter {
+  from { opacity: 0; transform: translateY(30px) scale(0.96); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* SUCCESS: card "inhales" then catapults up with 3D perspective tilt */
+.login-root--success .login-card-wrapper {
+  animation: login-card-catapult 1.4s cubic-bezier(0.4, 0, 0.7, 0.2) forwards;
+  animation-delay: 0.2s;
+}
+
+@keyframes login-card-catapult {
+  0%   { transform: translateY(0) scale(1) perspective(800px) rotateX(0deg); opacity: 1; }
+  12%  { transform: translateY(18px) scale(0.88) perspective(800px) rotateX(0deg); opacity: 1; }
+  25%  { transform: translateY(10px) scale(0.92) perspective(800px) rotateX(-2deg); opacity: 1; }
+  100% { transform: translateY(-150vh) scale(0.5) perspective(800px) rotateX(-20deg); opacity: 0; }
+}
+
+.login-card {
+  width: 100%;
+  max-width: 480px;
+  min-width: 380px;
+  padding: 48px 44px 40px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 32px;
+  backdrop-filter: blur(40px) saturate(1.2);
+  -webkit-backdrop-filter: blur(40px) saturate(1.2);
+  box-shadow:
+    0 24px 80px rgba(0, 0, 0, 0.4),
+    0 8px 32px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+/* ── card header ── */
+.login-card__header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 36px;
+}
+
+.login-card__icon-ring {
+  width: 72px; height: 72px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(139, 92, 246, 0.15));
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  margin-bottom: 22px;
+  position: relative;
+  box-shadow: 0 0 20px rgba(99, 102, 241, 0.15), 0 0 60px rgba(139, 92, 246, 0.08);
+  transition: box-shadow 0.3s ease;
+}
+.login-card__icon-ring:hover {
+  box-shadow: 0 0 30px rgba(99, 102, 241, 0.25), 0 0 80px rgba(139, 92, 246, 0.15);
+}
+.login-card__icon { color: #a78bfa; }
+
+.login-card__title {
+  font-size: 1.85rem; font-weight: 700;
+  color: #fff; letter-spacing: -0.02em; margin: 0;
+}
+.login-card__subtitle {
+  font-size: 0.92rem;
+  color: rgba(255, 255, 255, 0.45);
+  margin-top: 8px;
+}
+
+/* ═══════════════════════════════════════════════
+   Error Slot — fixed space, animated entry
+   ═══════════════════════════════════════════════ */
+.login-card__error-slot {
+  height: 48px;
+  margin-bottom: 16px;
+  overflow: hidden;
+}
+.login-card__error-slot:not(.login-card__error-slot--visible) {
+  visibility: hidden;
+}
+
+.login-card__error {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  border-radius: 14px;
+  font-size: 0.82rem;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  color: #fca5a5;
+  white-space: nowrap;
+  overflow: hidden;
+  transform: translateY(-100%);
+  opacity: 0;
+}
+
+/* Animate error sliding in from top */
+.login-card__error-slot--visible .login-card__error {
+  animation: login-error-slide-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes login-error-slide-in {
+  0%   { transform: translateY(-100%) scale(0.95); opacity: 0; }
+  60%  { transform: translateY(4px) scale(1.01); opacity: 1; }
+  100% { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+/* Subtle shake after appearing */
+.login-card__error-slot--visible .login-card__error::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  animation: login-error-shake 0.35s ease 0.5s;
+}
+
+@keyframes login-error-shake {
+  0%, 100% { transform: translateX(0); }
+  25%      { transform: translateX(-5px); }
+  75%      { transform: translateX(5px); }
+}
+
+/* ── form ── */
+.login-card__form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* ── input group ── */
+.login-input-group {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+}
+.login-input-group--focused {
+  border-color: rgba(99, 102, 241, 0.5);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.login-input-group__icon {
+  position: absolute; left: 18px;
+  color: rgba(255, 255, 255, 0.3);
+  transition: color 0.3s ease;
+  pointer-events: none; z-index: 1;
+}
+.login-input-group--focused .login-input-group__icon { color: #a78bfa; }
+
+.login-input-group__input {
+  flex: 1; background: transparent; border: none; outline: none;
+  color: #fff; font-size: 0.95rem;
+  padding: 18px 18px 18px 50px;
+  font-family: 'Inter', sans-serif;
+}
+.login-input-group__input::placeholder { color: rgba(255, 255, 255, 0.22); }
+
+.login-input-group__label {
+  position: absolute; top: -8px; left: 16px;
+  font-size: 0.68rem; font-weight: 600;
+  letter-spacing: 0.06em; text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.35);
+  background: #0a0a0f; padding: 0 6px;
+  pointer-events: none;
+  transition: color 0.3s ease;
+}
+.login-input-group--focused .login-input-group__label { color: #a78bfa; }
+
+/* ═══════════════════════════════════════════════
+   Submit Button — multi-phase with cart animation
+   ═══════════════════════════════════════════════ */
+.login-card__submit {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 18px;
+  margin-top: 10px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #fff;
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%);
+  background-size: 200% 200%;
+  border: none;
+  border-radius: 16px;
+  cursor: pointer;
+  overflow: hidden;
+  transition: transform 0.3s cubic-bezier(0.23, 1, 0.32, 1),
+              box-shadow 0.3s ease,
+              background 0.4s ease;
+  box-shadow: 0 6px 24px rgba(99, 102, 241, 0.3), 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.login-card__submit:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 36px rgba(99, 102, 241, 0.4), 0 4px 16px rgba(0, 0, 0, 0.25);
+}
+.login-card__submit:active:not(:disabled) { transform: translateY(0); }
+.login-card__submit:disabled { cursor: not-allowed; }
+
+/* LOADING: gradient pulses */
+.login-card__submit--loading {
+  animation: login-btn-pulse 1.5s ease-in-out infinite;
+}
+.login-card__submit--cart-drive {
+  animation: login-btn-pulse 1.5s ease-in-out infinite;
+}
+@keyframes login-btn-pulse {
+  0%, 100% { background-position: 0% 50%; opacity: 1; }
+  50%      { background-position: 100% 50%; opacity: 0.85; }
+}
+
+/* SUCCESS: green flash */
+.login-card__submit--success {
+  background: linear-gradient(135deg, #22c55e 0%, #16a34a 50%, #15803d 100%);
+  box-shadow: 0 6px 24px rgba(34, 197, 94, 0.4), 0 2px 8px rgba(0, 0, 0, 0.2);
+  animation: login-btn-success-flash 0.6s ease;
+}
+@keyframes login-btn-success-flash {
+  0%   { filter: brightness(1); }
+  30%  { filter: brightness(1.5); }
+  100% { filter: brightness(1); }
+}
+
+/* ERROR: red flash + shake */
+.login-card__submit--error {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 50%, #b91c1c 100%);
+  box-shadow: 0 6px 24px rgba(239, 68, 68, 0.4), 0 2px 8px rgba(0, 0, 0, 0.2);
+  animation: login-btn-shake 0.4s ease;
+}
+@keyframes login-btn-shake {
+  0%, 100% { transform: translateX(0); }
+  20%      { transform: translateX(-4px); }
+  40%      { transform: translateX(4px); }
+  60%      { transform: translateX(-3px); }
+  80%      { transform: translateX(3px); }
+}
+
+/* shine on hover */
+.login-card__submit-shine {
+  position: absolute;
+  top: 0; left: -100%;
+  width: 60%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.12), transparent);
+  transition: left 0.6s ease;
+}
+.login-card__submit:hover:not(:disabled) .login-card__submit-shine { left: 120%; }
+
+.login-card__submit-text {
+  position: relative; z-index: 1;
+}
+
+/* ── Cart + Spinner wrapper ── */
+.login-card__cart-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  z-index: 1;
+  width: 18px;
+  height: 18px;
+}
+
+/* Cart icon — visible in idle, drives right on cart-drive, hidden during loading */
+.login-card__cart-icon {
+  position: absolute;
+  top: 0; left: 0;
+  transition: transform 0.35s cubic-bezier(0.23, 1, 0.32, 1),
+              opacity 0.2s ease;
+}
+
+/* Hover: subtle nudge right */
+.login-card__submit:hover:not(:disabled) .login-card__cart-icon {
+  transform: translateX(5px);
+}
+
+/* CART-DRIVE: cart drives far right out of view */
+.login-card__submit--cart-drive .login-card__cart-icon {
+  transform: translateX(200px);
+  opacity: 0;
+  transition: transform 0.35s cubic-bezier(0.4, 0, 1, 1),
+              opacity 0.25s ease 0.15s;
+}
+
+/* LOADING/SUCCESS: cart hidden */
+.login-card__submit--loading .login-card__cart-icon,
+.login-card__submit--success .login-card__cart-icon {
+  transform: translateX(200px);
+  opacity: 0;
+  transition: none;
+}
+
+/* ERROR: cart drives back from right with brake-bounce */
+.login-card__submit--error .login-card__cart-icon {
+  animation: login-cart-return 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+@keyframes login-cart-return {
+  0%   { transform: translateX(200px); opacity: 0; }
+  30%  { opacity: 1; }
+  70%  { transform: translateX(-4px); opacity: 1; }
+  100% { transform: translateX(0); opacity: 1; }
+}
+
+/* Spinner icon — hidden by default, appears in loading/success */
+.login-card__spinner-icon {
+  position: absolute;
+  top: 0; left: 0;
+  opacity: 0;
+  transform: scale(0.5) rotate(0deg);
+  transition: opacity 0.2s ease, transform 0.3s ease;
+}
+
+/* LOADING: spinner appears with pop-in + spins */
+.login-card__submit--loading .login-card__spinner-icon {
+  opacity: 1;
+  transform: scale(1) rotate(0deg);
+  animation: login-spin 0.8s linear infinite;
+}
+
+/* SUCCESS: spinner → check (we keep spinning for simplicity) */
+.login-card__submit--success .login-card__spinner-icon {
+  opacity: 1;
+  transform: scale(1);
+  animation: login-spin 0.8s linear infinite;
+}
+
+@keyframes login-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/* ── footer ── */
+.login-card__footer {
+  text-align: center;
+  margin-top: 28px;
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  color: rgba(255, 255, 255, 0.2);
+}
+
+/* ═══════════════════════════════════════════════
+   Responsive Breakpoints
+   ═══════════════════════════════════════════════ */
+@media (max-width: 1400px) {
+  .login-scroll-column--left,
+  .login-scroll-column--right { width: 380px; }
+  .login-scroll-column--left  { left: 0; }
+  .login-scroll-column--right { right: 0; }
+  .login-product-card { width: 210px; }
+}
+
+@media (max-width: 1100px) {
+  .login-scroll-column--left,
+  .login-scroll-column--right { width: 300px; }
+  .login-scroll-column--left  { left: -10px; }
+  .login-scroll-column--right { right: -10px; }
+  .login-product-card { width: 180px; padding: 8px; }
+  .login-product-card__name { font-size: 0.7rem; }
+}
+
+@media (max-width: 860px) {
+  .login-scroll-column--left,
+  .login-scroll-column--right { width: 220px; }
+  .login-product-card { width: 150px; padding: 6px; }
+}
+
+/* ── Mobile: hide side columns, show center column ── */
+@media (max-width: 700px) {
+  .login-scroll-column--left,
+  .login-scroll-column--right {
+    display: none;
+  }
+
+  .login-scroll-column--center {
+    display: block;
+  }
+
+  .login-card {
+    margin: 16px;
+    padding: 36px 28px 28px;
+    border-radius: 28px;
+    min-width: unset;
+  }
+
+  .login-card__title { font-size: 1.5rem; }
+  .login-card__subtitle { font-size: 0.82rem; }
+}

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { supabase } from './lib/supabase';
 import { useAppStore } from './store/useAppStore';
@@ -15,17 +15,22 @@ import { AnalyticsView } from './views/AnalyticsView';
 function App() {
   const [session, setSession] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  
-  // We'll call these functions once the store is updated
+  const [showLogin, setShowLogin] = useState(true);
+
+  // Tracks whether the login came from the form (not a page refresh)
+  const loginFromForm = useRef(false);
+
   const { fetchAllData } = useAppStore();
 
   useEffect(() => {
-    // Initial fetch of session
+    // Initial session check
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setLoading(false);
       if (session) {
         fetchAllData(session.user.id);
+        // Already logged in on page load — hide login immediately, no animation
+        setShowLogin(false);
       }
     });
 
@@ -33,9 +38,25 @@ function App() {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
       if (session) {
         fetchAllData(session.user.id);
+        setSession(session);
+
+        if (loginFromForm.current) {
+          // Came from the login form → keep LoginView visible for exit animation
+          // The original LoginView is still mounted with its running animations
+          // Dashboard now renders UNDERNEATH it (LoginView is position:fixed)
+          loginFromForm.current = false;
+          setTimeout(() => {
+            setShowLogin(false);
+          }, 4000);
+        } else {
+          // Page refresh or token refresh — no animation
+          setShowLogin(false);
+        }
+      } else {
+        setSession(null);
+        setShowLogin(true);
       }
     });
 
@@ -46,24 +67,29 @@ function App() {
     return <div className="h-screen w-screen flex items-center justify-center bg-bg-secondary"><div className="animate-spin h-8 w-8 border-4 border-blue-500 rounded-full border-t-transparent"></div></div>;
   }
 
-  if (!session) {
-    return <LoginView />;
-  }
-
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<AppContainer />}>
-          <Route index element={<DashboardView />} />
-          <Route path="katalog" element={<KatalogView />} />
-          <Route path="favoriten" element={<FavoritenView />} />
-          <Route path="bundles" element={<BundlesView />} />
-          <Route path="analytics" element={<AnalyticsView />} />
-          <Route path="deals" element={<DealsView />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Route>
-      </Routes>
-    </BrowserRouter>
+    <>
+      {/* Dashboard renders whenever session exists */}
+      {session && (
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<AppContainer />}>
+              <Route index element={<DashboardView />} />
+              <Route path="katalog" element={<KatalogView />} />
+              <Route path="favoriten" element={<FavoritenView />} />
+              <Route path="bundles" element={<BundlesView />} />
+              <Route path="analytics" element={<AnalyticsView />} />
+              <Route path="deals" element={<DealsView />} />
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Route>
+          </Routes>
+        </BrowserRouter>
+      )}
+      {/* LoginView stays mounted with its own animations — position:fixed overlays Dashboard */}
+      {showLogin && (
+        <LoginView onLoginStart={() => { loginFromForm.current = true; }} />
+      )}
+    </>
   );
 }
 

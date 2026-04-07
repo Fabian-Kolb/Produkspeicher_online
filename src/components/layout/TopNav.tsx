@@ -4,6 +4,8 @@ import { Menu, Moon, Sun, LogOut } from 'lucide-react';
 import { useUIStore } from '../../store/useUIStore';
 import { useAppStore } from '../../store/useAppStore';
 import { supabase } from '../../lib/supabase';
+import logoDark from '../../assets/logo/logo_dark.png';
+import logoWhite from '../../assets/logo/logo_white.png';
 
 export const TopNav: React.FC = () => {
   const toggleMainMenu = useUIStore((s) => s.toggleMainMenu);
@@ -21,11 +23,13 @@ export const TopNav: React.FC = () => {
   return (
     <header className="fixed top-0 w-full z-50 px-6 py-3 flex items-center justify-between backdrop-blur-xl bg-[var(--theme-glass-bg)] border-b border-[var(--theme-glass-border)] transition-colors duration-300">
       <div className="flex items-center gap-3">
-        <div className="w-8 h-8 bg-text-primary text-bg-primary rounded-lg flex items-center justify-center font-bold text-lg shadow-md">
-          M
-        </div>
+        <img 
+          src={settings.theme === 'dark' ? logoWhite : logoDark} 
+          alt="Ventory Logo" 
+          className="h-8 w-auto object-contain" 
+        />
         <span className="font-playfair text-xl font-bold tracking-wide">
-          Shop Manager
+          Ventory
         </span>
       </div>
 

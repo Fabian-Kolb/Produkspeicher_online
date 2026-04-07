@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useRef } from 'react';
 import { supabase } from '../lib/supabase';
-import { Lock, Mail, Loader2, ShoppingCart, ShoppingBag } from 'lucide-react';
+import { Lock, Mail, Loader2, ShoppingCart } from 'lucide-react';
+import logoWhite from '../assets/logo/logo_white.png';
 import './LoginView.css';
 
 /* ── product data ── */
@@ -214,12 +215,10 @@ export const LoginView: React.FC<{ onLoginStart?: () => void }> = ({ onLoginStar
       <div className="login-card-wrapper">
         <div className="login-card">
           {/* header */}
-          <div className="login-card__header">
-            <div className="login-card__icon-ring">
-              <ShoppingBag size={30} className="login-card__icon" />
-            </div>
-            <h1 className="login-card__title">Shop Manager</h1>
-            <p className="login-card__subtitle">Sign in to manage your products</p>
+          <div className="login-card__header flex flex-col items-center">
+            <img src={logoWhite} alt="Ventory Logo" className="h-16 w-auto object-contain mb-4" />
+            <h1 className="login-card__title text-5xl font-bold tracking-tight">Ventory</h1>
+            <p className="login-card__subtitle mt-2">Dein Inventar. Dein Budget. Deine Kontrolle.</p>
           </div>
 
           {/* error — always reserves space */}

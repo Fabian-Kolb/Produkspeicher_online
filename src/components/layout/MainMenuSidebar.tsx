@@ -5,9 +5,12 @@ import { useUIStore } from '../../store/useUIStore';
 
 import { useAppStore } from '../../store/useAppStore';
 import { createDemoData } from '../../utils/demoData';
+import logoDark from '../../assets/logo/logo_dark.png';
+import logoWhite from '../../assets/logo/logo_white.png';
 
 export const MainMenuSidebar: React.FC = () => {
   const { isMainMenuOpen, toggleMainMenu, toggleThemeManager, openProductModal } = useUIStore();
+  const settings = useAppStore((state) => state.settings);
 
   
   // Dummy functions for now
@@ -15,7 +18,7 @@ export const MainMenuSidebar: React.FC = () => {
   const handleImport = () => console.log('Import triggered');
   
   const handleInfo = () => {
-    alert("Shop Manager (Produkspeicher Online)\nVersion 1.0.0\nBuilt with ❤️ by Vibe-Coding.");
+    alert("Ventory\nVersion 1.0.0\nBuilt with ❤️ by Vibe-Coding.");
   };
 
   const handleReset = async () => {
@@ -57,7 +60,14 @@ export const MainMenuSidebar: React.FC = () => {
         )}
       >
         <div className="flex items-center justify-between p-6 border-b border-border-primary">
-          <h2 className="text-xl font-bold font-playfair">Menü</h2>
+          <div className="flex items-center gap-2">
+            <img 
+              src={settings.theme === 'dark' ? logoWhite : logoDark} 
+              alt="Ventory Logo" 
+              className="h-8 w-auto object-contain" 
+            />
+            <h2 className="text-xl font-bold font-playfair">Ventory</h2>
+          </div>
           <button 
             onClick={toggleMainMenu}
             className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-border-primary transition-colors text-text-secondary hover:text-text-primary"

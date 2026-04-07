@@ -283,77 +283,85 @@ export const LoginView: React.FC<{ onLoginStart?: () => void }> = ({ onLoginStar
         </div>
 
         {/* scroll indicator */}
-        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 opacity-60 animate-bounce pointer-events-none">
-          <ChevronDown size={36} className="text-white" />
+        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 pointer-events-none z-20">
+          <div className="login-flydown-element">
+            <div className="opacity-60 animate-bounce">
+              <ChevronDown size={36} className="text-white" />
+            </div>
+          </div>
         </div>
       </div>
 
       {/* Bento Box Section */}
-      <div className="max-w-[1200px] mx-auto px-6 pb-24 relative z-10 w-full flex flex-col gap-6">
+      <div className="login-flydown-element w-full px-6 md:px-10 pb-24 relative z-10 flex flex-col gap-8">
         {/* Top Large Card */}
-        <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-8 md:p-12 flex flex-col md:flex-row items-center gap-10 shadow-2xl">
+        <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-10 md:p-16 flex flex-col md:flex-row items-center gap-12 shadow-2xl">
           <div className="flex-1">
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4 tracking-tight">Dein digitales Inventar.</h2>
-            <p className="text-white/60 text-lg leading-relaxed">
+            <h2 className="text-4xl md:text-5xl lg:text-7xl font-extrabold text-white mb-6 tracking-tighter leading-tight">Dein digitales Inventar.</h2>
+            <p className="text-white/70 text-lg md:text-xl lg:text-2xl leading-relaxed font-light">
               Verwalte alle deine Assets, Technik und Tools an einem zentralen Ort. 
               Behalte stets den Überblick über Anschaffungswerte und aktuelle Marktpreise, 
               und organisiere deine Ausstattung in praktischen Bundles.
             </p>
           </div>
           <div className="flex-1 w-full relative">
-            <div className="absolute inset-0 bg-indigo-500/20 blur-3xl rounded-full"></div>
+            <div className="absolute inset-0 bg-indigo-500/20 blur-[80px] rounded-full"></div>
             <img 
               src={dashboardPreviewImg} 
               alt="Dashboard Preview" 
-              className="relative w-full rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-white/10" 
+              className="relative w-full rounded-2xl shadow-[0_30px_70px_rgba(0,0,0,0.6)] border border-white/10" 
             />
           </div>
         </div>
 
         {/* Bottom Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Card 1 */}
-          <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-8 shadow-xl flex flex-col justify-between">
+          <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-8 md:p-12 shadow-2xl flex flex-col justify-between h-full gap-8 group transition-transform duration-500 hover:bg-white/[0.07]">
             <div>
-              <h3 className="text-xl font-bold text-white mb-2">Finanz-Check</h3>
-              <p className="text-white/60 text-sm mb-6">
+              <h3 className="text-2xl md:text-3xl lg:text-4xl font-extrabold text-white mb-4 tracking-tight">Finanz-Check</h3>
+              <p className="text-white/70 text-base md:text-lg leading-relaxed font-light">
                 Behalte dein monatliches Budget im Auge und tracke deine Ausgaben automatisch präzise über alle Kategorien hinweg.
               </p>
             </div>
-            <img 
-              src={budgetGraphImg} 
-              alt="Budget Control" 
-              className="w-full rounded-2xl shadow-lg border border-white/5" 
-            />
+            <div className="w-full overflow-hidden rounded-2xl border border-white/5 shadow-lg mt-auto">
+              <img 
+                src={budgetGraphImg} 
+                alt="Budget Control" 
+                className="w-full block group-hover:scale-105 transition-transform duration-700" 
+              />
+            </div>
           </div>
           
           {/* Card 2 */}
-          <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-8 shadow-xl flex flex-col justify-between">
+          <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-8 md:p-12 shadow-2xl flex flex-col justify-between h-full gap-8 group transition-transform duration-500 hover:bg-white/[0.07]">
             <div>
-              <h3 className="text-xl font-bold text-white mb-2">Preis-Alarm</h3>
-              <p className="text-white/60 text-sm mb-6">
+              <h3 className="text-2xl md:text-3xl lg:text-4xl font-extrabold text-white mb-4 tracking-tight">Preis-Alarm</h3>
+              <p className="text-white/70 text-base md:text-lg leading-relaxed font-light">
                 Entdecke Top-Deals in Echtzeit und verpasse nie wieder Rabatt-Aktionen für das Equipment, das du brauchst.
               </p>
             </div>
-            <img 
-              src={rabattImg} 
-              alt="Discount Alerts" 
-              className="w-full rounded-2xl shadow-lg border border-white/5" 
-            />
+            <div className="w-full overflow-hidden rounded-2xl border border-white/5 shadow-lg mt-auto">
+              <img 
+                src={rabattImg} 
+                alt="Discount Alerts" 
+                className="w-full block group-hover:scale-105 transition-transform duration-700" 
+              />
+            </div>
           </div>
 
           {/* Card 3 (Abstract CSS/Lucide) */}
-          <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-8 shadow-xl flex flex-col justify-between">
+          <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-8 md:p-12 shadow-2xl flex flex-col justify-between h-full gap-8 group transition-transform duration-500 hover:bg-white/[0.07]">
             <div>
-              <h3 className="text-xl font-bold text-white mb-2">Supabase Cloud-Sync</h3>
-              <p className="text-white/60 text-sm mb-6">
+              <h3 className="text-2xl md:text-3xl lg:text-4xl font-extrabold text-white mb-4 tracking-tight">Supabase Cloud-Sync</h3>
+              <p className="text-white/70 text-base md:text-lg leading-relaxed font-light">
                 Deine Daten sind jederzeit und überall verschlüsselt abrufbar. Keine lokalen Verluste dank nahtloser Cloud-Anbindung.
               </p>
             </div>
-            <div className="w-full aspect-[4/3] rounded-2xl bg-gradient-to-br from-indigo-500/10 to-purple-500/10 border border-white/5 shadow-inner flex items-center justify-center relative overflow-hidden">
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 bg-indigo-500/30 blur-2xl rounded-full"></div>
-              <Cloud size={64} className="text-indigo-400 relative z-10 drop-shadow-[0_0_15px_rgba(99,102,241,0.5)]" />
-              <div className="absolute bottom-0 w-full h-1/2 bg-gradient-to-t from-black/20 to-transparent"></div>
+            <div className="w-full aspect-video rounded-2xl bg-gradient-to-br from-indigo-500/10 to-purple-500/10 border border-white/5 shadow-inner flex items-center justify-center relative overflow-hidden mt-auto">
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-indigo-500/30 blur-[80px] rounded-full group-hover:scale-125 transition-transform duration-700" />
+              <Cloud size={120} strokeWidth={1.5} className="text-indigo-400 relative z-10 drop-shadow-[0_0_30px_rgba(99,102,241,0.6)] group-hover:-translate-y-3 transition-transform duration-500" />
+              <div className="absolute bottom-0 w-full h-[40%] bg-gradient-to-t from-black/40 to-transparent" />
             </div>
           </div>
         </div>

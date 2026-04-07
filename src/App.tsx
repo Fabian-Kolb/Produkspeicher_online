@@ -5,6 +5,7 @@ import { useAppStore } from './store/useAppStore';
 
 import { AppContainer } from './components/layout/AppContainer';
 import { LoginView } from './views/LoginView';
+import { OnboardingModal } from './components/auth/OnboardingModal';
 import { DashboardView } from './views/DashboardView';
 import { KatalogView } from './views/KatalogView';
 import { FavoritenView } from './views/FavoritenView';
@@ -16,6 +17,7 @@ function App() {
   const [session, setSession] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [showLogin, setShowLogin] = useState(true);
+  const [showOnboarding, setShowOnboarding] = useState(false);
 
   // Tracks whether the login came from the form (not a page refresh)
   const loginFromForm = useRef(false);
@@ -29,6 +31,8 @@ function App() {
       setLoading(false);
       if (session) {
         fetchAllData(session.user.id);
+        const hasDisplayName = !!session.user.user_metadata?.display_name;
+        if (!hasDisplayName) setShowOnboarding(true);
         // Already logged in on page load — hide login immediately, no animation
         setShowLogin(false);
       }
@@ -42,6 +46,8 @@ function App() {
         fetchAllData(session.user.id);
         setSession(session);
 
+        const hasDisplayName = !!session.user.user_metadata?.display_name;
+
         if (loginFromForm.current) {
           // Came from the login form → keep LoginView visible for exit animation
           // The original LoginView is still mounted with its running animations
@@ -49,14 +55,17 @@ function App() {
           loginFromForm.current = false;
           setTimeout(() => {
             setShowLogin(false);
+            if (!hasDisplayName) setShowOnboarding(true);
           }, 1800);
         } else {
           // Page refresh or token refresh — no animation
           setShowLogin(false);
+          if (!hasDisplayName) setShowOnboarding(true);
         }
       } else {
         setSession(null);
         setShowLogin(true);
+        setShowOnboarding(false);
       }
     });
 
@@ -88,6 +97,11 @@ function App() {
       {/* LoginView stays mounted with its own animations — position:fixed overlays Dashboard */}
       {showLogin && (
         <LoginView onLoginStart={() => { loginFromForm.current = true; }} />
+      )}
+      
+      {/* Onboarding View overlays Dashboard and blanks it out */}
+      {showOnboarding && !showLogin && (
+        <OnboardingModal onComplete={() => setShowOnboarding(false)} />
       )}
     </>
   );

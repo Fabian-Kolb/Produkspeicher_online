@@ -4,6 +4,7 @@ import { TopNav } from './TopNav';
 import { MainMenuSidebar } from './MainMenuSidebar';
 import { ThemeCreatorModal } from '../features/ThemeCreatorModal';
 import { ProductModal } from '../features/ProductModal';
+import { ProfileSettingsModal } from '../auth/ProfileSettingsModal';
 import { useAppStore } from '../../store/useAppStore';
 import { applyGlobalTheme, applyBaseMode } from '../../utils/themeHelpers';
 
@@ -71,6 +72,7 @@ export const AppContainer: React.FC = () => {
       <MainMenuSidebar />
       <ThemeCreatorModal />
       <ProductModal />
+      <ProfileSettingsModal />
       
       {/* Main Content Area */}
       <main className="pt-24 pb-16 px-4 md:px-8 w-full min-h-screen transition-all duration-300">

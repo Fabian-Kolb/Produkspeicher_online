@@ -5,6 +5,7 @@ interface UIState {
   currentView: 'dashboard' | 'products' | 'saved' | 'bundles' | 'analytics' | 'deals';
   isMainMenuOpen: boolean;
   isThemeManagerOpen: boolean;
+  isProfileModalOpen: boolean;
   
   // Products View State
   mainCat: string;
@@ -17,6 +18,7 @@ interface UIState {
   setView: (view: UIState['currentView']) => void;
   toggleMainMenu: () => void;
   toggleThemeManager: () => void;
+  toggleProfileModal: () => void;
 
   isProductModalOpen: boolean;
   editingProductId: string | null;
@@ -34,6 +36,7 @@ export const useUIStore = create<UIState>((set) => ({
   currentView: 'dashboard',
   isMainMenuOpen: false,
   isThemeManagerOpen: false,
+  isProfileModalOpen: false,
   isProductModalOpen: false,
   editingProductId: null,
   
@@ -46,6 +49,7 @@ export const useUIStore = create<UIState>((set) => ({
   setView: (view) => set({ currentView: view }),
   toggleMainMenu: () => set((state) => ({ isMainMenuOpen: !state.isMainMenuOpen })),
   toggleThemeManager: () => set((state) => ({ isThemeManagerOpen: !state.isThemeManagerOpen })),
+  toggleProfileModal: () => set((state) => ({ isProfileModalOpen: !state.isProfileModalOpen })),
   
   openProductModal: (productId?: string) => set({ isProductModalOpen: true, editingProductId: productId || null }),
   closeProductModal: () => set({ isProductModalOpen: false, editingProductId: null }),

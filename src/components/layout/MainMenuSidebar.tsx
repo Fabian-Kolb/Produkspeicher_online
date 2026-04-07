@@ -1,5 +1,5 @@
 import React from 'react';
-import { Settings, Play, Download, Upload, Info, Trash2, X, Sparkles } from 'lucide-react';
+import { Settings, Play, Download, Upload, Info, Trash2, X, Sparkles, User } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { useUIStore } from '../../store/useUIStore';
 
@@ -9,7 +9,7 @@ import logoDark from '../../assets/logo/logo_dark.png';
 import logoWhite from '../../assets/logo/logo_white.png';
 
 export const MainMenuSidebar: React.FC = () => {
-  const { isMainMenuOpen, toggleMainMenu, toggleThemeManager, openProductModal } = useUIStore();
+  const { isMainMenuOpen, toggleMainMenu, toggleThemeManager, openProductModal, toggleProfileModal } = useUIStore();
   const settings = useAppStore((state) => state.settings);
 
   
@@ -76,6 +76,9 @@ export const MainMenuSidebar: React.FC = () => {
           </button>
         </div>
         <div className="p-6 flex flex-col gap-3 relative overflow-y-auto max-h-[calc(100vh-80px)]">
+          <MenuButton icon={<User size={18} />} onClick={() => { toggleMainMenu(); toggleProfileModal(); }}>
+            Profil & Account
+          </MenuButton>
           <MenuButton icon={<Settings size={18} />} onClick={() => { toggleMainMenu(); toggleThemeManager(); }}>
             Design & Themes
           </MenuButton>

@@ -31,30 +31,6 @@ export const AppContainer: React.FC = () => {
     }
   }, [settings.theme, settings.activeThemeId, settings.customThemes, settings.isGlassEnabled]);
 
-  // Track scrollability for scrollbar styling
-  useEffect(() => {
-    const checkScrollable = () => {
-      // Small buffer to prevent flickering
-      if (document.documentElement.scrollHeight > window.innerHeight + 1) {
-        document.documentElement.classList.remove('not-scrollable');
-      } else {
-        document.documentElement.classList.add('not-scrollable');
-      }
-    };
-    
-    // Check initially and after a micro-delay for DOM updates
-    checkScrollable();
-    setTimeout(checkScrollable, 100);
-
-    const observer = new ResizeObserver(() => checkScrollable());
-    observer.observe(document.body);
-    window.addEventListener('resize', checkScrollable);
-
-    return () => {
-      observer.disconnect();
-      window.removeEventListener('resize', checkScrollable);
-    };
-  }, []);
 
   return (
     <div className="min-h-screen text-text-primary overflow-x-hidden relative bg-transparent">

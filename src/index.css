@@ -35,49 +35,16 @@
     --theme-glass-border: rgba(255, 255, 255, 0.1);
   }
 
-  /* We keep the dynamic theme variables here, the Live Theme Creator will overwrite them on :root via JS */
   html, body {
     @apply min-h-screen w-full bg-[var(--bg-color)] text-[var(--text-dark)] antialiased;
     font-family: 'Inter', sans-serif;
-    scrollbar-gutter: stable;
     transition: background-color 0.5s ease;
+    scrollbar-width: none; /* Firefox */
   }
 
-  html.glass-enabled {
-    --scrollbar-thumb: var(--scrollbar-glass-thumb, var(--theme-glass-bg));
-    --scrollbar-thumb-hover: var(--scrollbar-glass-hover, rgba(255, 255, 255, 0.3));
-    --scrollbar-border: 1px solid var(--theme-glass-border);
-  }
-
-  html.not-scrollable {
-    --scrollbar-track: var(--scrollbar-thumb, var(--text-grey));
-    --scrollbar-track-border: var(--scrollbar-border, none);
-  }
-
-  body.glass-enabled {
-    /* Gradients are now handled purely via animated React Blobs in AppContainer */
-  }
-
-  /* Custom Scrollbar - Modern & Clean */
+  /* Hide scrollbar - Chromium */
   ::-webkit-scrollbar {
-    width: 10px;
-    height: 10px;
-  }
-
-  ::-webkit-scrollbar-track {
-    background: var(--scrollbar-track, transparent);
-    border: var(--scrollbar-track-border, none);
-    border-radius: 10px;
-  }
-
-  ::-webkit-scrollbar-thumb {
-    background: var(--scrollbar-thumb, var(--text-grey));
-    border: var(--scrollbar-border, none);
-    border-radius: 10px;
-  }
-
-  ::-webkit-scrollbar-thumb:hover {
-    background: var(--scrollbar-thumb-hover, var(--text-dark));
+    display: none;
   }
 }
 

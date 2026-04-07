@@ -7,13 +7,22 @@
 .login-root {
   position: fixed;
   inset: 0;
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  overflow-y: auto;
+  overflow-x: hidden;
   background: #0a0a0f;
   font-family: 'Inter', sans-serif;
   z-index: 9999;
+  scroll-behavior: smooth;
+}
+
+.login-hero {
+  position: relative;
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
 }
 
 /* EXITING OVERLAY: LoginView sits on top of Dashboard and fades out smoothly */
@@ -31,7 +40,7 @@
 
 /* ── ambient gradient blobs ── */
 .login-blob {
-  position: absolute;
+  position: fixed;
   border-radius: 50%;
   filter: blur(120px);
   opacity: 0.4;

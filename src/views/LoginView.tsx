@@ -1,7 +1,10 @@
 import React, { useState, useCallback, useRef } from 'react';
 import { supabase } from '../lib/supabase';
-import { Lock, Mail, Loader2, ShoppingCart } from 'lucide-react';
+import { Lock, Mail, Loader2, ShoppingCart, ChevronDown, Cloud } from 'lucide-react';
 import logoWhite from '../assets/logo/logo_white.png';
+import dashboardPreviewImg from '../assets/landing/dashboard-preview.png';
+import budgetGraphImg from '../assets/landing/budget-graph.png';
+import rabattImg from '../assets/landing/rabatt.png';
 import './LoginView.css';
 
 /* ── product data ── */
@@ -204,76 +207,155 @@ export const LoginView: React.FC<{ onLoginStart?: () => void }> = ({ onLoginStar
       <div className="login-blob login-blob--2" />
       <div className="login-blob login-blob--3" />
 
-      {/* Desktop: two side columns */}
-      <ScrollColumn products={LEFT_PRODUCTS}  direction="up"   side="left" />
-      <ScrollColumn products={RIGHT_PRODUCTS} direction="down" side="right" />
+      {/* Hero Section */}
+      <div className="login-hero">
+        {/* Desktop: two side columns */}
+        <ScrollColumn products={LEFT_PRODUCTS}  direction="up"   side="left" />
+        <ScrollColumn products={RIGHT_PRODUCTS} direction="down" side="right" />
 
-      {/* Mobile: single centre column (behind login card) */}
-      <ScrollColumn products={ALL_PRODUCTS} direction="up" side="center" />
+        {/* Mobile: single centre column (behind login card) */}
+        <ScrollColumn products={ALL_PRODUCTS} direction="up" side="center" />
 
-      {/* centre login card */}
-      <div className="login-card-wrapper">
-        <div className="login-card">
-          {/* header */}
-          <div className="login-card__header flex flex-col items-center">
-            <img src={logoWhite} alt="Ventory Logo" className="h-16 w-auto object-contain mb-4" />
-            <h1 className="login-card__title text-5xl font-bold tracking-tight">Ventory</h1>
-            <p className="login-card__subtitle mt-2">Dein Inventar. Dein Budget. Deine Kontrolle.</p>
+        {/* centre login card */}
+        <div className="login-card-wrapper">
+          <div className="login-card">
+            {/* header */}
+            <div className="login-card__header flex flex-col items-center">
+              <img src={logoWhite} alt="Ventory Logo" className="h-16 w-auto object-contain mb-4" />
+              <h1 className="login-card__title text-5xl font-bold tracking-tight">Ventory</h1>
+              <p className="login-card__subtitle mt-2">Dein Inventar. Dein Budget. Deine Kontrolle.</p>
+            </div>
+
+            {/* error — always reserves space */}
+            <div className={`login-card__error-slot ${error ? 'login-card__error-slot--visible' : ''}`}>
+              <div className="login-card__error">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>
+                </svg>
+                <span>{error || '\u00A0'}</span>
+              </div>
+            </div>
+
+            {/* form */}
+            <form onSubmit={handleSubmit} className="login-card__form">
+              <div className={`login-input-group ${focused === 'email' ? 'login-input-group--focused' : ''}`}>
+                <Mail size={18} className="login-input-group__icon" />
+                <input
+                  id="login-email" type="email" required
+                  value={email} onChange={e => setEmail(e.target.value)}
+                  onFocus={() => setFocused('email')} onBlur={() => setFocused(null)}
+                  placeholder="you@example.com" className="login-input-group__input"
+                  autoComplete="email"
+                />
+                <label htmlFor="login-email" className="login-input-group__label">Email</label>
+              </div>
+
+              <div className={`login-input-group ${focused === 'password' ? 'login-input-group--focused' : ''}`}>
+                <Lock size={18} className="login-input-group__icon" />
+                <input
+                  id="login-password" type="password" required
+                  value={password} onChange={e => setPassword(e.target.value)}
+                  onFocus={() => setFocused('password')} onBlur={() => setFocused(null)}
+                  placeholder="••••••••" className="login-input-group__input"
+                  autoComplete="current-password"
+                />
+                <label htmlFor="login-password" className="login-input-group__label">Password</label>
+              </div>
+
+              <button
+                type="submit"
+                disabled={isActive}
+                className={`login-card__submit login-card__submit--${phase}`}
+              >
+                <span className="login-card__submit-text">{buttonLabel}</span>
+                <span className="login-card__cart-wrap">
+                  <ShoppingCart size={18} className="login-card__cart-icon" />
+                  <Loader2 size={18} className="login-card__spinner-icon" />
+                </span>
+                <div className="login-card__submit-shine" />
+              </button>
+            </form>
+
+            <p className="login-card__footer">
+              Secure access &bull; Encrypted connection
+            </p>
+          </div>
+        </div>
+
+        {/* scroll indicator */}
+        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 opacity-60 animate-bounce pointer-events-none">
+          <ChevronDown size={36} className="text-white" />
+        </div>
+      </div>
+
+      {/* Bento Box Section */}
+      <div className="max-w-[1200px] mx-auto px-6 pb-24 relative z-10 w-full flex flex-col gap-6">
+        {/* Top Large Card */}
+        <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-8 md:p-12 flex flex-col md:flex-row items-center gap-10 shadow-2xl">
+          <div className="flex-1">
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4 tracking-tight">Dein digitales Inventar.</h2>
+            <p className="text-white/60 text-lg leading-relaxed">
+              Verwalte alle deine Assets, Technik und Tools an einem zentralen Ort. 
+              Behalte stets den Überblick über Anschaffungswerte und aktuelle Marktpreise, 
+              und organisiere deine Ausstattung in praktischen Bundles.
+            </p>
+          </div>
+          <div className="flex-1 w-full relative">
+            <div className="absolute inset-0 bg-indigo-500/20 blur-3xl rounded-full"></div>
+            <img 
+              src={dashboardPreviewImg} 
+              alt="Dashboard Preview" 
+              className="relative w-full rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-white/10" 
+            />
+          </div>
+        </div>
+
+        {/* Bottom Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Card 1 */}
+          <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-8 shadow-xl flex flex-col justify-between">
+            <div>
+              <h3 className="text-xl font-bold text-white mb-2">Finanz-Check</h3>
+              <p className="text-white/60 text-sm mb-6">
+                Behalte dein monatliches Budget im Auge und tracke deine Ausgaben automatisch präzise über alle Kategorien hinweg.
+              </p>
+            </div>
+            <img 
+              src={budgetGraphImg} 
+              alt="Budget Control" 
+              className="w-full rounded-2xl shadow-lg border border-white/5" 
+            />
+          </div>
+          
+          {/* Card 2 */}
+          <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-8 shadow-xl flex flex-col justify-between">
+            <div>
+              <h3 className="text-xl font-bold text-white mb-2">Preis-Alarm</h3>
+              <p className="text-white/60 text-sm mb-6">
+                Entdecke Top-Deals in Echtzeit und verpasse nie wieder Rabatt-Aktionen für das Equipment, das du brauchst.
+              </p>
+            </div>
+            <img 
+              src={rabattImg} 
+              alt="Discount Alerts" 
+              className="w-full rounded-2xl shadow-lg border border-white/5" 
+            />
           </div>
 
-          {/* error — always reserves space */}
-          <div className={`login-card__error-slot ${error ? 'login-card__error-slot--visible' : ''}`}>
-            <div className="login-card__error">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>
-              </svg>
-              <span>{error || '\u00A0'}</span>
+          {/* Card 3 (Abstract CSS/Lucide) */}
+          <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-8 shadow-xl flex flex-col justify-between">
+            <div>
+              <h3 className="text-xl font-bold text-white mb-2">Supabase Cloud-Sync</h3>
+              <p className="text-white/60 text-sm mb-6">
+                Deine Daten sind jederzeit und überall verschlüsselt abrufbar. Keine lokalen Verluste dank nahtloser Cloud-Anbindung.
+              </p>
+            </div>
+            <div className="w-full aspect-[4/3] rounded-2xl bg-gradient-to-br from-indigo-500/10 to-purple-500/10 border border-white/5 shadow-inner flex items-center justify-center relative overflow-hidden">
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 bg-indigo-500/30 blur-2xl rounded-full"></div>
+              <Cloud size={64} className="text-indigo-400 relative z-10 drop-shadow-[0_0_15px_rgba(99,102,241,0.5)]" />
+              <div className="absolute bottom-0 w-full h-1/2 bg-gradient-to-t from-black/20 to-transparent"></div>
             </div>
           </div>
-
-          {/* form */}
-          <form onSubmit={handleSubmit} className="login-card__form">
-            <div className={`login-input-group ${focused === 'email' ? 'login-input-group--focused' : ''}`}>
-              <Mail size={18} className="login-input-group__icon" />
-              <input
-                id="login-email" type="email" required
-                value={email} onChange={e => setEmail(e.target.value)}
-                onFocus={() => setFocused('email')} onBlur={() => setFocused(null)}
-                placeholder="you@example.com" className="login-input-group__input"
-                autoComplete="email"
-              />
-              <label htmlFor="login-email" className="login-input-group__label">Email</label>
-            </div>
-
-            <div className={`login-input-group ${focused === 'password' ? 'login-input-group--focused' : ''}`}>
-              <Lock size={18} className="login-input-group__icon" />
-              <input
-                id="login-password" type="password" required
-                value={password} onChange={e => setPassword(e.target.value)}
-                onFocus={() => setFocused('password')} onBlur={() => setFocused(null)}
-                placeholder="••••••••" className="login-input-group__input"
-                autoComplete="current-password"
-              />
-              <label htmlFor="login-password" className="login-input-group__label">Password</label>
-            </div>
-
-            <button
-              type="submit"
-              disabled={isActive}
-              className={`login-card__submit login-card__submit--${phase}`}
-            >
-              <span className="login-card__submit-text">{buttonLabel}</span>
-              <span className="login-card__cart-wrap">
-                <ShoppingCart size={18} className="login-card__cart-icon" />
-                <Loader2 size={18} className="login-card__spinner-icon" />
-              </span>
-              <div className="login-card__submit-shine" />
-            </button>
-          </form>
-
-          <p className="login-card__footer">
-            Secure access &bull; Encrypted connection
-          </p>
         </div>
       </div>
     </div>

@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef, useEffect } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import { supabase } from '../lib/supabase';
 import { Lock, Mail, Loader2, ShoppingCart, ShoppingBag } from 'lucide-react';
 import './LoginView.css';

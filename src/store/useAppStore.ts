@@ -37,6 +37,8 @@ interface AppState {
   addBundle: (bundle: Omit<Bundle, 'id' | 'dateAdded'>) => Promise<void>;
   updateBundle: (id: string, bundle: Partial<Bundle>) => Promise<void>;
   deleteBundle: (id: string) => Promise<void>;
+  
+  injectDemoData: (products: Product[], bundles: Bundle[]) => Promise<void>;
 }
 
 const defaultCategories = ['Hardware', 'Software', 'Setup', 'Clothing', 'Home'];
@@ -257,5 +259,23 @@ export const useAppStore = create<AppState>()((set, get) => ({
       bundles: state.bundles.filter(b => b.id !== id)
     }));
     await supabase.from('bundles').delete().eq('id', id);
+  },
+
+  injectDemoData: async (products, bundles) => {
+    const { userId } = get();
+    if (!userId) return;
+    
+    const pWithUser = products.map(p => ({ ...p, user_id: userId }));
+    const bWithUser = bundles.map(b => ({ ...b, user_id: userId }));
+    
+    // Update local state
+    set(state => ({
+      products: [...state.products, ...products],
+      bundles: [...state.bundles, ...bundles]
+    }));
+    
+    // Push DB
+    await supabase.from('products').insert(pWithUser);
+    await supabase.from('bundles').insert(bWithUser);
   }
 }));

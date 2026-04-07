@@ -13,19 +13,19 @@
   justify-content: center;
   background: #0a0a0f;
   font-family: 'Inter', sans-serif;
+  z-index: 9999;
 }
 
 /* EXITING OVERLAY: LoginView sits on top of Dashboard and fades out smoothly */
 .login-root--exiting {
-  z-index: 9999;
-  animation: login-root-fadeout 4s ease forwards;
-  animation-delay: 0.5s;
+  animation: login-root-fadeout 1.2s ease forwards;
+  animation-delay: 0.6s;
+  pointer-events: none; /* Allows immediate interaction with Dashboard below */
 }
 
 @keyframes login-root-fadeout {
   0%   { opacity: 1; }
-  25%  { opacity: 0.95; }
-  50%  { opacity: 0.7; }
+  30%  { opacity: 0.9; }
   100% { opacity: 0; }
 }
 

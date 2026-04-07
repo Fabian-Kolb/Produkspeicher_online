@@ -49,7 +49,7 @@ function App() {
           loginFromForm.current = false;
           setTimeout(() => {
             setShowLogin(false);
-          }, 4000);
+          }, 1800);
         } else {
           // Page refresh or token refresh — no animation
           setShowLogin(false);

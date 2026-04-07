@@ -3,6 +3,8 @@ import { Settings, Play, Download, Upload, Info, Trash2, X, Sparkles } from 'luc
 import { cn } from '../../utils/cn';
 import { useUIStore } from '../../store/useUIStore';
 
+import { useAppStore } from '../../store/useAppStore';
+import { createDemoData } from '../../utils/demoData';
 
 export const MainMenuSidebar: React.FC = () => {
   const { isMainMenuOpen, toggleMainMenu, toggleThemeManager, openProductModal } = useUIStore();
@@ -11,15 +13,32 @@ export const MainMenuSidebar: React.FC = () => {
   // Dummy functions for now
   const handleExport = () => console.log('Export triggered');
   const handleImport = () => console.log('Import triggered');
-  const handleInfo = () => console.log('Info Modal');
-  const handleReset = () => console.log('Reset Modal');
+  
+  const handleInfo = () => {
+    alert("Shop Manager (Produkspeicher Online)\nVersion 1.0.0\nBuilt with ❤️ by Vibe-Coding.");
+  };
 
-  const handleDemoMode = () => {
-    console.warn("Demo Mode is currently disabled because it requires an update to work with Supabase.");
-    // const demoData = createDemoData();
-    // setProducts(demoData.products);
-    // setBundles(demoData.bundles);
-    toggleMainMenu();
+  const handleReset = async () => {
+    if (window.confirm("ACHTUNG: Möchtest du wirklich ALLE deine Daten (Produkte & Bundles) löschen? Dies kann nicht rückgängig gemacht werden.")) {
+      const { products, bundles, deleteProduct, deleteBundle } = useAppStore.getState();
+      
+      // Delete all products
+      await Promise.all(products.map(p => deleteProduct(p.id)));
+      // Delete all bundles
+      await Promise.all(bundles.map(b => deleteBundle(b.id)));
+      
+      alert("Alle Daten wurden gelöscht.");
+      toggleMainMenu();
+    }
+  };
+
+  const handleDemoMode = async () => {
+    if (window.confirm("Möchtest du die Demo-Inhalte (Dummy-Daten) zu deinem Account hinzufügen?")) {
+      const demoData = createDemoData();
+      await useAppStore.getState().injectDemoData(demoData.products, demoData.bundles);
+      alert("Demo-Inhalte erfolgreich hinzugefügt!");
+      toggleMainMenu();
+    }
   };
 
   return (

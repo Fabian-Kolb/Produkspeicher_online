@@ -71,7 +71,7 @@ export const createDemoData = (): { products: Product[], bundles: Bundle[] } => 
       mainImgIdx: 0,
       dateAdded: getPastDate(5),
       isFavorite: false,
-      status: 'reduced'
+      status: 'active'
     },
     {
       id: getNextId(),
@@ -88,6 +88,7 @@ export const createDemoData = (): { products: Product[], bundles: Bundle[] } => 
       imgs: [images.audio[0]],
       mainImgIdx: 0,
       dateAdded: getPastDate(60),
+      dateBought: getPastDate(45),
       isFavorite: true,
       status: 'bought'
     },
@@ -125,7 +126,7 @@ export const createDemoData = (): { products: Product[], bundles: Bundle[] } => 
       mainImgIdx: 0,
       dateAdded: getPastDate(2),
       isFavorite: true,
-      status: 'reduced'
+      status: 'active'
     },
     {
       id: getNextId(),
@@ -142,6 +143,7 @@ export const createDemoData = (): { products: Product[], bundles: Bundle[] } => 
       imgs: [images.clothing[0]],
       mainImgIdx: 0,
       dateAdded: getPastDate(10),
+      dateBought: getPastDate(1),
       isFavorite: false,
       status: 'bought'
     },
@@ -197,6 +199,7 @@ export const createDemoData = (): { products: Product[], bundles: Bundle[] } => 
       imgs: [images.laptops[0]], // placeholder
       mainImgIdx: 0,
       dateAdded: getPastDate(3),
+      dateBought: getPastDate(2),
       isFavorite: true,
       status: 'bought'
     },
@@ -252,7 +255,7 @@ export const createDemoData = (): { products: Product[], bundles: Bundle[] } => 
       mainImgIdx: 0,
       dateAdded: getPastDate(2),
       isFavorite: false,
-      status: 'reduced'
+      status: 'active'
     },
     {
       id: getNextId(),
@@ -269,6 +272,7 @@ export const createDemoData = (): { products: Product[], bundles: Bundle[] } => 
       imgs: [images.clothing[1]],
       mainImgIdx: 0,
       dateAdded: getPastDate(35),
+      dateBought: getPastDate(5),
       isFavorite: true,
       status: 'bought'
     },
@@ -342,7 +346,7 @@ export const createDemoData = (): { products: Product[], bundles: Bundle[] } => 
       mainImgIdx: 0,
       dateAdded: getPastDate(6),
       isFavorite: false,
-      status: 'reduced'
+      status: 'active'
     },
     {
       id: getNextId(),

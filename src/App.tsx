@@ -22,7 +22,7 @@ function App() {
   // Tracks whether the login came from the form (not a page refresh)
   const loginFromForm = useRef(false);
 
-  const { fetchAllData } = useAppStore();
+  const { fetchAllData, setUserName } = useAppStore();
 
   useEffect(() => {
     // Initial session check
@@ -31,6 +31,9 @@ function App() {
       setLoading(false);
       if (session) {
         fetchAllData(session.user.id);
+        const name = session.user.user_metadata?.display_name || 'User';
+        setUserName(name);
+        
         const hasDisplayName = !!session.user.user_metadata?.display_name;
         if (!hasDisplayName) setShowOnboarding(true);
         // Already logged in on page load — hide login immediately, no animation
@@ -45,6 +48,8 @@ function App() {
       if (session) {
         fetchAllData(session.user.id);
         setSession(session);
+        const name = session.user.user_metadata?.display_name || 'User';
+        setUserName(name);
 
         const hasDisplayName = !!session.user.user_metadata?.display_name;
 
@@ -64,6 +69,7 @@ function App() {
         }
       } else {
         setSession(null);
+        setUserName(null);
         setShowLogin(true);
         setShowOnboarding(false);
       }

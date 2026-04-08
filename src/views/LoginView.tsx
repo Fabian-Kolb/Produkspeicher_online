@@ -126,7 +126,7 @@ const ScrollColumn: React.FC<{
     <div className={`login-scroll-column login-scroll-column--${side}`}>
       <div className={`login-scroll-track login-scroll-track--${direction}`}>
         {doubled.map((p, i) => (
-          <ProductCard key={`${p.name}-${i}`} product={p} style={styles[i % styles.length]} index={i} />
+          <ProductCard key={`${p.name}-${i}`} product={p} style={styles[i % products.length]} index={i} />
         ))}
       </div>
     </div>

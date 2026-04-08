@@ -7,8 +7,8 @@ import type { Product } from '../types';
 export const DealsView: React.FC = () => {
   const { products } = useAppStore();
   
-  // Deals are defined as products that are reduced (discount > 0 or status === 'reduced')
-  const dealProducts = products.filter((p: Product) => p.discount > 0 || p.status === 'reduced');
+  // Deals are defined as products that have a discount (discount > 0)
+  const dealProducts = products.filter((p: Product) => p.discount > 0);
 
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">

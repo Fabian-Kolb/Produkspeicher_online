@@ -1,8 +1,12 @@
 import { create } from 'zustand';
 import { supabase } from '../lib/supabase';
 import type { Product, AppSettings, Bundle, Website, CustomTheme } from '../types';
+import { createDemoData } from '../utils/demoData';
 
 interface AppState {
+  isDemoMode: boolean;
+  _dbProducts: Product[];
+  _dbBundles: Bundle[];
   products: Product[];
   categories: string[];
   subCats: Record<string, string[]>;
@@ -13,10 +17,15 @@ interface AppState {
   
   // Auth helper
   userId: string | null;
+  userName: string | null;
   setUserId: (id: string | null) => void;
+  setUserName: (name: string | null) => void;
   fetchAllData: (userId: string) => Promise<void>;
 
   // Actions
+  toggleDemoMode: () => void;
+  _refreshView: () => void;
+
   addProduct: (product: Omit<Product, 'id'>) => Promise<void>;
   updateProduct: (id: string, product: Partial<Product>) => Promise<void>;
   deleteProduct: (id: string) => Promise<void>;
@@ -37,8 +46,6 @@ interface AppState {
   addBundle: (bundle: Omit<Bundle, 'id' | 'dateAdded'>) => Promise<void>;
   updateBundle: (id: string, bundle: Partial<Bundle>) => Promise<void>;
   deleteBundle: (id: string) => Promise<void>;
-  
-  injectDemoData: (products: Product[], bundles: Bundle[]) => Promise<void>;
 }
 
 const defaultCategories = ['Hardware', 'Software', 'Setup', 'Clothing', 'Home'];
@@ -81,6 +88,9 @@ const syncAppState = async (userId: string, state: any) => {
 };
 
 export const useAppStore = create<AppState>()((set, get) => ({
+  isDemoMode: localStorage.getItem('ventory_demo_mode') === 'true',
+  _dbProducts: [],
+  _dbBundles: [],
   products: [],
   categories: defaultCategories,
   subCats: defaultSubCats,
@@ -89,15 +99,34 @@ export const useAppStore = create<AppState>()((set, get) => ({
   bundles: [],
   settings: defaultSettings,
   userId: null,
+  userName: null,
 
   setUserId: (userId) => set({ userId }),
+  setUserName: (userName) => set({ userName }),
+
+  toggleDemoMode: () => {
+    const newVal = !get().isDemoMode;
+    localStorage.setItem('ventory_demo_mode', String(newVal));
+    set({ isDemoMode: newVal });
+    get()._refreshView();
+  },
+
+  _refreshView: () => {
+    const { isDemoMode, _dbProducts, _dbBundles } = get();
+    if (isDemoMode) {
+      const demo = createDemoData();
+      set({ products: demo.products, bundles: demo.bundles });
+    } else {
+      set({ products: _dbProducts, bundles: _dbBundles });
+    }
+  },
 
   fetchAllData: async (userId) => {
     set({ userId });
     
     // Fetch Products
     const { data: pData } = await supabase.from('products').select('*').eq('user_id', userId);
-    if (pData) set({ products: pData as Product[] });
+    if (pData) set({ _dbProducts: pData as Product[] });
 
     // Fetch Websites
     const { data: wData } = await supabase.from('websites').select('*').eq('user_id', userId);
@@ -105,7 +134,10 @@ export const useAppStore = create<AppState>()((set, get) => ({
 
     // Fetch Bundles
     const { data: bData } = await supabase.from('bundles').select('*').eq('user_id', userId);
-    if (bData) set({ bundles: bData as Bundle[] });
+    if (bData) set({ _dbBundles: bData as Bundle[] });
+
+    // Refresh view state based on demo mode
+    get()._refreshView();
 
     // Fetch App State
     const { data: sData } = await supabase.from('app_state').select('*').eq('user_id', userId).maybeSingle();
@@ -123,23 +155,51 @@ export const useAppStore = create<AppState>()((set, get) => ({
   },
 
   addProduct: async (product) => {
-    const { userId } = get();
+    const { userId, isDemoMode } = get();
     if (!userId) return;
     const newProduct = { ...product, id: crypto.randomUUID() };
-    set((state) => ({ products: [...state.products, newProduct as Product] }));
+    if (isDemoMode) {
+      set((state) => ({ products: [...state.products, newProduct as Product] }));
+      return;
+    }
+    set((state) => ({ 
+      products: [...state.products, newProduct as Product],
+      _dbProducts: [...state._dbProducts, newProduct as Product]
+    }));
     await supabase.from('products').insert([{ ...newProduct, user_id: userId }]);
   },
   
   updateProduct: async (id, updated) => {
+    const { isDemoMode } = get();
+    const updateData = { ...updated };
+    if (updated.status === 'bought') {
+      updateData.dateBought = new Date().toISOString();
+    }
+
+    if (isDemoMode) {
+      set((state) => ({
+        products: state.products.map(p => p.id === id ? { ...p, ...updateData } : p)
+      }));
+      return;
+    }
     set((state) => ({
-      products: state.products.map(p => p.id === id ? { ...p, ...updated } : p)
+      products: state.products.map(p => p.id === id ? { ...p, ...updateData } : p),
+      _dbProducts: state._dbProducts.map(p => p.id === id ? { ...p, ...updateData } : p)
     }));
-    await supabase.from('products').update(updated).eq('id', id);
+    await supabase.from('products').update(updateData).eq('id', id);
   },
   
   deleteProduct: async (id) => {
+    const { isDemoMode } = get();
+    if (isDemoMode) {
+      set((state) => ({
+        products: state.products.filter(p => p.id !== id)
+      }));
+      return;
+    }
     set((state) => ({
-      products: state.products.filter(p => p.id !== id)
+      products: state.products.filter(p => p.id !== id),
+      _dbProducts: state._dbProducts.filter(p => p.id !== id)
     }));
     await supabase.from('products').delete().eq('id', id);
   },
@@ -238,44 +298,49 @@ export const useAppStore = create<AppState>()((set, get) => ({
   },
 
   addBundle: async (bundle) => {
-    const { userId } = get();
+    const { userId, isDemoMode } = get();
     if (!userId) return;
     const newBundle = { ...bundle, id: crypto.randomUUID(), dateAdded: new Date().toISOString() };
+    if (isDemoMode) {
+      set((state) => ({
+        bundles: [...state.bundles, newBundle as Bundle]
+      }));
+      return;
+    }
     set((state) => ({
-      bundles: [...state.bundles, newBundle as Bundle]
+      bundles: [...state.bundles, newBundle as Bundle],
+      _dbBundles: [...state._dbBundles, newBundle as Bundle]
     }));
     await supabase.from('bundles').insert([{ ...newBundle, user_id: userId }]);
   },
 
   updateBundle: async (id, updated) => {
+    const { isDemoMode } = get();
+    if (isDemoMode) {
+      set((state) => ({
+        bundles: state.bundles.map(b => b.id === id ? { ...b, ...updated } : b)
+      }));
+      return;
+    }
     set((state) => ({
-      bundles: state.bundles.map(b => b.id === id ? { ...b, ...updated } : b)
+      bundles: state.bundles.map(b => b.id === id ? { ...b, ...updated } : b),
+      _dbBundles: state._dbBundles.map(b => b.id === id ? { ...b, ...updated } : b)
     }));
     await supabase.from('bundles').update(updated).eq('id', id);
   },
 
   deleteBundle: async (id) => {
+    const { isDemoMode } = get();
+    if (isDemoMode) {
+      set((state) => ({
+        bundles: state.bundles.filter(b => b.id !== id)
+      }));
+      return;
+    }
     set((state) => ({
-      bundles: state.bundles.filter(b => b.id !== id)
+      bundles: state.bundles.filter(b => b.id !== id),
+      _dbBundles: state._dbBundles.filter(b => b.id !== id)
     }));
     await supabase.from('bundles').delete().eq('id', id);
-  },
-
-  injectDemoData: async (products, bundles) => {
-    const { userId } = get();
-    if (!userId) return;
-    
-    const pWithUser = products.map(p => ({ ...p, user_id: userId }));
-    const bWithUser = bundles.map(b => ({ ...b, user_id: userId }));
-    
-    // Update local state
-    set(state => ({
-      products: [...state.products, ...products],
-      bundles: [...state.bundles, ...bundles]
-    }));
-    
-    // Push DB
-    await supabase.from('products').insert(pWithUser);
-    await supabase.from('bundles').insert(bWithUser);
   }
 }));

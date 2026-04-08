@@ -13,8 +13,9 @@ export interface Product {
   imgs: string[];
   mainImgIdx?: number;
   dateAdded: string;
+  dateBought?: string | null;
   isFavorite: boolean;
-  status: 'active' | 'bought' | 'reduced';
+  status: 'active' | 'bought';
   customOrder?: number;
 }
 

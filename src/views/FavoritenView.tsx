@@ -30,7 +30,7 @@ export const FavoritenView: React.FC = () => {
     if (statusFilter === 'bought') {
       result = result.filter((p: Product) => p.status === 'bought');
     } else if (statusFilter === 'reduced') {
-      result = result.filter((p: Product) => p.status === 'reduced' || p.discount > 0);
+      result = result.filter((p: Product) => p.discount > 0);
     }
 
     // 3. Category Filter

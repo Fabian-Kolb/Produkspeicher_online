@@ -6,7 +6,20 @@ import type { Product } from '../types';
 
 export const DashboardView: React.FC = () => {
   const navigate = useNavigate();
-  const { products, settings } = useAppStore();
+  const { products, settings, userName, isDemoMode } = useAppStore();
+  
+  const displayName = isDemoMode ? 'Gast' : userName || 'User';
+
+  const welcomeMessage = useMemo(() => {
+    const messages = [
+      `Willkommen zurück, ${displayName}`,
+      `Hey ${displayName}, schön dich zu sehen!`,
+      `Hallo ${displayName}, was shoppen wir heute?`,
+      `Moin ${displayName}, bereit für neue Deals?`,
+      `Hi ${displayName}, dein Überblick ist bereit.`
+    ];
+    return messages[Math.floor(Math.random() * messages.length)];
+  }, [displayName]);
 
   // Helper logic for KPIs
   const currentMonth = new Date().getMonth();
@@ -14,12 +27,17 @@ export const DashboardView: React.FC = () => {
 
   const spentThisMonth = useMemo(() => {
     return products
-      .filter((p: Product) => p.status === 'bought' && new Date(p.dateAdded).getMonth() === currentMonth && new Date(p.dateAdded).getFullYear() === currentYear)
+      .filter((p: Product) => {
+        if (p.status !== 'bought') return false;
+        const dateToCompare = p.dateBought || p.dateAdded;
+        const d = new Date(dateToCompare);
+        return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
+      })
       .reduce((sum: number, p: Product) => sum + p.finalPrice, 0);
   }, [products, currentMonth, currentYear]);
 
   const savedCount = products.filter((p: Product) => p.isFavorite).length;
-  const alertCount = products.filter((p: Product) => p.status === 'reduced').length;
+  const alertCount = products.filter((p: Product) => p.discount > 0).length;
 
   const budgetPct = Math.min((spentThisMonth / settings.monthlyBudget) * 100, 100);
   const isOverBudget = spentThisMonth > settings.monthlyBudget;
@@ -29,7 +47,7 @@ export const DashboardView: React.FC = () => {
   return (
     <div className="flex flex-col gap-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="flex flex-col items-center justify-center text-center mt-4">
-        <h1 className="text-3xl md:text-4xl font-playfair font-bold mb-2">Willkommen zurück</h1>
+        <h1 className="text-3xl md:text-4xl font-playfair font-bold mb-2">{welcomeMessage}</h1>
         <p className="text-text-secondary">
           Hier ist dein Shopping-Überblick für den{' '}
           <input 

@@ -22,8 +22,14 @@ interface UIState {
 
   isProductModalOpen: boolean;
   editingProductId: string | null;
+  productDraft: Partial<import('../types').Product> | null;
+  bundleDraft: { name: string; items: import('../types').BundleItem[] } | null;
+  activeBundleId: string | null;
   openProductModal: (productId?: string) => void;
   closeProductModal: () => void;
+  setProductDraft: (draft: Partial<import('../types').Product> | null) => void;
+  setBundleDraft: (draft: { name: string; items: import('../types').BundleItem[] } | null) => void;
+  setActiveBundleId: (id: string | null) => void;
   
   setMainCat: (cat: string) => void;
   toggleSubCat: (subCat: string) => void;
@@ -39,6 +45,9 @@ export const useUIStore = create<UIState>((set) => ({
   isProfileModalOpen: false,
   isProductModalOpen: false,
   editingProductId: null,
+  productDraft: null,
+  bundleDraft: null,
+  activeBundleId: null,
   
   mainCat: 'Alle',
   selectedSubCats: [],
@@ -53,6 +62,9 @@ export const useUIStore = create<UIState>((set) => ({
   
   openProductModal: (productId?: string) => set({ isProductModalOpen: true, editingProductId: productId || null }),
   closeProductModal: () => set({ isProductModalOpen: false, editingProductId: null }),
+  setProductDraft: (draft) => set({ productDraft: draft }),
+  setBundleDraft: (draft) => set({ bundleDraft: draft }),
+  setActiveBundleId: (id) => set({ activeBundleId: id }),
   
   setMainCat: (cat) => set({ mainCat: cat, selectedSubCats: [] }),
   toggleSubCat: (subCat) => set((state) => {

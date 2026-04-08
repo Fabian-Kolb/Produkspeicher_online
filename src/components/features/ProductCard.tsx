@@ -23,7 +23,10 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const handleToggleBought = (e: React.MouseEvent) => {
     e.stopPropagation();
     const newStatus = product.status === 'bought' ? 'active' : 'bought';
-    updateProduct(product.id, { status: newStatus });
+    updateProduct(product.id, { 
+      status: newStatus,
+      dateBought: newStatus === 'bought' ? new Date().toISOString() : null
+    });
   };
 
   const mainImg = product.imgs[product.mainImgIdx || 0] || 'https://via.placeholder.com/400';

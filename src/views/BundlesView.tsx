@@ -1,5 +1,6 @@
 import React, { useMemo, useState, useEffect, useRef } from 'react';
 import { useAppStore } from '../store/useAppStore';
+import { useUIStore } from '../store/useUIStore';
 import { Layers, Plus, Trash2, Search, X } from 'lucide-react';
 import type { BundleItem } from '../types';
 
@@ -37,11 +38,8 @@ const MarqueeOverflow: React.FC<{ children: React.ReactNode; className?: string 
 
 export const BundlesView: React.FC = () => {
   const { bundles, products, categories, subCats, addBundle, updateBundle, deleteBundle } = useAppStore();
-  const [activeBundleId, setActiveBundleId] = useState<string | null>(null);
+  const { activeBundleId, setActiveBundleId, bundleDraft, setBundleDraft } = useUIStore();
 
-  // Draft state for editor
-  const [draftName, setDraftName] = useState('');
-  const [draftItems, setDraftItems] = useState<BundleItem[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
 
   // Editor filter state (local to bundle editor, separate from global filters)
@@ -49,23 +47,30 @@ export const BundlesView: React.FC = () => {
   const [editorSelectedSubCats, setEditorSubCats] = useState<string[]>([]);
   const [editorStatusFilter, setEditorStatusFilter] = useState<'all' | 'bought' | 'reduced'>('all');
 
-  // When active bundle changes, update draft
+  // When active bundle changes, update draft in UIStore
   useEffect(() => {
     if (activeBundleId && activeBundleId !== 'new') {
       const b = bundles.find(b => b.id === activeBundleId);
       if (b) {
-        setDraftName(b.name);
-        setDraftItems(b.items);
+        setBundleDraft({ name: b.name, items: b.items });
       }
-    } else {
-      setDraftName('');
-      setDraftItems([]);
+    } else if (activeBundleId === 'new') {
+      // Initialize new draft if none exists
+      if (!bundleDraft) {
+        setBundleDraft({ name: '', items: [] });
+      }
     }
     // Reset editor filters when opening editor
     setEditorMainCat('Alle');
     setEditorSubCats([]);
     setEditorStatusFilter('all');
-  }, [activeBundleId, bundles]);
+  }, [activeBundleId, bundles, setBundleDraft, bundleDraft]);
+
+  const draftName = bundleDraft?.name || '';
+  const draftItems = bundleDraft?.items || [];
+
+  const setDraftName = (name: string) => setBundleDraft({ name, items: draftItems });
+  const setDraftItems = (items: BundleItem[]) => setBundleDraft({ name: draftName, items });
 
   // Editor filtered products (with category, sub-cat, status, search)
   const editorFilteredProducts = useMemo(() => {
@@ -79,7 +84,7 @@ export const BundlesView: React.FC = () => {
     if (editorStatusFilter === 'bought') {
       result = result.filter(p => p.status === 'bought');
     } else if (editorStatusFilter === 'reduced') {
-      result = result.filter(p => p.status === 'reduced' || p.discount > 0);
+      result = result.filter(p => p.discount > 0);
     }
 
     if (editorMainCat !== 'Alle') {
@@ -100,33 +105,42 @@ export const BundlesView: React.FC = () => {
     if (activeBundleId === 'new') {
       addBundle({ name: draftName, items: draftItems });
       setActiveBundleId(null);
+      setBundleDraft(null); // Clear draft after saving
     } else if (activeBundleId) {
       updateBundle(activeBundleId, { name: draftName, items: draftItems });
       setActiveBundleId(null);
+      setBundleDraft(null); // Clear draft after saving
     }
   };
 
   const handleAddItem = (productId: string) => {
-    setDraftItems(prev => {
-      const existing = prev.find(i => i.id === productId);
-      if (existing) {
-        return prev.map(i => i.id === productId ? { ...i, qty: i.qty + 1 } : i);
-      }
-      return [...prev, { id: productId, qty: 1 }];
-    });
+    const existing = draftItems.find(i => i.id === productId);
+    let next;
+    if (existing) {
+      next = draftItems.map(i => i.id === productId ? { ...i, qty: i.qty + 1 } : i);
+    } else {
+      next = [...draftItems, { id: productId, qty: 1 }];
+    }
+    setDraftItems(next);
   };
 
   const handleRemoveItem = (productId: string) => {
-    setDraftItems(prev => prev.filter(i => i.id !== productId));
+    setDraftItems(draftItems.filter(i => i.id !== productId));
   };
 
   const handleDecreaseItem = (productId: string) => {
-    setDraftItems(prev => prev.map(i => {
+    const next = draftItems.map(i => {
       if (i.id === productId) {
         return i.qty > 1 ? { ...i, qty: i.qty - 1 } : i;
       }
       return i;
-    }).filter(i => i.qty > 0));
+    }).filter(i => i.qty > 0);
+    setDraftItems(next);
+  };
+
+  const handleCancelBundle = () => {
+    setBundleDraft(null);
+    setActiveBundleId(null);
   };
 
   const draftTotal = useMemo(() => {
@@ -395,7 +409,7 @@ export const BundlesView: React.FC = () => {
                   placeholder="Name der Zusammenstellung..."
                   className="bg-transparent border-none outline-none font-bold text-lg text-text-primary placeholder:text-text-secondary/70 w-full"
                 />
-                <button onClick={() => setActiveBundleId(null)} className="text-text-secondary hover:text-text-primary transition-colors cursor-pointer shrink-0 ml-4 font-bold"><X size={20} /></button>
+                <button onClick={handleCancelBundle} className="text-text-secondary hover:text-text-primary transition-colors cursor-pointer shrink-0 ml-4 font-bold"><X size={20} /></button>
               </div>
 
               <div className="flex-1 overflow-y-auto hidden-scrollbar pr-2 space-y-3">

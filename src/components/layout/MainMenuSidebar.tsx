@@ -2,15 +2,13 @@ import React from 'react';
 import { Settings, Play, Download, Upload, Info, Trash2, X, Sparkles, User } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { useUIStore } from '../../store/useUIStore';
-
 import { useAppStore } from '../../store/useAppStore';
-import { createDemoData } from '../../utils/demoData';
 import logoDark from '../../assets/logo/logo_dark.png';
 import logoWhite from '../../assets/logo/logo_white.png';
 
 export const MainMenuSidebar: React.FC = () => {
   const { isMainMenuOpen, toggleMainMenu, toggleThemeManager, openProductModal, toggleProfileModal } = useUIStore();
-  const settings = useAppStore((state) => state.settings);
+  const { settings, isDemoMode, toggleDemoMode } = useAppStore();
 
   
   // Dummy functions for now
@@ -35,13 +33,8 @@ export const MainMenuSidebar: React.FC = () => {
     }
   };
 
-  const handleDemoMode = async () => {
-    if (window.confirm("Möchtest du die Demo-Inhalte (Dummy-Daten) zu deinem Account hinzufügen?")) {
-      const demoData = createDemoData();
-      await useAppStore.getState().injectDemoData(demoData.products, demoData.bundles);
-      alert("Demo-Inhalte erfolgreich hinzugefügt!");
-      toggleMainMenu();
-    }
+  const handleDemoMode = () => {
+    toggleDemoMode();
   };
 
   return (
@@ -85,8 +78,8 @@ export const MainMenuSidebar: React.FC = () => {
           <MenuButton icon={<Play size={18} />} onClick={() => { toggleMainMenu(); openProductModal(); }}>
             + Neues Produkt
           </MenuButton>
-          <MenuButton icon={<Sparkles size={18} />} onClick={handleDemoMode}>
-            Demo-Inhalte (Dummy Data)
+          <MenuButton icon={<Sparkles size={18} />} onClick={handleDemoMode} isActive={isDemoMode}>
+            {isDemoMode ? 'Demo-Modus: AN' : 'Demo-Modus aktivieren'}
           </MenuButton>
           <MenuButton icon={<Download size={18} />} onClick={handleExport}>
             Exportieren
@@ -111,9 +104,10 @@ interface MenuButtonProps {
   children: React.ReactNode;
   onClick: () => void;
   isDestructive?: boolean;
+  isActive?: boolean;
 }
 
-const MenuButton: React.FC<MenuButtonProps> = ({ icon, children, onClick, isDestructive }) => {
+const MenuButton: React.FC<MenuButtonProps> = ({ icon, children, onClick, isDestructive, isActive }) => {
   return (
     <button
       onClick={onClick}
@@ -121,12 +115,18 @@ const MenuButton: React.FC<MenuButtonProps> = ({ icon, children, onClick, isDest
         'w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-200 group text-left font-medium',
         isDestructive 
           ? 'text-heart hover:bg-heart/10' 
-          : 'text-text-primary hover:bg-border-primary'
+          : isActive 
+            ? 'bg-blue-500/10 text-blue-500 ring-1 ring-blue-500/30'
+            : 'text-text-primary hover:bg-border-primary'
       )}
     >
       <span className={cn(
         'transition-transform duration-200 group-hover:scale-110',
-        isDestructive ? 'text-heart' : 'text-text-secondary group-hover:text-text-primary'
+        isDestructive 
+          ? 'text-heart' 
+          : isActive 
+            ? 'text-blue-500' 
+            : 'text-text-secondary group-hover:text-text-primary'
       )}>
         {icon}
       </span>

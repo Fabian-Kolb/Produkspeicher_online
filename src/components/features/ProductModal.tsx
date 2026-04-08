@@ -7,7 +7,7 @@ import { Button } from '../common/Button';
 import type { Product } from '../../types';
 
 export const ProductModal: React.FC = () => {
-  const { isProductModalOpen, editingProductId, closeProductModal } = useUIStore();
+  const { isProductModalOpen, editingProductId, closeProductModal, productDraft, setProductDraft } = useUIStore();
   const { products, addProduct, updateProduct, categories, subCats } = useAppStore();
 
   const [formData, setFormData] = useState<Partial<Product>>({
@@ -28,12 +28,20 @@ export const ProductModal: React.FC = () => {
 
   const [imgInput, setImgInput] = useState('');
 
+  // Sync formData changes back to UIStore's productDraft (for persistence across view switches)
+  useEffect(() => {
+    if (isProductModalOpen && !editingProductId) {
+      setProductDraft(formData);
+    }
+  }, [formData, isProductModalOpen, editingProductId, setProductDraft]);
+
   useEffect(() => {
     if (isProductModalOpen && editingProductId) {
       const p = products.find(prod => prod.id === editingProductId);
       if (p) setFormData(p);
     } else if (isProductModalOpen && !editingProductId) {
-      setFormData({
+      // Use existing draft or defaults
+      setFormData(productDraft || {
         name: '', shop: '', url: '', price: 0, discount: 0, finalPrice: 0,
         rating: 0, details: '', imgs: [], mainCat: categories[0] || 'Setup', subCats: [],
         status: 'active', isFavorite: false, dateAdded: new Date().toISOString()
@@ -45,6 +53,8 @@ export const ProductModal: React.FC = () => {
   if (!isProductModalOpen) return null;
 
   const handleSave = () => {
+    const isNowBought = (formData.status || 'active') === 'bought';
+    
     const p: Omit<Product, 'id'> = {
       name: formData.name || 'Unbenannt',
       shop: formData.shop || 'Unbekannt',
@@ -59,14 +69,21 @@ export const ProductModal: React.FC = () => {
       subCats: formData.subCats || [],
       status: formData.status || 'active',
       isFavorite: formData.isFavorite || false,
-      dateAdded: formData.dateAdded || new Date().toISOString()
+      dateAdded: formData.dateAdded || new Date().toISOString(),
+      dateBought: isNowBought ? (formData.dateBought || new Date().toISOString()) : null
     };
 
     if (editingProductId) {
       updateProduct(editingProductId, p);
     } else {
       addProduct(p);
+      setProductDraft(null); // Clear draft after creating new product
     }
+    closeProductModal();
+  };
+
+  const handleCancel = () => {
+    setProductDraft(null);
     closeProductModal();
   };
 
@@ -90,7 +107,7 @@ export const ProductModal: React.FC = () => {
           <h2 className="text-2xl font-playfair font-bold">
             {editingProductId ? 'Produkt bearbeiten' : 'Neues Produkt'}
           </h2>
-          <button onClick={closeProductModal} className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-black/10 transition-colors">
+          <button onClick={handleCancel} className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-black/10 transition-colors">
             <X size={24} />
           </button>
         </div>
@@ -201,7 +218,7 @@ export const ProductModal: React.FC = () => {
 
         {/* Footer */}
         <div className="p-6 border-t border-border-primary shrink-0 flex justify-end gap-3">
-          <Button variant="ghost" onClick={closeProductModal}>Abbrechen</Button>
+          <Button variant="ghost" onClick={handleCancel}>Abbrechen</Button>
           <Button variant="primary" onClick={handleSave} className="flex items-center gap-2">
             <Save size={18} /> Speichern
           </Button>

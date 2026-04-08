@@ -61,7 +61,7 @@ export const DashboardView: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Budget Widget */}
         <div 
-          onClick={() => navigate('/analytics')}
+          onClick={() => navigate('/budget')}
           className="glass-panel p-6 cursor-pointer hover:-translate-y-1 transition-transform duration-300"
         >
           <div className="flex justify-between items-center mb-6 text-text-secondary">

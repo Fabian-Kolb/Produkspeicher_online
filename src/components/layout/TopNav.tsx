@@ -16,7 +16,7 @@ export const TopNav: React.FC = () => {
     { to: '/katalog', label: 'Katalog' },
     { to: '/favoriten', label: 'Favoriten' },
     { to: '/bundles', label: 'Bundles' },
-    { to: '/analytics', label: 'Budget' },
+    { to: '/budget', label: 'Budget' },
     { to: '/deals', label: 'Deals' },
   ];
 

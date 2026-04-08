@@ -11,7 +11,7 @@ import { KatalogView } from './views/KatalogView';
 import { FavoritenView } from './views/FavoritenView';
 import { DealsView } from './views/DealsView';
 import { BundlesView } from './views/BundlesView';
-import { AnalyticsView } from './views/AnalyticsView';
+import { BudgetView } from './views/BudgetView';
 
 function App() {
   const [session, setSession] = useState<any>(null);
@@ -93,7 +93,7 @@ function App() {
               <Route path="katalog" element={<KatalogView />} />
               <Route path="favoriten" element={<FavoritenView />} />
               <Route path="bundles" element={<BundlesView />} />
-              <Route path="analytics" element={<AnalyticsView />} />
+              <Route path="budget" element={<BudgetView />} />
               <Route path="deals" element={<DealsView />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Route>

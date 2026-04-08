@@ -2,7 +2,7 @@ import { create } from 'zustand';
 
 // Transient UI state that shouldn't be persisted to localStorage
 interface UIState {
-  currentView: 'dashboard' | 'products' | 'saved' | 'bundles' | 'analytics' | 'deals';
+  currentView: 'dashboard' | 'products' | 'saved' | 'bundles' | 'budget' | 'deals';
   isMainMenuOpen: boolean;
   isThemeManagerOpen: boolean;
   isProfileModalOpen: boolean;

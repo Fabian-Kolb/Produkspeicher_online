@@ -99,50 +99,105 @@ export const BudgetView: React.FC = () => {
   const getY = (val: number) => PAD_BOTTOM - (val / roundedMax) * DRAW_HEIGHT;
   const getX = (i: number) => MARGIN_LEFT + (i * (DRAW_WIDTH / (chartData.length - 1 || 1)));
 
-  // Calculate tangents/angles for thickening segments
-  const pointAngles = useMemo(() => {
-    return chartData.map((_, i) => {
-      const prevX = i === 0 ? getX(i) : getX(i - 1);
-      const prevY = i === 0 ? getY(chartData[i].value) : getY(chartData[i - 1].value);
-      const nextX = i === chartData.length - 1 ? getX(i) : getX(i + 1);
-      const nextY = i === chartData.length - 1 ? getY(chartData[i].value) : getY(chartData[i + 1].value);
-      
-      const dx = nextX - prevX;
-      const dy = nextY - prevY;
-      
-      if (dx === 0) return 0;
-      return Math.atan2(dy, dx) * (180 / Math.PI);
-    });
-  }, [chartData, roundedMax]);
 
 
+  // Geometrical Variable-Stroke Algorithmus (Sampling, Normals & Envelope)
+  const { envelopeData, areaData, firstPoint, lastPoint, baseWidth } = useMemo(() => {
+    if (chartData.length < 2) return { envelopeData: "", areaData: "" };
 
-  // Bezier curve helper
-  const getCurvePath = (data: any[]) => {
-    if (data.length < 2) return "";
+    const dataPoints = chartData.map((d, i) => ({ x: getX(i), y: getY(d.value) }));
     
-    // First point
-    let path = `M ${getX(0)},${getY(data[0].value)}`;
+    // 1. Spline Base Generation & High-Res Sampling
+    const RESOLUTION = 2; // Pixel sampling distance
+    const sampledPoints: {x: number, y: number}[] = [];
     
-    for (let i = 0; i < data.length - 1; i++) {
-      const x1 = getX(i);
-      const y1 = getY(data[i].value);
-      const x2 = getX(i + 1);
-      const y2 = getY(data[i + 1].value);
+    const beziers = [];
+    for (let i = 0; i < dataPoints.length - 1; i++) {
+      const p1 = dataPoints[i];
+      const p2 = dataPoints[i + 1];
+      // Mathematischer (Monotone-X) Spline verhindert organisches Ausschwingen/Overshoots
+      const cp1x = p1.x + (p2.x - p1.x) / 2;
+      const cp1y = p1.y;
       
-      // Control points (simple horizontal offset for smooth look)
-      const cp1x = x1 + (x2 - x1) / 2;
-      const cp1y = y1;
-      const cp2x = x1 + (x2 - x1) / 2;
-      const cp2y = y2;
-      
-      path += ` C ${cp1x},${cp1y} ${cp2x},${cp2y} ${x2},${y2}`;
+      const cp2x = p1.x + (p2.x - p1.x) / 2;
+      const cp2y = p2.y;
+
+      beziers.push({
+        p1, 
+        cp1: { x: cp1x, y: cp1y },
+        cp2: { x: cp2x, y: cp2y },
+        p2 
+      });
     }
-    
-    return path;
-  };
 
-  const curveData = useMemo(() => getCurvePath(chartData), [chartData, roundedMax]);
+    beziers.forEach((b) => {
+      const straightDist = Math.hypot(b.p2.x - b.p1.x, b.p2.y - b.p1.y);
+      const steps = Math.max(Math.ceil(straightDist / RESOLUTION), 2);
+      for(let j = 0; j < steps; j++) {
+        const t = j / steps;
+        const mt = 1 - t;
+        const x = mt*mt*mt*b.p1.x + 3*mt*mt*t*b.cp1.x + 3*mt*t*t*b.cp2.x + t*t*t*b.p2.x;
+        const y = mt*mt*mt*b.p1.y + 3*mt*mt*t*b.cp1.y + 3*mt*t*t*b.cp2.y + t*t*t*b.p2.y;
+        sampledPoints.push({ x, y });
+      }
+    });
+    const lastP = beziers[beziers.length-1].p2;
+    sampledPoints.push({ x: lastP.x, y: lastP.y });
+
+    // 2. Normals computation & Distance-based Bell Curve Thickness
+    const baseWidth = 0.8; // Radius of thin line sections
+    const peakWidth = 2.8; // Radius of node swells (Reduced for a more minimal look)
+    const falloff = 60;    // Gaussian spread factor (much shorter swelling)
+    
+    const topEdge: {x: number, y: number}[] = [];
+    const bottomEdge: {x: number, y: number}[] = [];
+    
+    for (let i = 0; i < sampledPoints.length; i++) {
+        const pt = sampledPoints[i];
+        
+        let prev = i > 0 ? sampledPoints[i-1] : pt;
+        let next = i < sampledPoints.length-1 ? sampledPoints[i+1] : pt;
+        if (i === 0) prev = { x: pt.x - (next.x - pt.x), y: pt.y - (next.y - pt.y) };
+        if (i === sampledPoints.length-1) next = { x: pt.x + (pt.x - prev.x), y: pt.y + (pt.y - prev.y) };
+        
+        let dx = next.x - prev.x;
+        let dy = next.y - prev.y;
+        const len = Math.hypot(dx, dy);
+        if (len > 0) { dx /= len; dy /= len; }
+        
+        const nx = -dy;
+        const ny = dx;
+        
+        // Find distance to closest INNER data node (skipping first and last)
+        let minDistSq = Infinity;
+        for (let idx = 1; idx < dataPoints.length - 1; idx++) {
+            const dp = dataPoints[idx];
+            const dsq = (pt.x - dp.x)**2 + (pt.y - dp.y)**2;
+            if (dsq < minDistSq) minDistSq = dsq;
+        }
+        
+        // Gaussian Bell Modulation
+        const thickness = baseWidth + (peakWidth - baseWidth) * Math.exp(-minDistSq / falloff);
+        
+        topEdge.push({ x: pt.x + nx * thickness, y: pt.y + ny * thickness });
+        bottomEdge.push({ x: pt.x - nx * thickness, y: pt.y - ny * thickness });
+    }
+
+    // 3. Assemble Continuous Envelope Polygon
+    let env = `M ${topEdge[0].x},${topEdge[0].y}`;
+    for (let i = 1; i < topEdge.length; i++) env += ` L ${topEdge[i].x},${topEdge[i].y}`;
+    // Add a semicircular rounded cap at the end? A simple SVG circle element is easier, done in render loop below.
+    for (let i = bottomEdge.length - 1; i >= 0; i--) env += ` L ${bottomEdge[i].x},${bottomEdge[i].y}`;
+    env += " Z";
+
+    // Background Fill Area
+    let area = `M ${sampledPoints[0].x},${sampledPoints[0].y}`;
+    for (let i = 1; i < sampledPoints.length; i++) area += ` L ${sampledPoints[i].x},${sampledPoints[i].y}`;
+    area += ` L ${sampledPoints[sampledPoints.length-1].x},${getY(0)}`;
+    area += ` L ${sampledPoints[0].x},${getY(0)} Z`;
+
+    return { envelopeData: env, areaData: area, firstPoint: sampledPoints[0], lastPoint: sampledPoints[sampledPoints.length - 1], baseWidth };
+  }, [chartData, roundedMax]);
 
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 min-h-[calc(100vh-100px)]">
@@ -210,29 +265,6 @@ export const BudgetView: React.FC = () => {
                   <stop offset="0%" stopColor="var(--text-dark)" stopOpacity="0.3" />
                   <stop offset="100%" stopColor="var(--text-dark)" stopOpacity="0" />
                 </linearGradient>
-
-                {/* Filter for smooth mask transitions */}
-                <filter id="maskBlur">
-                  <feGaussianBlur stdDeviation="3" />
-                </filter>
-
-                {/* Mask for perfect curve-aligned organic thickening */}
-                <mask id="thickPathMask">
-                  <rect x="0" y="0" width="600" height="250" fill="black" />
-                  <g filter="url(#maskBlur)">
-                    {chartData.map((_, i) => (
-                      <ellipse 
-                        key={i} 
-                        cx={getX(i)} 
-                        cy={getY(chartData[i].value)} 
-                        rx="18" 
-                        ry="12" 
-                        fill="white" 
-                        transform={`rotate(${pointAngles[i]} ${getX(i)} ${getY(chartData[i].value)})`}
-                      />
-                    ))}
-                  </g>
-                </mask>
               </defs>
 
               {/* Y-Axis Grid Lines & Labels (Inside SVG for perfect alignment) */}
@@ -252,34 +284,23 @@ export const BudgetView: React.FC = () => {
 
               {/* Area Fill */}
               <path
-                d={`
-                  ${curveData}
-                  L ${getX(chartData.length - 1)},${getY(0)}
-                  L ${MARGIN_LEFT},${getY(0)}
-                  Z
-                `}
+                d={areaData}
                 fill="url(#chartGradient)"
               />
 
-              {/* Thicker Curve Nodes (via Mask) */}
+              {/* Algorithmic Variable-Stroke Envelope Polygon */}
               <path
-                d={curveData}
-                fill="none"
-                stroke="var(--text-dark)"
-                strokeWidth="4"
-                strokeLinecap="round"
-                mask="url(#thickPathMask)"
+                d={envelopeData}
+                fill="white"
               />
 
-              {/* Line */}
-              <path
-                d={curveData}
-                fill="none"
-                stroke="var(--text-dark)"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
+              {/* Rounded End Caps */}
+              {firstPoint && (
+                <>
+                  <circle cx={firstPoint.x} cy={firstPoint.y} r={baseWidth} fill="white" />
+                  <circle cx={lastPoint.x} cy={lastPoint.y} r={baseWidth} fill="white" />
+                </>
+              )}
 
               {/* Data Points */}
               {chartData.map((d, i) => (
@@ -292,7 +313,8 @@ export const BudgetView: React.FC = () => {
                     strokeDasharray="4 4"
                     className="opacity-20 group-hover:opacity-100"
                   />
-                  
+
+                  {/* Organic Variable Stroke completely replaces external nodes. */}
                   {/* Invisible larger hover area for tooltips */}
                   <rect
                     x={getX(i) - 15}

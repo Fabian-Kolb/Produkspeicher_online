@@ -1,10 +1,26 @@
 import React, { useMemo, useState } from 'react';
 import { useAppStore } from '../store/useAppStore';
+import { useUIStore } from '../store/useUIStore';
 import type { Product } from '../types';
 
 export const BudgetView: React.FC = () => {
-  const { products, settings } = useAppStore();
+  const { products, settings, updateSettings } = useAppStore();
+  const { setView, setStatusFilter, setSearchQuery } = useUIStore();
   const [timeRange, setTimeRange] = useState<'7d' | 'month' | 'total'>('7d');
+  const [hoveredDay, setHoveredDay] = useState<{ label: string, value: number, products: Product[] } | null>(null);
+  
+  const [isEditingBudget, setIsEditingBudget] = useState(false);
+  const [tempBudget, setTempBudget] = useState(String(settings.monthlyBudget));
+
+  const handleBudgetSubmit = () => {
+    const val = Number(tempBudget);
+    if (!isNaN(val) && val >= 0) {
+      updateSettings({ monthlyBudget: val });
+    } else {
+      setTempBudget(String(settings.monthlyBudget));
+    }
+    setIsEditingBudget(false);
+  };
 
   const currentMonth = new Date().getMonth();
   const currentYear = new Date().getFullYear();
@@ -199,6 +215,48 @@ export const BudgetView: React.FC = () => {
     return { envelopeData: env, areaData: area, firstPoint: sampledPoints[0], lastPoint: sampledPoints[sampledPoints.length - 1], baseWidth };
   }, [chartData, roundedMax]);
 
+  const timeRangeLabel = timeRange === '7d' ? '7 Tage' : timeRange === 'month' ? 'Dieser Monat' : 'Gesamt';
+  const timeRangeSpend = chartData.reduce((sum, d) => sum + d.value, 0);
+  const timeRangeProductsCount = chartData.reduce((sum, d) => sum + d.products.length, 0);
+  const averagePrice = timeRangeProductsCount > 0 ? timeRangeSpend / timeRangeProductsCount : 0;
+
+  const topCategories = useMemo(() => {
+    const productsInTimeRange = chartData.flatMap(d => d.products);
+    const catMap: Record<string, number> = {};
+    productsInTimeRange.forEach(p => {
+      const cat = p.mainCat || 'Ohne Kategorie';
+      catMap[cat] = (catMap[cat] || 0) + (p.finalPrice || 0);
+    });
+    return Object.entries(catMap)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 3)
+      .map(([name, amount]) => ({ name, amount }));
+  }, [chartData]);
+
+  const maxCategorySpend = topCategories.length > 0 ? Math.max(topCategories[0].amount, 1) : 1;
+
+  const groupedTransactions = useMemo(() => {
+    const sorted = [...boughtProducts].sort(
+      (a, b) => new Date(b.dateBought || b.dateAdded).getTime() - new Date(a.dateBought || a.dateAdded).getTime()
+    );
+    
+    const groups: { monthLabel: string; products: Product[] }[] = [];
+    
+    sorted.forEach((p) => {
+      const d = new Date(p.dateBought || p.dateAdded);
+      const monthLabel = d.toLocaleDateString('de-DE', { month: 'long', year: 'numeric' });
+      
+      let lastGroup = groups[groups.length - 1];
+      if (!lastGroup || lastGroup.monthLabel !== monthLabel) {
+        lastGroup = { monthLabel, products: [] };
+        groups.push(lastGroup);
+      }
+      lastGroup.products.push(p);
+    });
+    
+    return groups;
+  }, [boughtProducts]);
+
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 min-h-[calc(100vh-100px)]">
       {/* Header */}
@@ -229,18 +287,53 @@ export const BudgetView: React.FC = () => {
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <div className="bg-[var(--theme-glass-bg)] border border-[var(--theme-glass-border)] backdrop-blur-xl p-6 rounded-2xl shadow-sm">
-          <h3 className="text-[10px] font-bold text-text-secondary uppercase tracking-wider mb-2">Ausgaben ({timeRange === '7d' ? '7 Tage' : timeRange === 'month' ? 'Dieser Monat' : 'Gesamt'})</h3>
-          <p className="text-2xl font-bold">{chartData.reduce((sum, d) => sum + d.value, 0).toLocaleString('de-DE', {minimumFractionDigits: 2})} €</p>
+          <h3 className="text-[10px] font-bold text-text-secondary uppercase tracking-wider mb-2">Ausgaben ({timeRangeLabel})</h3>
+          <p className="text-2xl font-bold">{timeRangeSpend.toLocaleString('de-DE', {minimumFractionDigits: 2, maximumFractionDigits: 2})} €</p>
         </div>
         <div className="bg-[var(--theme-glass-bg)] border border-[var(--theme-glass-border)] backdrop-blur-xl p-6 rounded-2xl shadow-sm">
-          <h3 className="text-[10px] font-bold text-text-secondary uppercase tracking-wider mb-2">Käufe (Gesamt)</h3>
-          <p className="text-2xl font-bold">{boughtProducts.length}</p>
+          <h3 className="text-[10px] font-bold text-text-secondary uppercase tracking-wider mb-2">Ø Preis ({timeRangeLabel})</h3>
+          <p className="text-2xl font-bold">{averagePrice.toLocaleString('de-DE', {minimumFractionDigits: 2, maximumFractionDigits: 2})} €</p>
         </div>
         <div className="bg-[var(--theme-glass-bg)] border border-[var(--theme-glass-border)] backdrop-blur-xl p-6 rounded-2xl shadow-sm">
-          <h3 className="text-[10px] font-bold text-text-secondary uppercase tracking-wider mb-2">Monatsbudget</h3>
-          <p className="text-2xl font-bold">{settings.monthlyBudget.toLocaleString('de-DE')} €</p>
+          <h3 className="text-[10px] font-bold text-text-secondary uppercase tracking-wider mb-2">Käufe ({timeRangeLabel})</h3>
+          <p className="text-2xl font-bold">{timeRangeProductsCount}</p>
+        </div>
+        <div className="bg-[var(--theme-glass-bg)] border border-[var(--theme-glass-border)] backdrop-blur-xl p-6 rounded-2xl shadow-sm group transition-all duration-300 hover:shadow-md">
+          <div className="flex justify-between items-center mb-2">
+            <h3 className="text-[10px] font-bold text-text-secondary uppercase tracking-wider">Monatsbudget</h3>
+            {!isEditingBudget && (
+              <button 
+                onClick={() => { setIsEditingBudget(true); setTempBudget(String(settings.monthlyBudget)); }} 
+                className="opacity-0 group-hover:opacity-100 transition-opacity text-text-secondary hover:text-text-primary p-1 bg-black/5 dark:bg-white/5 rounded"
+                title="Budget bearbeiten"
+              >
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+              </button>
+            )}
+          </div>
+          {isEditingBudget ? (
+            <div className="flex items-center gap-1.5 animate-in fade-in">
+              <input 
+                type="number" 
+                value={tempBudget}
+                onChange={(e) => setTempBudget(e.target.value)}
+                onBlur={handleBudgetSubmit}
+                onKeyDown={(e) => { if (e.key === 'Enter') handleBudgetSubmit(); }}
+                className="w-24 bg-black/5 dark:bg-white/5 border border-[var(--theme-glass-border)] px-2 py-1 rounded-lg text-xl font-bold outline-none text-text-primary focus:border-text-primary transition-colors"
+                autoFocus
+              />
+              <span className="text-xl font-bold">€</span>
+            </div>
+          ) : (
+            <p 
+              className="text-2xl font-bold cursor-pointer transition-colors hover:text-emerald-500" 
+              onClick={() => { setIsEditingBudget(true); setTempBudget(String(settings.monthlyBudget)); }}
+            >
+              {settings.monthlyBudget.toLocaleString('de-DE')} €
+            </p>
+          )}
         </div>
       </div>
 
@@ -304,58 +397,45 @@ export const BudgetView: React.FC = () => {
 
               {/* Data Points */}
               {chartData.map((d, i) => (
-                <g key={i} className="group cursor-pointer">
+                <g 
+                  key={i} 
+                  className="group cursor-pointer"
+                  onMouseEnter={() => setHoveredDay(d)}
+                  onMouseLeave={() => setHoveredDay(null)}
+                >
                   {/* Vertical Guide Line */}
                   <line 
                     x1={getX(i)} y1={PAD_TOP} x2={getX(i)} y2={getY(0)} 
                     stroke="var(--theme-glass-border)" 
                     strokeWidth="1" 
                     strokeDasharray="4 4"
-                    className="opacity-20 group-hover:opacity-100"
+                    className="opacity-20 group-hover:opacity-100 transition-opacity duration-300"
+                  />
+
+                  {/* Glow Effect on Hover */}
+                  <circle
+                    cx={getX(i)}
+                    cy={getY(d.value)}
+                    r={16}
+                    className="fill-white opacity-0 group-hover:opacity-10 transition-opacity duration-300 blur-md pointer-events-none"
+                  />
+                  <circle
+                    cx={getX(i)}
+                    cy={getY(d.value)}
+                    r={8}
+                    className="fill-white opacity-0 group-hover:opacity-30 transition-opacity duration-300 blur-[3px] pointer-events-none"
                   />
 
                   {/* Organic Variable Stroke completely replaces external nodes. */}
                   {/* Invisible larger hover area for tooltips */}
                   <rect
-                    x={getX(i) - 15}
-                    y={getY(d.value) - 15}
-                    width="30"
-                    height="30"
+                    x={getX(i) - 20}
+                    y={getY(d.value) - 20}
+                    width="40"
+                    height="40"
                     fill="transparent"
                   />
-                  {/* Tooltip on Hover */}
-                  <foreignObject
-                    x={getX(i) - 90}
-                    y={getY(d.value) - (d.products.length > 0 ? (d.products.length * 25 + 60) : 50)}
-                    width="180"
-                    height={d.products.length > 0 ? (d.products.length * 25 + 60) : 50}
-                    className="pointer-events-none opacity-0 group-hover:opacity-100 z-50 overflow-visible"
-                  >
-                    <div className="bg-text-primary/95 text-bg-primary backdrop-blur-md p-3 rounded-xl shadow-2xl flex flex-col gap-1 w-full">
-                      <div className="flex justify-between items-center border-b border-bg-primary/20 pb-1 mb-1">
-                        <span className="text-[10px] font-bold opacity-70">{d.label}</span>
-                        <span className="text-[10px] font-bold">{d.value.toLocaleString('de-DE')} €</span>
-                      </div>
-                      <div className="flex flex-col gap-1 max-h-[150px] overflow-y-auto pr-1">
-                        {d.products.length > 0 ? (
-                          d.products.map((p, pIdx) => (
-                            <div key={pIdx} className="flex justify-between items-center text-[9px]">
-                              <span className="truncate flex-1 mr-2">{p.name}</span>
-                              <span className="font-bold">{(p.finalPrice || 0).toLocaleString('de-DE')} €</span>
-                            </div>
-                          ))
-                        ) : (
-                          <span className="text-[9px] opacity-60 italic">Keine Käufe</span>
-                        )}
-                      </div>
-                      {d.products.length > 1 && (
-                        <div className="border-t border-bg-primary/20 pt-1 mt-1 flex justify-between text-[10px] font-bold">
-                          <span>Gesamt</span>
-                          <span>{d.value.toLocaleString('de-DE')} €</span>
-                        </div>
-                      )}
-                    </div>
-                  </foreignObject>
+
                 </g>
               ))}
             </svg>
@@ -379,29 +459,216 @@ export const BudgetView: React.FC = () => {
           </div>
         </div>
         
-        {/* Budget Tracker */}
-        <div className="bg-[var(--theme-glass-bg)] border border-[var(--theme-glass-border)] backdrop-blur-xl p-6 rounded-3xl shadow-sm flex flex-col h-fit">
-          <h3 className="font-bold mb-6">Budget Tracker</h3>
-          <p className="text-3xl font-bold mb-1">{spentThisMonth.toLocaleString('de-DE', {minimumFractionDigits: 2, maximumFractionDigits: 2})} €</p>
-          <p className="text-xs text-text-secondary mb-6">von {settings.monthlyBudget.toLocaleString('de-DE', {minimumFractionDigits: 2, maximumFractionDigits: 2})} € Budget</p>
+        {/* Right Column */}
+        {/* Right Column */}
+        <div className="flex flex-col gap-6 h-full">
           
-          <div className="w-full h-3 bg-white/30 dark:bg-black/30 rounded-full mb-4 overflow-hidden shadow-inner">
-            <div 
-              className="h-full bg-emerald-400 rounded-full" 
-              style={{ width: `${Math.min((spentThisMonth / settings.monthlyBudget) * 100, 100)}%` }}
-            ></div>
+          <div className="flex gap-4">
+            {/* Budget Tracker (Half Width) */}
+            <div className="bg-[var(--theme-glass-bg)] border border-[var(--theme-glass-border)] backdrop-blur-xl p-5 rounded-3xl shadow-sm flex flex-col flex-1 relative overflow-hidden group hover:shadow-lg transition-shadow duration-300">
+              <div className="absolute -top-12 -right-12 w-32 h-32 bg-emerald-500/10 rounded-full blur-2xl group-hover:bg-emerald-500/20 transition-all duration-700"></div>
+              
+              <div className="relative z-10 flex flex-col h-full">
+                <div className="flex justify-between items-start mb-6">
+                  <h3 className="font-bold text-sm">Budget Tracker</h3>
+                  <span className="text-xs font-bold bg-emerald-500/10 text-emerald-500 px-2.5 py-1 rounded-full border border-emerald-500/20">
+                    {settings.monthlyBudget > 0 ? Math.round((spentThisMonth / settings.monthlyBudget) * 100) : 0}% genutzt
+                  </span>
+                </div>
+                
+                <div className="flex flex-col flex-1 justify-center">
+                  <div className="flex flex-col gap-1 mb-6">
+                     <span className="text-xs text-text-secondary font-medium uppercase tracking-wider">Ausgegeben</span>
+                     <div className="flex items-baseline gap-1.5">
+                       <p className="text-4xl font-bold">{spentThisMonth.toLocaleString('de-DE', {minimumFractionDigits: 0, maximumFractionDigits: 0})}</p>
+                       <span className="text-xl font-bold text-text-secondary">€</span>
+                     </div>
+                     <span className="text-sm font-bold text-emerald-500 mt-1 bg-emerald-500/10 w-max px-2 py-1 rounded-md">
+                       Noch {(settings.monthlyBudget - spentThisMonth).toLocaleString('de-DE', {minimumFractionDigits: 0, maximumFractionDigits: 0})} € übrig
+                     </span>
+                  </div>
+                  
+                  {/* Enhanced Progress Bar */}
+                  <div className="w-full h-3 bg-black/10 dark:bg-white/10 rounded-full overflow-hidden shadow-inner relative mb-2">
+                    <div 
+                      className="absolute top-0 left-0 h-full bg-gradient-to-r from-emerald-400 to-emerald-500 rounded-full transition-all duration-1000 ease-out overflow-hidden" 
+                      style={{ width: `${Math.min((spentThisMonth / (settings.monthlyBudget || 1)) * 100, 100)}%` }}
+                    >
+                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full animate-[shimmer_2s_infinite]"></div>
+                    </div>
+                  </div>
+                  
+                  <div className="flex justify-between text-xs text-text-secondary font-bold mt-1">
+                    <span>0 €</span>
+                    <span>Gesamt: {settings.monthlyBudget.toLocaleString('de-DE')} €</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Top Kategorien (Half Width) */}
+            <div className="bg-[var(--theme-glass-bg)] border border-[var(--theme-glass-border)] backdrop-blur-xl p-5 rounded-3xl shadow-sm flex flex-col flex-1 relative">
+              <h3 className="font-bold mb-6 text-sm">Top Kategorien</h3>
+              <div className="flex flex-col gap-5 flex-1 justify-center">
+                {topCategories.length > 0 ? (
+                  topCategories.map((cat, idx) => (
+                    <div key={idx} className="flex flex-col gap-2">
+                      <div className="flex justify-between items-center text-sm">
+                        <span className="truncate pr-2 font-semibold text-text-primary">{cat.name}</span>
+                        <span className="font-bold shrink-0">{cat.amount.toLocaleString('de-DE', {maximumFractionDigits: 0})} €</span>
+                      </div>
+                      <div className="w-full h-2 bg-black/5 dark:bg-white/10 rounded-full overflow-hidden flex-shrink-0">
+                        <div 
+                          className="h-full bg-[var(--text-dark)] rounded-full opacity-60 transition-all duration-1000 ease-out"
+                          style={{ width: `${Math.min((cat.amount / maxCategorySpend) * 100, 100)}%` }}
+                        ></div>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-sm text-text-secondary italic">Keine Ausgaben</p>
+                )}
+              </div>
+            </div>
           </div>
-          
-          <p className="text-xs font-medium text-emerald-500">
-            Noch {(settings.monthlyBudget - spentThisMonth).toLocaleString('de-DE', {minimumFractionDigits: 2, maximumFractionDigits: 2})} € verfügbar
-          </p>
+
+          {/* Tag Details (Interactive hover box - Supermarket Receipt Style) */}
+          <div className="bg-[var(--theme-glass-bg)] border border-[var(--theme-glass-border)] backdrop-blur-xl p-6 rounded-3xl shadow-sm flex flex-col flex-1 relative overflow-hidden group">
+            
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="font-bold text-sm tracking-wide flex items-center gap-2">
+                <svg className="w-4 h-4 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                TAGESBELEG
+              </h3>
+              {hoveredDay && (
+                <span className="text-[10px] font-mono font-medium opacity-50 bg-black/5 dark:bg-white/5 px-2 py-1 rounded">
+                  {hoveredDay.label}
+                </span>
+              )}
+            </div>
+
+            {hoveredDay ? (
+              <div className="flex flex-col h-full flex-1 min-h-[150px] animate-in fade-in">
+                
+                {/* List of Products */}
+                <div className="flex flex-col gap-4 overflow-y-auto flex-1 pr-2 mb-6 scrollbar-thin">
+                  {hoveredDay.products.length > 0 ? (
+                    hoveredDay.products.map((p, idx) => (
+                      <div key={idx} className="flex items-center gap-4 group/item">
+                        {p.imgs && p.imgs.length > 0 ? (
+                          <img src={p.imgs[p.mainImgIdx || 0]} alt={p.name} className="w-12 h-12 rounded-xl object-cover bg-black/10 dark:bg-white/10 shrink-0 shadow-sm" />
+                        ) : (
+                          <div className="w-12 h-12 rounded-xl bg-[var(--theme-glass-border)] flex items-center justify-center text-lg font-bold text-text-secondary shrink-0 shadow-sm">
+                            {p.name.charAt(0).toUpperCase()}
+                          </div>
+                        )}
+                        <div className="flex flex-col flex-1 min-w-0">
+                          <span className="text-sm font-semibold truncate text-text-primary group-hover/item:text-emerald-500 transition-colors">{p.name}</span>
+                          <span className="text-[10px] text-text-secondary truncate">{p.mainCat || 'Ohne Kategorie'}</span>
+                        </div>
+                        <span className="text-sm font-bold font-mono opacity-90 shrink-0">{(p.finalPrice || 0).toLocaleString('de-DE', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="flex-1 flex flex-col items-center justify-center opacity-60">
+                      <p className="text-sm italic py-4">Keine Einkäufe getätigt</p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Supermarket Receipt Total Line */}
+                {hoveredDay.products.length > 0 && (
+                  <div className="mt-auto relative pt-5 pb-2">
+                    {/* Dashed Line SVG for perfect "Receipt" look */}
+                    <div className="absolute top-0 left-0 right-0 h-[2px] w-full" style={{ backgroundImage: 'linear-gradient(to right, var(--text-dark) 40%, transparent 40%)', backgroundSize: '8px 1px', backgroundRepeat: 'repeat-x', opacity: 0.2 }}></div>
+                    
+                    {/* The receipt cut-out circles at the edges to simulate tape roll */}
+                    <div className="absolute -left-8 -top-[7px] w-4 h-4 bg-[var(--bg-color)] rounded-full shadow-inner"></div>
+                    <div className="absolute -right-8 -top-[7px] w-4 h-4 bg-[var(--bg-color)] rounded-full shadow-inner"></div>
+                    
+                    <div className="flex justify-between items-end">
+                      <div className="flex flex-col">
+                        <span className="text-[10px] text-text-secondary uppercase tracking-widest font-bold mb-1">Endsumme</span>
+                        <span className="text-[10px] text-text-secondary">{hoveredDay.products.length} {hoveredDay.products.length === 1 ? 'Position' : 'Positionen'}</span>
+                      </div>
+                      <div className="flex items-baseline gap-1">
+                        <span className="text-sm font-bold text-text-secondary">€</span>
+                        <span className="text-3xl font-bold font-mono tracking-tight text-text-primary group-hover:text-emerald-500 transition-colors duration-500">
+                          {hoveredDay.value.toLocaleString('de-DE', {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center flex-1 opacity-40 animate-in fade-in min-h-[150px]">
+                <div className="w-16 h-16 mb-4 rounded-2xl bg-black/5 dark:bg-white/5 flex items-center justify-center">
+                  <svg className="w-8 h-8 text-text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                </div>
+                <p className="text-xs italic font-medium max-w-[180px] text-center">
+                  Berühre einen Tag im Diagramm, um den Beleg zu drucken.
+                </p>
+              </div>
+            )}
+          </div>
         </div>
       </div>
       
       {/* Transactions */}
-      <div>
-        <h3 className="font-bold mb-4 px-2">Transaktionen</h3>
-        <p className="px-2 text-sm text-text-secondary">Keine kürzlichen Transaktionen vorhanden.</p>
+      <div className="mt-4">
+        <h3 className="font-bold mb-6 px-2 text-xl tracking-wide">Transaktionen</h3>
+        <div className="flex flex-col px-2 mb-8">
+          {groupedTransactions.length > 0 ? (
+            groupedTransactions.map((group, gIdx) => (
+              <div key={gIdx} className="mb-8 last:mb-0">
+                {/* Month Separator */}
+                <div className="flex items-center gap-4 mb-4 opacity-80">
+                  <h4 className="font-bold text-sm text-text-secondary uppercase tracking-widest">{group.monthLabel}</h4>
+                  <div className="flex-1 h-[1px] bg-[var(--theme-glass-border)]"></div>
+                </div>
+                
+                <div className="flex flex-col gap-4">
+                  {group.products.map(p => {
+                    const dateObj = new Date(p.dateBought || p.dateAdded);
+                    const dateStr = dateObj.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' });
+                    
+                    return (
+                      <div 
+                        key={p.id} 
+                        onClick={() => {
+                          setView('products');
+                          setStatusFilter('bought');
+                          setSearchQuery(p.name);
+                        }}
+                        className="bg-[var(--theme-glass-bg)] border border-[var(--theme-glass-border)] backdrop-blur-xl p-4 md:p-5 rounded-3xl shadow-sm flex items-center gap-5 cursor-pointer hover:shadow-md hover:border-emerald-500/50 transition-all duration-300 group"
+                      >
+                        {p.imgs && p.imgs.length > 0 ? (
+                          <img src={p.imgs[p.mainImgIdx || 0]} alt={p.name} className="w-16 h-16 md:w-20 md:h-20 rounded-2xl object-cover shadow-sm bg-black/10 dark:bg-white/10 shrink-0" />
+                        ) : (
+                          <div className="w-16 h-16 md:w-20 md:h-20 rounded-2xl bg-[var(--theme-glass-border)] flex items-center justify-center text-2xl font-bold text-text-secondary shrink-0 shadow-sm">
+                            {p.name.charAt(0).toUpperCase()}
+                          </div>
+                        )}
+                        <div className="flex flex-col flex-1 min-w-0 justify-center">
+                          <span className="text-lg md:text-xl font-bold truncate text-text-primary group-hover:text-emerald-500 transition-colors">{p.name}</span>
+                          <span className="text-xs md:text-sm text-text-secondary mt-1 font-medium">{dateStr} {p.mainCat ? `• ${p.mainCat}` : ''}</span>
+                        </div>
+                        <span className="text-xl md:text-2xl font-bold font-mono tracking-tight shrink-0 whitespace-nowrap pr-2 md:pr-4 text-text-primary">{(p.finalPrice || 0).toLocaleString('de-DE', {minimumFractionDigits: 2, maximumFractionDigits: 2})} €</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            ))
+          ) : (
+            <p className="text-sm text-text-secondary italic">Keine kürzlichen Transaktionen vorhanden.</p>
+          )}
+        </div>
       </div>
     </div>
   );

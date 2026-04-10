@@ -16,10 +16,16 @@
   --color-heart: var(--heart-color);
 
   --animate-wiggle: wiggle 0.3s ease-in-out infinite;
+  --animate-shimmer: shimmer 2s infinite;
   
   @keyframes wiggle {
     0%, 100% { transform: rotate(-3deg); }
     50% { transform: rotate(3deg); }
+  }
+
+  @keyframes shimmer {
+    0% { transform: translateX(-150%) skewX(-20deg); }
+    100% { transform: translateX(200%) skewX(-20deg); }
   }
 }
 

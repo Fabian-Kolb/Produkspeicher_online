@@ -8,7 +8,7 @@ export const DashboardView: React.FC = () => {
   const navigate = useNavigate();
   const { products, settings, userName, isDemoMode } = useAppStore();
   
-  const displayName = isDemoMode ? 'Gast' : userName || 'User';
+  const displayName = userName || (isDemoMode ? 'Gast' : 'User');
 
   const welcomeMessage = useMemo(() => {
     const messages = [

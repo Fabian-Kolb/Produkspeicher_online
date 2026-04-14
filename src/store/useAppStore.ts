@@ -122,7 +122,8 @@ export const useAppStore = create<AppState>()((set, get) => ({
   },
 
   fetchAllData: async (userId) => {
-    set({ userId });
+    set({ userId, isDemoMode: false });
+    localStorage.setItem('ventory_demo_mode', 'false');
     
     // Fetch Products
     const { data: pData } = await supabase.from('products').select('*').eq('user_id', userId);

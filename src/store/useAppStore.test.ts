@@ -41,22 +41,26 @@ describe('useAppStore', () => {
     const store = useAppStore.getState();
     
     await store.addProduct({
-      n: 'Test MacBook',
-      b: 'Apple',
-      p: 1500,
-      status: 'wishlist',
+      name: 'Test MacBook',
+      shop: 'Apple',
+      price: 1500,
+      status: 'active',
       discount: 0,
-      link: '',
-      note: '',
+      finalPrice: 1500,
+      url: '',
+      details: '',
       rating: 0,
-      category: 'Hardware',
-      subCategory: 'Laptops'
+      mainCat: 'Hardware',
+      subCats: ['Laptops'],
+      imgs: [],
+      isFavorite: false,
+      dateAdded: new Date().toISOString()
     });
 
     const updatedStore = useAppStore.getState();
     // Danach sollte genau ein Produkt existieren
     expect(updatedStore.products.length).toBe(1);
-    expect(updatedStore.products[0].n).toBe('Test MacBook');
+    expect(updatedStore.products[0].name).toBe('Test MacBook');
     // Die ID sollte von crypto.randomUUID() generiert worden sein
     expect(updatedStore.products[0].id).toBeDefined();
   });

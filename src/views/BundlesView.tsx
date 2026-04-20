@@ -216,16 +216,16 @@ export const BundlesView: React.FC = () => {
                     className="glass-panel rounded-2xl md:rounded-3xl p-4 md:p-8 relative overflow-hidden"
                   >
                     {/* Top row: Name + Controls */}
-                    <div className="flex justify-between items-start mb-4 md:mb-8 gap-3">
-                      <div className="flex-1 min-w-0">
+                    <div className="flex flex-col md:flex-row justify-between items-start mb-4 md:mb-8 gap-4 md:gap-3">
+                      <div className="w-full md:flex-1 min-w-0">
                         <MarqueeOverflow>
-                          <h2 className="text-lg md:text-2xl font-playfair font-bold text-text-primary mr-8">{bundle.name}</h2>
+                          <h2 className="text-lg md:text-2xl font-playfair font-bold text-text-primary md:mr-8 whitespace-nowrap">{bundle.name}</h2>
                         </MarqueeOverflow>
-                        <p className="text-xs text-text-secondary mt-0.5">{totalArticles} Artikel</p>
+                        <p className="text-xs text-text-secondary mt-1 md:mt-0.5">{totalArticles} Artikel</p>
                       </div>
 
                       {/* Right side: Price + Actions */}
-                      <div className="bg-white/10 border border-white/20 backdrop-blur-md rounded-2xl md:rounded-3xl p-3 md:p-4 flex flex-col items-end gap-2 md:gap-3 shrink-0">
+                      <div className="bg-white/10 border border-white/20 backdrop-blur-md rounded-2xl md:rounded-3xl p-3 md:p-4 flex flex-col items-end gap-2 md:gap-3 shrink-0 self-end md:self-start">
                         <span className="text-lg md:text-2xl font-bold text-text-primary">{totalPrice.toFixed(2)} €</span>
                         <div className="flex items-center gap-1.5 md:gap-2">
                           <button

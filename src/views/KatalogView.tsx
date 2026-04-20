@@ -14,6 +14,7 @@ export const KatalogView: React.FC = () => {
   } = useUIStore();
 
   const filteredProducts = useMemo(() => {
+    // ... (logic remains same)
     let result = products;
 
     // 1. Search
@@ -30,7 +31,7 @@ export const KatalogView: React.FC = () => {
       result = result.filter((p: Product) => p.status === 'bought');
     } else if (statusFilter === 'reduced') {
       result = result.filter((p: Product) => p.discount > 0);
-    } // 'active' might mean everything or not bought? Let's assume all for now.
+    } 
 
     // 3. Category Filter
     if (mainCat !== 'Alle') {
@@ -47,7 +48,6 @@ export const KatalogView: React.FC = () => {
       if (sortMode === 'priceDesc') return b.finalPrice - a.finalPrice;
       if (sortMode === 'newest') return new Date(b.dateAdded).getTime() - new Date(a.dateAdded).getTime();
       if (sortMode === 'oldest') return new Date(a.dateAdded).getTime() - new Date(b.dateAdded).getTime();
-      // default: favorites first, then by date added
       if (a.isFavorite && !b.isFavorite) return -1;
       if (!a.isFavorite && b.isFavorite) return 1;
       return new Date(b.dateAdded).getTime() - new Date(a.dateAdded).getTime();

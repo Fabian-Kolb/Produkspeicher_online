@@ -31,6 +31,7 @@ interface AppState {
   deleteProduct: (id: string) => Promise<void>;
 
   addCategory: (cat: string) => Promise<void>;
+  renameCategory: (oldName: string, newName: string) => Promise<void>;
   deleteCategory: (cat: string) => Promise<void>;
   addSubCategory: (mainCat: string, subCat: string) => Promise<void>;
   deleteSubCategory: (mainCat: string, subCat: string) => Promise<void>;
@@ -213,14 +214,51 @@ export const useAppStore = create<AppState>()((set, get) => ({
     await syncAppState(get().userId!, get());
   },
 
+  renameCategory: async (oldName, newName) => {
+    const { userId, products, _dbProducts, subCats, categories } = get();
+    if (!userId) return;
+
+    const newCategories = categories.map(c => c === oldName ? newName : c);
+    const newSubCats = { ...subCats };
+    if (newSubCats[oldName]) {
+      newSubCats[newName] = newSubCats[oldName];
+      delete newSubCats[oldName];
+    }
+
+    const updatedProducts = products.map(p => p.mainCat === oldName ? { ...p, mainCat: newName } : p);
+    const updatedDbProducts = _dbProducts.map(p => p.mainCat === oldName ? { ...p, mainCat: newName } : p);
+
+    set({
+      categories: newCategories,
+      subCats: newSubCats,
+      products: updatedProducts,
+      _dbProducts: updatedDbProducts
+    });
+
+    await syncAppState(userId, { ...get(), categories: newCategories, subCats: newSubCats });
+    await supabase.from('products').update({ mainCat: newName }).eq('user_id', userId).eq('mainCat', oldName);
+  },
+
   deleteCategory: async (cat) => {
+    const { userId, products, _dbProducts } = get();
+    if (!userId) return;
+
+    const updatedProducts = products.map(p => p.mainCat === cat ? { ...p, mainCat: 'Alle' } : p);
+    const updatedDbProducts = _dbProducts.map(p => p.mainCat === cat ? { ...p, mainCat: 'Alle' } : p);
+
     set((state) => {
       const newCats = state.categories.filter(c => c !== cat);
       const newSubCats = { ...state.subCats };
       delete newSubCats[cat];
-      return { categories: newCats, subCats: newSubCats };
+      return { 
+        categories: newCats, 
+        subCats: newSubCats,
+        products: updatedProducts,
+        _dbProducts: updatedDbProducts
+      };
     });
-    await syncAppState(get().userId!, get());
+    await syncAppState(userId, get());
+    await supabase.from('products').update({ mainCat: 'Alle' }).eq('user_id', userId).eq('mainCat', cat);
   },
 
   addSubCategory: async (mainCat, subCat) => {

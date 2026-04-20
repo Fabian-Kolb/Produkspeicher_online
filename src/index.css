@@ -56,7 +56,14 @@
 
 @layer utilities {
   .glass-panel {
-    @apply bg-[var(--theme-glass-bg)] border border-[var(--theme-glass-border)] backdrop-blur-xl rounded-3xl shadow-[0_8px_32px_rgba(0,0,0,0.05)];
+    @apply border border-[var(--theme-glass-border)] rounded-3xl shadow-[0_8px_32px_rgba(0,0,0,0.05)];
+    background-color: var(--card-bg);
+    transition: background-color 0.3s ease, backdrop-filter 0.3s ease;
+  }
+
+  :root.glass-enabled .glass-panel,
+  body.glass-enabled .glass-panel {
+    @apply bg-[var(--theme-glass-bg)] backdrop-blur-xl;
   }
   .focus-ring {
     @apply focus:outline-none focus:ring-2 focus:ring-accent-dark focus:border-transparent;

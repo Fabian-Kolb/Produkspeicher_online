@@ -1,14 +1,17 @@
-import { Settings } from 'lucide-react';
-import { useUIStore } from '../../store/useUIStore';
+ import { Settings } from 'lucide-react';
+ import { useUIStore } from '../../store/useUIStore';
+ import { CategoryMenu } from '../features/CategoryMenu';
+ import React, { useRef } from 'react';
 
-export const SubNavigation: React.FC<{
-  categories: string[];
-}> = ({ categories }) => {
-  const { mainCat, setMainCat, openProductModal, toggleThemeManager } = useUIStore();
+ export const SubNavigation: React.FC<{
+   categories: string[];
+ }> = ({ categories }) => {
+   const { mainCat, setMainCat, openProductModal, toggleCategoryMenu, isCategoryMenuOpen } = useUIStore();
+   const settingsBtnRef = useRef<HTMLButtonElement>(null);
 
   return (
-    <div className="w-full mt-2 mb-12 flex justify-center">
-      <div className="bg-[var(--theme-glass-bg)] border border-[var(--theme-glass-border)] backdrop-blur-md px-1.5 py-1.5 flex items-center gap-2 rounded-full overflow-x-auto no-scrollbar shadow-sm">
+    <div className="w-full mt-2 mb-6 md:mb-12 flex justify-center -mx-4 px-4 md:mx-0 md:px-0">
+      <div className="bg-[var(--theme-glass-bg)] border border-[var(--theme-glass-border)] backdrop-blur-md px-1.5 py-1.5 flex items-center gap-1 md:gap-2 rounded-full overflow-x-auto no-scrollbar shadow-sm w-full md:w-auto pb-1">
         <NavPill
           active={false}
           onClick={() => openProductModal()}
@@ -35,16 +38,27 @@ export const SubNavigation: React.FC<{
           </NavPill>
         ))}
 
-        <div className="w-[1px] h-7 bg-border-primary/50 mx-1"></div>
-
-        <button 
-          onClick={toggleThemeManager}
-          className="w-10 h-10 flex items-center justify-center rounded-full text-text-secondary hover:text-text-primary hover:bg-black/5 dark:hover:bg-white/5 transition-colors mr-1"
-        >
-          <Settings size={18} />
-        </button>
-      </div>
-    </div>
+         <div className="w-[1px] h-7 bg-border-primary/50 mx-1"></div>
+ 
+         <div className="relative">
+           <button 
+             ref={settingsBtnRef}
+             onClick={toggleCategoryMenu}
+             className={`w-10 h-10 flex items-center justify-center rounded-full transition-all mr-1 ${
+               isCategoryMenuOpen 
+                 ? 'bg-text-primary text-bg-primary scale-110 shadow-lg' 
+                 : 'text-text-secondary hover:text-text-primary hover:bg-black/5 dark:hover:bg-white/5'
+             }`}
+           >
+             <Settings size={18} />
+           </button>
+ 
+           {isCategoryMenuOpen && (
+             <CategoryMenu anchorRef={settingsBtnRef} />
+           )}
+         </div>
+       </div>
+     </div>
   );
 };
 

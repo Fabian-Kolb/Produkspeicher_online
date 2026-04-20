@@ -2,8 +2,10 @@ import React, { useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 import { TopNav } from './TopNav';
 import { MainMenuSidebar } from './MainMenuSidebar';
+import { BottomNav } from './BottomNav';
 import { ThemeCreatorModal } from '../features/ThemeCreatorModal';
 import { ProductModal } from '../features/ProductModal';
+import { ProductDetailModal } from '../features/ProductDetailModal';
 import { ProfileSettingsModal } from '../auth/ProfileSettingsModal';
 import { useAppStore } from '../../store/useAppStore';
 import { applyGlobalTheme, applyBaseMode } from '../../utils/themeHelpers';
@@ -46,12 +48,14 @@ export const AppContainer: React.FC = () => {
 
       <TopNav />
       <MainMenuSidebar />
+      <BottomNav />
       <ThemeCreatorModal />
       <ProductModal />
+      <ProductDetailModal />
       <ProfileSettingsModal />
       
       {/* Main Content Area */}
-      <main className="pt-24 pb-16 px-4 md:px-8 w-full min-h-screen transition-all duration-300">
+      <main className="pt-16 md:pt-24 pb-24 md:pb-8 px-4 md:px-8 w-full min-h-screen transition-all duration-300">
         <Outlet />
       </main>
 

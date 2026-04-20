@@ -1,10 +1,13 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { supabase } from '../../lib/supabase';
 import { useUIStore } from '../../store/useUIStore';
+import { useAppStore } from '../../store/useAppStore';
+import { cn } from '../../utils/cn';
 import { X, ImagePlus, User, Loader2, Save, Trash2 } from 'lucide-react';
 
 export const ProfileSettingsModal: React.FC = () => {
   const { isProfileModalOpen, toggleProfileModal } = useUIStore();
+  const settings = useAppStore(state => state.settings);
   
   const [name, setName] = useState('');
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
@@ -114,11 +117,17 @@ export const ProfileSettingsModal: React.FC = () => {
   return (
     <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
       <div 
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
+        className={cn(
+          "absolute inset-0 bg-black/60 transition-all",
+          settings.isGlassEnabled && "backdrop-blur-sm"
+        )}
         onClick={toggleProfileModal}
       />
 
-      <div className="relative z-10 w-full max-w-md bg-bg-card border border-border-primary rounded-3xl p-6 md:p-8 shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+      <div className={cn(
+        "relative z-10 w-full max-w-md border border-border-primary rounded-3xl p-6 md:p-8 shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200",
+        settings.isGlassEnabled ? "bg-bg-card/95 backdrop-blur-xl" : "bg-bg-card"
+      )}>
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <h2 className="text-2xl font-bold font-playfair flex items-center gap-2">

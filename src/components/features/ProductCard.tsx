@@ -2,6 +2,7 @@ import React from 'react';
 import { Bookmark, ShoppingBag, Trash2 } from 'lucide-react';
 import type { Product } from '../../types';
 import { useAppStore } from '../../store/useAppStore';
+import { useUIStore } from '../../store/useUIStore';
 
 interface ProductCardProps {
   product: Product;
@@ -9,6 +10,7 @@ interface ProductCardProps {
 
 export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const { updateProduct, deleteProduct } = useAppStore();
+  const { openProductDetailModal } = useUIStore();
 
   const handleToggleFavorite = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -32,7 +34,10 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const mainImg = product.imgs[product.mainImgIdx || 0] || 'https://via.placeholder.com/400';
 
   return (
-    <div className="glass-panel group relative flex flex-col overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl rounded-[1.5rem] p-3 cursor-pointer">
+    <div 
+      onClick={() => openProductDetailModal(product.id)}
+      className="glass-panel group relative flex flex-col overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl rounded-[1.5rem] p-3 cursor-pointer"
+    >
       
       {/* Image Container */}
       <div className="relative w-full aspect-square rounded-2xl overflow-hidden bg-black/20 mb-3">

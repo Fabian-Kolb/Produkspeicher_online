@@ -41,14 +41,16 @@ export const MainMenuSidebar: React.FC = () => {
     <>
       <div 
         className={cn(
-          'fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] transition-opacity duration-300',
+          'fixed inset-0 bg-black/60 z-[100] transition-all duration-300',
+          settings.isGlassEnabled && 'backdrop-blur-sm',
           isMainMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
         )}
         onClick={toggleMainMenu}
       />
       <div 
         className={cn(
-          'fixed top-0 right-0 h-full w-[320px] bg-bg-card border-l border-border-primary z-[101] shadow-2xl transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]',
+          'fixed top-0 right-0 h-full w-[320px] border-l border-border-primary z-[101] shadow-2xl transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]',
+          settings.isGlassEnabled ? 'bg-bg-card/80 backdrop-blur-xl' : 'bg-bg-card',
           isMainMenuOpen ? 'translate-x-0' : 'translate-x-full'
         )}
       >

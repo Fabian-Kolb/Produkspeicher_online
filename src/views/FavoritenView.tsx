@@ -63,14 +63,14 @@ export const FavoritenView: React.FC = () => {
       <div className="flex flex-col gap-6 mb-12">
         {/* Top Row: Search & Main Actions */}
         <div className="flex flex-wrap items-center justify-center gap-3">
-          <div className="relative">
+          <div className="relative w-full sm:w-auto">
             <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-text-secondary" />
             <input
               type="text"
               placeholder="In Favoriten suchen..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-64 bg-[var(--theme-glass-bg)] border border-[var(--theme-glass-border)] backdrop-blur-md rounded-full pl-10 pr-4 py-2 text-sm outline-none focus:border-text-secondary transition-all shadow-sm"
+              className="w-full sm:w-64 bg-[var(--theme-glass-bg)] border border-[var(--theme-glass-border)] backdrop-blur-md rounded-full pl-10 pr-4 py-2 text-sm outline-none focus:border-text-secondary transition-all shadow-sm"
             />
           </div>
 
@@ -101,33 +101,32 @@ export const FavoritenView: React.FC = () => {
         </div>
 
         {/* Bottom Row: Sub Filters */}
-        {mainCat !== 'Alle' && subCats[mainCat] && (
-          <div className="flex flex-wrap gap-2 justify-center">
-            {subCats[mainCat].map(sub => (
-              <button
-                key={sub}
-                onClick={() => {
-                  useUIStore.setState(state => {
-                    const newSubCats = state.selectedSubCats.includes(sub)
-                      ? state.selectedSubCats.filter(s => s !== sub)
-                      : [...state.selectedSubCats, sub];
-                    return { selectedSubCats: newSubCats };
-                  })
-                }}
-                className={`px-5 py-2 rounded-full text-sm font-medium transition-colors border shadow-sm ${selectedSubCats.includes(sub)
-                    ? 'bg-text-primary text-bg-primary border-transparent'
-                    : 'bg-[var(--theme-glass-bg)]/50 backdrop-blur-md text-text-secondary border-border-primary/30 hover:text-text-primary hover:bg-[var(--theme-glass-bg)]'
-                  }`}
-              >
-                {sub}
-              </button>
-            ))}
-          </div>
-        )}
+        <div className="min-h-[44px] flex flex-wrap gap-2 justify-center items-center">
+          {mainCat !== 'Alle' && subCats[mainCat] && subCats[mainCat].map(sub => (
+            <button
+              key={sub}
+              onClick={() => {
+                useUIStore.setState(state => {
+                  const newSubCats = state.selectedSubCats.includes(sub)
+                    ? state.selectedSubCats.filter(s => s !== sub)
+                    : [...state.selectedSubCats, sub];
+                  return { selectedSubCats: newSubCats };
+                })
+              }}
+              className={`px-5 py-2 rounded-full text-sm font-medium transition-colors border shadow-sm ${selectedSubCats.includes(sub)
+                  ? 'bg-text-primary text-bg-primary border-transparent'
+                  : 'bg-[var(--theme-glass-bg)]/50 backdrop-blur-md text-text-secondary border-border-primary/30 hover:text-text-primary hover:bg-[var(--theme-glass-bg)]'
+                }`}
+            >
+              {sub}
+            </button>
+          ))}
+        </div>
+
       </div>
 
       {/* Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-6">
+      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3 sm:gap-6">
         {filteredProducts.map((product: Product) => (
           <ProductCard key={product.id} product={product} />
         ))}

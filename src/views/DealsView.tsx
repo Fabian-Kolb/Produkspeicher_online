@@ -19,7 +19,7 @@ export const DealsView: React.FC = () => {
         <p className="text-text-secondary mt-2">Aktuelle Preissenkungen in deiner Liste.</p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3 sm:gap-6">
         {dealProducts.map((product: Product) => (
           <ProductCard key={product.id} product={product} />
         ))}

@@ -57,8 +57,14 @@ export const ThemeCreatorModal: React.FC = () => {
   };
 
   return (
-    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 sm:p-6 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
-      <div className="w-full max-w-4xl max-h-[90vh] glass-panel bg-bg-card/95 border border-border-primary rounded-3xl overflow-hidden flex flex-col shadow-2xl animate-in zoom-in-95 duration-300">
+    <div className={cn(
+      "fixed inset-0 z-[200] flex items-center justify-center p-4 sm:p-6 bg-black/60 animate-in fade-in duration-300",
+      settings.isGlassEnabled && "backdrop-blur-sm"
+    )}>
+      <div className={cn(
+        "w-full max-w-4xl max-h-[90vh] glass-panel border border-border-primary rounded-3xl overflow-hidden flex flex-col shadow-2xl animate-in zoom-in-95 duration-300",
+        settings.isGlassEnabled ? "bg-bg-card/95" : "bg-bg-card"
+      )}>
         
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-border-primary shrink-0">
@@ -68,9 +74,9 @@ export const ThemeCreatorModal: React.FC = () => {
           </button>
         </div>
 
-        <div className="flex flex-1 overflow-hidden">
+        <div className="flex flex-col md:flex-row flex-1 overflow-hidden">
           {/* Sidebar / Tabs */}
-          <div className="w-1/3 border-r border-border-primary p-6 flex flex-col gap-4 overflow-y-auto hidden-scrollbar">
+          <div className="w-full md:w-1/3 border-b md:border-b-0 md:border-r border-border-primary p-4 md:p-6 flex flex-col gap-4 overflow-y-auto hidden-scrollbar">
             {/* Presets */}
             <div>
               <h3 className="text-sm font-bold text-text-secondary uppercase tracking-wider mb-4">Standard</h3>
@@ -155,7 +161,7 @@ export const ThemeCreatorModal: React.FC = () => {
           </div>
 
           {/* Right Content Area */}
-          <div className="w-2/3 p-8 overflow-y-auto bg-black/5">
+          <div className="w-full md:w-2/3 p-4 md:p-8 overflow-y-auto bg-black/5">
             {activeTab === 'presets' ? (
               <div className="h-full flex flex-col items-center justify-center text-center text-text-secondary">
                 <div className="text-6xl mb-4">🎨</div>

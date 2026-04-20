@@ -7,18 +7,18 @@ import type { Product, Website } from '../types';
 
 /* ── Default/Standard Shops ────────────────────────────────── */
 const DEFAULT_SHOPS: Website[] = [
-  { n: 'Amazon',      u: 'https://www.amazon.de',       c: 'Allgemein',   s: 'A' },
-  { n: 'eBay',        u: 'https://www.ebay.de',         c: 'Allgemein',   s: 'E' },
-  { n: 'Zalando',     u: 'https://www.zalando.de',      c: 'Mode',        s: 'Z' },
-  { n: 'ASOS',        u: 'https://www.asos.com/de',     c: 'Mode',        s: 'A' },
-  { n: 'MediaMarkt',  u: 'https://www.mediamarkt.de',   c: 'Elektronik',  s: 'M' },
-  { n: 'Saturn',      u: 'https://www.saturn.de',       c: 'Elektronik',  s: 'S' },
-  { n: 'IKEA',        u: 'https://www.ikea.com/de',     c: 'Wohnen',      s: 'I' },
-  { n: 'Otto',        u: 'https://www.otto.de',         c: 'Allgemein',   s: 'O' },
-  { n: 'H&M',         u: 'https://www2.hm.com/de_de',   c: 'Mode',        s: 'H' },
-  { n: 'Nike',        u: 'https://www.nike.com/de',     c: 'Sport',       s: 'N' },
-  { n: 'Adidas',      u: 'https://www.adidas.de',       c: 'Sport',       s: 'A' },
-  { n: 'Thomann',     u: 'https://www.thomann.de',      c: 'Musik',       s: 'T' },
+  { n: 'Amazon', u: 'https://www.amazon.de', c: 'Allgemein', s: 'A' },
+  { n: 'eBay', u: 'https://www.ebay.de', c: 'Allgemein', s: 'E' },
+  { n: 'Zalando', u: 'https://www.zalando.de', c: 'Mode', s: 'Z' },
+  { n: 'ASOS', u: 'https://www.asos.com/de', c: 'Mode', s: 'A' },
+  { n: 'MediaMarkt', u: 'https://www.mediamarkt.de', c: 'Elektronik', s: 'M' },
+  { n: 'Saturn', u: 'https://www.saturn.de', c: 'Elektronik', s: 'S' },
+  { n: 'IKEA', u: 'https://www.ikea.com/de', c: 'Wohnen', s: 'I' },
+  { n: 'Otto', u: 'https://www.otto.de', c: 'Allgemein', s: 'O' },
+  { n: 'H&M', u: 'https://www2.hm.com/de_de', c: 'Mode', s: 'H' },
+  { n: 'Nike', u: 'https://www.nike.com/de', c: 'Sport', s: 'N' },
+  { n: 'Adidas', u: 'https://www.adidas.de', c: 'Sport', s: 'A' },
+  { n: 'Thomann', u: 'https://www.thomann.de', c: 'Musik', s: 'T' },
 ];
 
 /* ── Accent colors for shop avatars ────────────────────────── */
@@ -111,9 +111,8 @@ const AddShopModal: React.FC<AddShopModalProps> = ({ open, onClose, onAdd, categ
 
   return (
     <div
-      className={`fixed inset-0 z-50 flex items-center justify-center p-4 transition-all duration-300 ${
-        closing ? 'opacity-0' : 'opacity-100'
-      }`}
+      className={`fixed inset-0 z-50 flex items-center justify-center p-4 transition-all duration-300 ${closing ? 'opacity-0' : 'opacity-100'
+        }`}
       onClick={handleClose}
     >
       {/* Backdrop */}
@@ -122,11 +121,10 @@ const AddShopModal: React.FC<AddShopModalProps> = ({ open, onClose, onAdd, categ
       {/* Modal Card */}
       <div
         onClick={(e) => e.stopPropagation()}
-        className={`relative w-full max-w-md glass-panel p-6 transition-all duration-300 ${
-          closing
-            ? 'scale-95 opacity-0 translate-y-4'
-            : 'scale-100 opacity-100 translate-y-0 animate-in fade-in zoom-in-95 slide-in-from-bottom-4 duration-300'
-        }`}
+        className={`relative w-full max-w-md glass-panel p-6 transition-all duration-300 ${closing
+          ? 'scale-95 opacity-0 translate-y-4'
+          : 'scale-100 opacity-100 translate-y-0 animate-in fade-in zoom-in-95 slide-in-from-bottom-4 duration-300'
+          }`}
       >
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
@@ -226,7 +224,7 @@ const AddShopModal: React.FC<AddShopModalProps> = ({ open, onClose, onAdd, categ
 export const DashboardView: React.FC = () => {
   const navigate = useNavigate();
   const { products, settings, userName, isDemoMode, websites, addWebsite } = useAppStore();
-  
+
   const displayName = userName || (isDemoMode ? 'Gast' : 'User');
 
   /* ── Welcome ───────────────────────────────────────────── */
@@ -318,12 +316,12 @@ export const DashboardView: React.FC = () => {
     <div className="flex flex-col gap-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
       {/* ── Welcome Hero ─────────────────────────────────── */}
       <div className="flex flex-col items-center justify-center text-center mt-4">
-        <h1 className="text-3xl md:text-4xl font-playfair font-bold mb-2">{welcomeMessage}</h1>
-        <p className="text-text-secondary">
+        <h1 className="text-2xl md:text-3xl lg:text-4xl font-playfair font-bold mb-2">{welcomeMessage}</h1>
+        <p className="text-text-secondary text-sm md:text-base">
           Hier ist dein Shopping-Überblick für den{' '}
-          <input 
-            type="date" 
-            defaultValue={todayStr} 
+          <input
+            type="date"
+            defaultValue={todayStr}
             className="bg-transparent border-b border-text-secondary text-text-primary outline-none focus:border-text-primary transition-colors cursor-pointer"
           />
         </p>
@@ -332,7 +330,7 @@ export const DashboardView: React.FC = () => {
       {/* ── KPI Widgets ──────────────────────────────────── */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Budget Widget */}
-        <div 
+        <div
           onClick={() => navigate('/budget')}
           className="glass-panel p-6 cursor-pointer hover:-translate-y-1 transition-transform duration-300"
         >
@@ -348,7 +346,7 @@ export const DashboardView: React.FC = () => {
               von <span className="font-bold text-text-primary">{settings.monthlyBudget.toLocaleString('de-DE')} €</span> Budget
             </div>
             <div className="w-full h-2 bg-black/20 rounded-full overflow-hidden mb-2 relative">
-              <div 
+              <div
                 className={`h-full rounded-full transition-all duration-1000 ${isOverBudget ? 'bg-heart' : 'bg-emerald-500'}`}
                 style={{ width: `${budgetPct}%` }}
               />
@@ -357,7 +355,7 @@ export const DashboardView: React.FC = () => {
         </div>
 
         {/* Favorites Widget */}
-        <div 
+        <div
           onClick={() => navigate('/favoriten')}
           className="glass-panel p-6 cursor-pointer hover:-translate-y-1 transition-transform duration-300"
         >
@@ -373,7 +371,7 @@ export const DashboardView: React.FC = () => {
         </div>
 
         {/* Price Alerts Widget */}
-        <div 
+        <div
           onClick={() => navigate('/deals')}
           className="glass-panel p-6 cursor-pointer hover:-translate-y-1 transition-transform duration-300 relative overflow-hidden"
         >
@@ -392,7 +390,7 @@ export const DashboardView: React.FC = () => {
             </div>
             <div className="text-xs text-text-secondary">Artikel reduziert</div>
           </div>
-          
+
           {alertCount > 0 && (
             <div className="absolute inset-0 bg-heart/5 mix-blend-screen pointer-events-none" />
           )}
@@ -401,8 +399,8 @@ export const DashboardView: React.FC = () => {
 
       {/* ── Shops Section ────────────────────────────────── */}
       <div className="mt-4">
-        <div className="flex items-center justify-between mb-5">
-          <h2 className="text-2xl font-playfair font-bold">Deine Shops</h2>
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
+          <h2 className="text-xl md:text-2xl font-playfair font-bold">Deine Shops</h2>
           <button
             onClick={() => setShowAddShopModal(true)}
             className="flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium bg-text-primary text-bg-primary hover:opacity-90 active:scale-95 transition-all duration-200 shadow-md"
@@ -521,17 +519,17 @@ export const DashboardView: React.FC = () => {
                 style={{ animationDelay: `${delay}ms`, animationFillMode: 'both' }}
               >
                 {/* External link indicator */}
-                <ExternalLink 
-                  size={12} 
-                  className="absolute top-2.5 right-2.5 opacity-0 group-hover:opacity-50 transition-opacity duration-300 text-text-secondary" 
+                <ExternalLink
+                  size={12}
+                  className="absolute top-2.5 right-2.5 opacity-0 group-hover:opacity-50 transition-opacity duration-300 text-text-secondary"
                 />
 
                 {/* Avatar */}
                 <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${colorClass} flex items-center justify-center shadow-lg overflow-hidden group-hover:scale-110 transition-transform duration-300`}>
                   {favicon ? (
-                    <img 
-                      src={favicon} 
-                      alt={shop.n} 
+                    <img
+                      src={favicon}
+                      alt={shop.n}
                       className="w-7 h-7 object-contain"
                       onError={(e) => {
                         (e.target as HTMLImageElement).style.display = 'none';
@@ -568,7 +566,7 @@ export const DashboardView: React.FC = () => {
           <div className="glass-panel py-16 flex flex-col items-center justify-center text-text-secondary animate-in fade-in duration-300">
             <div className="text-5xl mb-4">🏪</div>
             <p className="text-sm mb-1">Keine Shops in dieser Kategorie.</p>
-            <button 
+            <button
               onClick={() => setActiveFilter('Alle')}
               className="mt-3 text-xs text-text-primary underline underline-offset-4 hover:no-underline transition-all"
             >

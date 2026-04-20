@@ -99,8 +99,14 @@ export const ProductModal: React.FC = () => {
   };
 
   return (
-    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 sm:p-6 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
-      <div className="w-full max-w-2xl max-h-[95vh] glass-panel bg-bg-card/95 border border-border-primary rounded-3xl overflow-hidden flex flex-col shadow-2xl animate-in zoom-in-95 duration-300">
+    <div className={cn(
+      "fixed inset-0 z-[200] flex items-center justify-center p-4 sm:p-6 bg-black/60 animate-in fade-in duration-300",
+      settings.isGlassEnabled && "backdrop-blur-sm"
+    )}>
+      <div className={cn(
+        "w-full max-w-2xl max-h-[95vh] glass-panel border border-border-primary rounded-3xl overflow-hidden flex flex-col shadow-2xl animate-in zoom-in-95 duration-300",
+        settings.isGlassEnabled ? "bg-bg-card/95" : "bg-bg-card"
+      )}>
 
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-border-primary shrink-0">
@@ -131,7 +137,7 @@ export const ProductModal: React.FC = () => {
             <Input value={formData.url} onChange={e => setFormData({ ...formData, url: e.target.value })} placeholder="https://..." />
           </div>
 
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
               <label className="text-xs font-bold text-text-secondary uppercase tracking-wider mb-2 block">Preis (€)</label>
               <Input type="number" value={formData.price} onChange={e => {

@@ -260,29 +260,33 @@ export const BudgetView: React.FC = () => {
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 min-h-[calc(100vh-100px)]">
       {/* Header */}
-      <div className="flex justify-between items-center mb-10 px-2 mt-4">
-        <h1 className="text-3xl font-playfair font-bold">Budget</h1>
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6 md:mb-10 px-2 mt-4">
+        <h1 className="text-2xl md:text-3xl font-playfair font-bold">Budget</h1>
         
-        <div className="bg-[var(--theme-glass-bg)] border border-[var(--theme-glass-border)] backdrop-blur-md px-1 py-1 flex items-center rounded-full shadow-sm">
+        <div className="bg-[var(--theme-glass-bg)] border border-[var(--theme-glass-border)] backdrop-blur-md px-1 py-1 flex items-center rounded-full shadow-sm self-start sm:self-auto">
           <button 
             onClick={() => setTimeRange('7d')}
-            className={`px-4 py-1.5 rounded-full text-xs font-bold ${timeRange === '7d' ? 'bg-text-primary text-bg-primary shadow-md' : 'text-text-secondary hover:text-text-primary'}`}
+            className={`px-3 md:px-4 py-1.5 rounded-full text-xs font-bold ${timeRange === '7d' ? 'bg-text-primary text-bg-primary shadow-md' : 'text-text-secondary hover:text-text-primary'}`}
           >
             7 Tage
           </button>
           <button 
             onClick={() => setTimeRange('month')}
-            className={`px-4 py-1.5 rounded-full text-xs font-bold ${timeRange === 'month' ? 'bg-text-primary text-bg-primary shadow-md' : 'text-text-secondary hover:text-text-primary'}`}
+            className={`px-3 md:px-4 py-1.5 rounded-full text-xs font-bold ${timeRange === 'month' ? 'bg-text-primary text-bg-primary shadow-md' : 'text-text-secondary hover:text-text-primary'}`}
           >
-            Dieser Monat
+            <span className="hidden sm:inline">Dieser Monat</span>
+            <span className="sm:hidden">Monat</span>
           </button>
           <button 
             onClick={() => setTimeRange('total')}
-            className={`px-4 py-1.5 rounded-full text-xs font-bold ${timeRange === 'total' ? 'bg-text-primary text-bg-primary shadow-md' : 'text-text-secondary hover:text-text-primary'}`}
+            className={`px-3 md:px-4 py-1.5 rounded-full text-xs font-bold ${timeRange === 'total' ? 'bg-text-primary text-bg-primary shadow-md' : 'text-text-secondary hover:text-text-primary'}`}
           >
             Gesamt
           </button>
-          <button className="px-4 py-1.5 rounded-full text-text-secondary hover:text-text-primary text-xs font-bold">Benutzerdefiniert</button>
+          <button className="px-3 md:px-4 py-1.5 rounded-full text-text-secondary hover:text-text-primary text-xs font-bold">
+            <span className="hidden sm:inline">Benutzerdefiniert</span>
+            <span className="sm:hidden">Eigene</span>
+          </button>
         </div>
       </div>
 
@@ -347,7 +351,7 @@ export const BudgetView: React.FC = () => {
           </div>
           
           {/* SVG Line Chart with Integrated Grid */}
-          <div className="flex-1 relative mt-4 mx-6 mb-10 h-[250px]">
+          <div className="flex-1 relative mt-4 mx-2 md:mx-6 mb-10 h-[200px] md:h-[250px]">
             <svg 
               className="w-full h-full overflow-visible" 
               viewBox="0 0 600 250" 
@@ -463,7 +467,7 @@ export const BudgetView: React.FC = () => {
         {/* Right Column */}
         <div className="flex flex-col gap-6 h-full">
           
-          <div className="flex gap-4">
+          <div className="flex flex-col sm:flex-row gap-4">
             {/* Budget Tracker (Half Width) */}
             <div className="bg-[var(--theme-glass-bg)] border border-[var(--theme-glass-border)] backdrop-blur-xl p-5 rounded-3xl shadow-sm flex flex-col flex-1 relative overflow-hidden group hover:shadow-lg transition-shadow duration-300">
               <div className="absolute -top-12 -right-12 w-32 h-32 bg-emerald-500/10 rounded-full blur-2xl group-hover:bg-emerald-500/20 transition-all duration-700"></div>

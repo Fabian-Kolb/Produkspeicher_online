@@ -6,6 +6,7 @@ interface UIState {
   isMainMenuOpen: boolean;
   isThemeManagerOpen: boolean;
   isProfileModalOpen: boolean;
+  isCategoryMenuOpen: boolean;
   
   // Products View State
   mainCat: string;
@@ -19,6 +20,8 @@ interface UIState {
   toggleMainMenu: () => void;
   toggleThemeManager: () => void;
   toggleProfileModal: () => void;
+  toggleCategoryMenu: () => void;
+  closeCategoryMenu: () => void;
 
   isProductModalOpen: boolean;
   editingProductId: string | null;
@@ -27,6 +30,10 @@ interface UIState {
   activeBundleId: string | null;
   openProductModal: (productId?: string) => void;
   closeProductModal: () => void;
+  isProductDetailModalOpen: boolean;
+  viewingProductId: string | null;
+  openProductDetailModal: (productId: string) => void;
+  closeProductDetailModal: () => void;
   setProductDraft: (draft: Partial<import('../types').Product> | null) => void;
   setBundleDraft: (draft: { name: string; items: import('../types').BundleItem[] } | null) => void;
   setActiveBundleId: (id: string | null) => void;
@@ -43,11 +50,14 @@ export const useUIStore = create<UIState>((set) => ({
   isMainMenuOpen: false,
   isThemeManagerOpen: false,
   isProfileModalOpen: false,
+  isCategoryMenuOpen: false,
   isProductModalOpen: false,
   editingProductId: null,
   productDraft: null,
   bundleDraft: null,
   activeBundleId: null,
+  isProductDetailModalOpen: false,
+  viewingProductId: null,
   
   mainCat: 'Alle',
   selectedSubCats: [],
@@ -59,12 +69,16 @@ export const useUIStore = create<UIState>((set) => ({
   toggleMainMenu: () => set((state) => ({ isMainMenuOpen: !state.isMainMenuOpen })),
   toggleThemeManager: () => set((state) => ({ isThemeManagerOpen: !state.isThemeManagerOpen })),
   toggleProfileModal: () => set((state) => ({ isProfileModalOpen: !state.isProfileModalOpen })),
+  toggleCategoryMenu: () => set((state) => ({ isCategoryMenuOpen: !state.isCategoryMenuOpen, isThemeManagerOpen: false })),
+  closeCategoryMenu: () => set({ isCategoryMenuOpen: false }),
   
   openProductModal: (productId?: string) => set({ isProductModalOpen: true, editingProductId: productId || null }),
   closeProductModal: () => set({ isProductModalOpen: false, editingProductId: null }),
   setProductDraft: (draft) => set({ productDraft: draft }),
   setBundleDraft: (draft) => set({ bundleDraft: draft }),
   setActiveBundleId: (id) => set({ activeBundleId: id }),
+  openProductDetailModal: (productId) => set({ isProductDetailModalOpen: true, viewingProductId: productId }),
+  closeProductDetailModal: () => set({ isProductDetailModalOpen: false, viewingProductId: null }),
   
   setMainCat: (cat) => set({ mainCat: cat, selectedSubCats: [] }),
   toggleSubCat: (subCat) => set((state) => {

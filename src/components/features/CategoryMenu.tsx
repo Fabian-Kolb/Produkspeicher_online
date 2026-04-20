@@ -3,7 +3,7 @@ import { Pencil, Trash2, Plus, Check, X } from 'lucide-react';
 import { useAppStore } from '../../store/useAppStore';
 import { useUIStore } from '../../store/useUIStore';
 
-export const CategoryMenu: React.FC<{ anchorRef: React.RefObject<HTMLButtonElement> }> = ({ anchorRef }) => {
+export const CategoryMenu: React.FC<{ anchorRef: React.RefObject<HTMLButtonElement | null> }> = ({ anchorRef }) => {
   const { categories, addCategory, deleteCategory, renameCategory } = useAppStore();
   const { closeCategoryMenu } = useUIStore();
   

@@ -7,14 +7,14 @@ interface UIState {
   isThemeManagerOpen: boolean;
   isProfileModalOpen: boolean;
   isCategoryMenuOpen: boolean;
-  
+
   // Products View State
   mainCat: string;
   selectedSubCats: string[];
   sortMode: 'default' | 'priceAsc' | 'priceDesc' | 'newest' | 'oldest';
   searchQuery: string;
   statusFilter: 'active' | 'bought' | 'reduced';
-  
+
   // Actions
   setView: (view: UIState['currentView']) => void;
   toggleMainMenu: () => void;
@@ -37,7 +37,7 @@ interface UIState {
   setProductDraft: (draft: Partial<import('../types').Product> | null) => void;
   setBundleDraft: (draft: { name: string; items: import('../types').BundleItem[] } | null) => void;
   setActiveBundleId: (id: string | null) => void;
-  
+
   setMainCat: (cat: string) => void;
   toggleSubCat: (subCat: string) => void;
   setSortMode: (mode: UIState['sortMode']) => void;
@@ -58,20 +58,20 @@ export const useUIStore = create<UIState>((set) => ({
   activeBundleId: null,
   isProductDetailModalOpen: false,
   viewingProductId: null,
-  
+
   mainCat: 'Alle',
   selectedSubCats: [],
   sortMode: 'default',
   searchQuery: '',
   statusFilter: 'active',
-  
+
   setView: (view) => set({ currentView: view }),
   toggleMainMenu: () => set((state) => ({ isMainMenuOpen: !state.isMainMenuOpen })),
   toggleThemeManager: () => set((state) => ({ isThemeManagerOpen: !state.isThemeManagerOpen })),
   toggleProfileModal: () => set((state) => ({ isProfileModalOpen: !state.isProfileModalOpen })),
   toggleCategoryMenu: () => set((state) => ({ isCategoryMenuOpen: !state.isCategoryMenuOpen, isThemeManagerOpen: false })),
   closeCategoryMenu: () => set({ isCategoryMenuOpen: false }),
-  
+
   openProductModal: (productId?: string) => set({ isProductModalOpen: true, editingProductId: productId || null }),
   closeProductModal: () => set({ isProductModalOpen: false, editingProductId: null }),
   setProductDraft: (draft) => set({ productDraft: draft }),
@@ -79,7 +79,7 @@ export const useUIStore = create<UIState>((set) => ({
   setActiveBundleId: (id) => set({ activeBundleId: id }),
   openProductDetailModal: (productId) => set({ isProductDetailModalOpen: true, viewingProductId: productId }),
   closeProductDetailModal: () => set({ isProductDetailModalOpen: false, viewingProductId: null }),
-  
+
   setMainCat: (cat) => set({ mainCat: cat, selectedSubCats: [] }),
   toggleSubCat: (subCat) => set((state) => {
     if (subCat === 'Alle') return { selectedSubCats: [] };

@@ -4,11 +4,12 @@ import { useUIStore } from '../../store/useUIStore';
 import { useAppStore } from '../../store/useAppStore';
 import { Input } from '../common/Input';
 import { Button } from '../common/Button';
+import { cn } from '../../utils/cn';
 import type { Product } from '../../types';
 
 export const ProductModal: React.FC = () => {
   const { isProductModalOpen, editingProductId, closeProductModal, productDraft, setProductDraft } = useUIStore();
-  const { products, addProduct, updateProduct, categories, subCats } = useAppStore();
+  const { products, addProduct, updateProduct, categories, subCats, settings } = useAppStore();
 
   const [formData, setFormData] = useState<Partial<Product>>({
     name: '',

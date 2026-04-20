@@ -17,9 +17,9 @@ vi.mock('../lib/supabase', () => ({
 describe('useAppStore', () => {
   beforeEach(() => {
     // Vor jedem Test setzen wir den Zustand Store in einen definierten, isolierten Status (Demo-Modus).
-    useAppStore.setState({ 
-      isDemoMode: true, 
-      products: [], 
+    useAppStore.setState({
+      isDemoMode: true,
+      products: [],
       categories: ['Hardware', 'Software'],
       subCats: { 'Hardware': ['Gaming'] },
       userId: 'test-user-id' // Wichtig, damit Aktionen nicht blockiert werden
@@ -29,7 +29,7 @@ describe('useAppStore', () => {
   it('sollte eine neue Kategorie erfolgreich hinzufügen', async () => {
     const store = useAppStore.getState();
     await store.addCategory('Furniture');
-    
+
     const updatedStore = useAppStore.getState();
     // Prüfen, ob Furniture im Array ist
     expect(updatedStore.categories).toContain('Furniture');
@@ -39,7 +39,7 @@ describe('useAppStore', () => {
 
   it('sollte ein Produkt im Demo-Modus hinzufügen können', async () => {
     const store = useAppStore.getState();
-    
+
     await store.addProduct({
       name: 'Test MacBook',
       shop: 'Apple',

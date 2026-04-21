@@ -1,4 +1,4 @@
-import { Settings, Play, Info, Trash2, X, Sparkles, User } from 'lucide-react';
+import { Settings, Info, Trash2, X, Sparkles, User } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { useUIStore } from '../../store/useUIStore';
 import { useAppStore } from '../../store/useAppStore';

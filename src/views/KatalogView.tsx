@@ -9,7 +9,7 @@ import { cn } from '../utils/cn';
 
 
 export const KatalogView: React.FC = () => {
-  const { products, categories, subCats, settings } = useAppStore();
+  const { products, categories, subCats } = useAppStore();
   const {
     mainCat, selectedSubCats, sortMode, searchQuery, statusFilter,
     setSearchQuery, setSortMode, setStatusFilter

@@ -17,6 +17,17 @@ interface LogEntry {
 
 const CHANGELOG: LogEntry[] = [
   {
+    version: '0.5.9',
+    date: '21. April 2026',
+    changes: {
+      fixed: [
+        'Produktions-Build (npm run build) wiederhergestellt',
+        'Unbenutzte Imports (AnimatePresence, Play) entfernt',
+        'Unbenutzte Variable "settings" in KatalogView entfernt'
+      ]
+    }
+  },
+  {
     version: '0.5.8',
     date: '21. April 2026',
     changes: {

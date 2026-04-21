@@ -113,107 +113,10 @@ export const BudgetView: React.FC = () => {
   }, [chartData]);
 
   const getY = (val: number) => PAD_BOTTOM - (val / roundedMax) * DRAW_HEIGHT;
-  const getX = (i: number) => MARGIN_LEFT + (i * (DRAW_WIDTH / (chartData.length - 1 || 1)));
-
-
-
-  // Geometrical Variable-Stroke Algorithmus (Sampling, Normals & Envelope)
-  const { envelopeData, areaData, firstPoint, lastPoint, baseWidth } = useMemo(() => {
-    if (chartData.length < 2) return { envelopeData: "", areaData: "" };
-
-    const dataPoints = chartData.map((d, i) => ({ x: getX(i), y: getY(d.value) }));
-    
-    // 1. Spline Base Generation & High-Res Sampling
-    const RESOLUTION = 2; // Pixel sampling distance
-    const sampledPoints: {x: number, y: number}[] = [];
-    
-    const beziers = [];
-    for (let i = 0; i < dataPoints.length - 1; i++) {
-      const p1 = dataPoints[i];
-      const p2 = dataPoints[i + 1];
-      // Mathematischer (Monotone-X) Spline verhindert organisches Ausschwingen/Overshoots
-      const cp1x = p1.x + (p2.x - p1.x) / 2;
-      const cp1y = p1.y;
-      
-      const cp2x = p1.x + (p2.x - p1.x) / 2;
-      const cp2y = p2.y;
-
-      beziers.push({
-        p1, 
-        cp1: { x: cp1x, y: cp1y },
-        cp2: { x: cp2x, y: cp2y },
-        p2 
-      });
-    }
-
-    beziers.forEach((b) => {
-      const straightDist = Math.hypot(b.p2.x - b.p1.x, b.p2.y - b.p1.y);
-      const steps = Math.max(Math.ceil(straightDist / RESOLUTION), 2);
-      for(let j = 0; j < steps; j++) {
-        const t = j / steps;
-        const mt = 1 - t;
-        const x = mt*mt*mt*b.p1.x + 3*mt*mt*t*b.cp1.x + 3*mt*t*t*b.cp2.x + t*t*t*b.p2.x;
-        const y = mt*mt*mt*b.p1.y + 3*mt*mt*t*b.cp1.y + 3*mt*t*t*b.cp2.y + t*t*t*b.p2.y;
-        sampledPoints.push({ x, y });
-      }
-    });
-    const lastP = beziers[beziers.length-1].p2;
-    sampledPoints.push({ x: lastP.x, y: lastP.y });
-
-    // 2. Normals computation & Distance-based Bell Curve Thickness
-    const baseWidth = 0.8; // Radius of thin line sections
-    const peakWidth = 2.8; // Radius of node swells (Reduced for a more minimal look)
-    const falloff = 60;    // Gaussian spread factor (much shorter swelling)
-    
-    const topEdge: {x: number, y: number}[] = [];
-    const bottomEdge: {x: number, y: number}[] = [];
-    
-    for (let i = 0; i < sampledPoints.length; i++) {
-        const pt = sampledPoints[i];
-        
-        let prev = i > 0 ? sampledPoints[i-1] : pt;
-        let next = i < sampledPoints.length-1 ? sampledPoints[i+1] : pt;
-        if (i === 0) prev = { x: pt.x - (next.x - pt.x), y: pt.y - (next.y - pt.y) };
-        if (i === sampledPoints.length-1) next = { x: pt.x + (pt.x - prev.x), y: pt.y + (pt.y - prev.y) };
-        
-        let dx = next.x - prev.x;
-        let dy = next.y - prev.y;
-        const len = Math.hypot(dx, dy);
-        if (len > 0) { dx /= len; dy /= len; }
-        
-        const nx = -dy;
-        const ny = dx;
-        
-        // Find distance to closest INNER data node (skipping first and last)
-        let minDistSq = Infinity;
-        for (let idx = 1; idx < dataPoints.length - 1; idx++) {
-            const dp = dataPoints[idx];
-            const dsq = (pt.x - dp.x)**2 + (pt.y - dp.y)**2;
-            if (dsq < minDistSq) minDistSq = dsq;
-        }
-        
-        // Gaussian Bell Modulation
-        const thickness = baseWidth + (peakWidth - baseWidth) * Math.exp(-minDistSq / falloff);
-        
-        topEdge.push({ x: pt.x + nx * thickness, y: pt.y + ny * thickness });
-        bottomEdge.push({ x: pt.x - nx * thickness, y: pt.y - ny * thickness });
-    }
-
-    // 3. Assemble Continuous Envelope Polygon
-    let env = `M ${topEdge[0].x},${topEdge[0].y}`;
-    for (let i = 1; i < topEdge.length; i++) env += ` L ${topEdge[i].x},${topEdge[i].y}`;
-    // Add a semicircular rounded cap at the end? A simple SVG circle element is easier, done in render loop below.
-    for (let i = bottomEdge.length - 1; i >= 0; i--) env += ` L ${bottomEdge[i].x},${bottomEdge[i].y}`;
-    env += " Z";
-
-    // Background Fill Area
-    let area = `M ${sampledPoints[0].x},${sampledPoints[0].y}`;
-    for (let i = 1; i < sampledPoints.length; i++) area += ` L ${sampledPoints[i].x},${sampledPoints[i].y}`;
-    area += ` L ${sampledPoints[sampledPoints.length-1].x},${getY(0)}`;
-    area += ` L ${sampledPoints[0].x},${getY(0)} Z`;
-
-    return { envelopeData: env, areaData: area, firstPoint: sampledPoints[0], lastPoint: sampledPoints[sampledPoints.length - 1], baseWidth };
-  }, [chartData, roundedMax]);
+  const BAR_PITCH = DRAW_WIDTH / (chartData.length || 1);
+  const getX = (i: number) => MARGIN_LEFT + (i * BAR_PITCH) + (BAR_PITCH / 2);
+  const BAR_GAP = 2;
+  const barWidth = Math.max(BAR_PITCH - BAR_GAP, 4);
 
   const timeRangeLabel = timeRange === '7d' ? '7 Tage' : timeRange === 'month' ? 'Dieser Monat' : 'Gesamt';
   const timeRangeSpend = chartData.reduce((sum, d) => sum + d.value, 0);
@@ -350,7 +253,7 @@ export const BudgetView: React.FC = () => {
             <span className="text-xs text-text-secondary">Ausgaben (€)</span>
           </div>
           
-          {/* SVG Line Chart with Integrated Grid */}
+          {/* SVG Bar Chart with Integrated Grid */}
           <div className="flex-1 relative mt-4 mx-2 md:mx-6 mb-10 h-[200px] md:h-[250px]">
             <svg 
               className="w-full h-full overflow-visible" 
@@ -358,100 +261,100 @@ export const BudgetView: React.FC = () => {
               preserveAspectRatio="none"
             >
               <defs>
-                <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="var(--text-dark)" stopOpacity="0.3" />
-                  <stop offset="100%" stopColor="var(--text-dark)" stopOpacity="0" />
+                <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="currentColor" stopOpacity="0.85" className="text-text-primary" />
+                  <stop offset="100%" stopColor="currentColor" stopOpacity="0.2" className="text-text-primary" />
+                </linearGradient>
+                <linearGradient id="barHoverGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="currentColor" stopOpacity="1" className="text-text-primary" />
+                  <stop offset="100%" stopColor="currentColor" stopOpacity="1" className="text-text-primary" />
                 </linearGradient>
               </defs>
 
               {/* Y-Axis Grid Lines & Labels (Inside SVG for perfect alignment) */}
               <g className="grid-lines">
                 {/* Max Line */}
-                <line x1={MARGIN_LEFT} y1={getY(roundedMax)} x2="600" y2={getY(roundedMax)} stroke="var(--theme-glass-border)" strokeWidth="1" />
-                <text x={MARGIN_LEFT - 10} y={getY(roundedMax) + 4} fill="white" fontSize="9" textAnchor="end" className="font-medium opacity-80">{Math.round(roundedMax).toLocaleString('de-DE')} €</text>
+                <line x1={MARGIN_LEFT} y1={getY(roundedMax)} x2="600" y2={getY(roundedMax)} stroke="var(--theme-glass-border)" strokeWidth="1" strokeDasharray="4 4" className="opacity-60" />
+                <text x={MARGIN_LEFT - 10} y={getY(roundedMax) + 4} fill="currentColor" fontSize="10" textAnchor="end" className="text-text-secondary font-medium opacity-80">{Math.round(roundedMax).toLocaleString('de-DE')} €</text>
 
                 {/* Middle Line */}
-                <line x1={MARGIN_LEFT} y1={getY(roundedMax / 2)} x2="600" y2={getY(roundedMax / 2)} stroke="var(--theme-glass-border)" strokeWidth="1" />
-                <text x={MARGIN_LEFT - 10} y={getY(roundedMax / 2) + 4} fill="white" fontSize="9" textAnchor="end" className="font-medium opacity-80">{Math.round(roundedMax / 2).toLocaleString('de-DE')} €</text>
+                <line x1={MARGIN_LEFT} y1={getY(roundedMax / 2)} x2="600" y2={getY(roundedMax / 2)} stroke="var(--theme-glass-border)" strokeWidth="1" strokeDasharray="4 4" className="opacity-60" />
+                <text x={MARGIN_LEFT - 10} y={getY(roundedMax / 2) + 4} fill="currentColor" fontSize="10" textAnchor="end" className="text-text-secondary font-medium opacity-80">{Math.round(roundedMax / 2).toLocaleString('de-DE')} €</text>
 
                 {/* Origin Line (0 Euro) */}
                 <line x1={MARGIN_LEFT} y1={getY(0)} x2="600" y2={getY(0)} stroke="var(--theme-glass-border)" strokeWidth="1.5" />
-                <text x={MARGIN_LEFT - 10} y={getY(0) + 4} fill="white" fontSize="9" textAnchor="end" className="font-medium">0 €</text>
+                <text x={MARGIN_LEFT - 10} y={getY(0) + 4} fill="currentColor" fontSize="10" textAnchor="end" className="text-text-secondary font-medium opacity-80">0 €</text>
               </g>
 
-              {/* Area Fill */}
-              <path
-                d={areaData}
-                fill="url(#chartGradient)"
-              />
+              {/* Data Bars */}
+              {chartData.map((d, i) => {
+                const yPos = getY(d.value);
+                const barHeight = Math.max(PAD_BOTTOM - yPos, 0);
+                const isHovered = hoveredDay?.label === d.label;
+                const isEmpty = d.value === 0;
 
-              {/* Algorithmic Variable-Stroke Envelope Polygon */}
-              <path
-                d={envelopeData}
-                fill="white"
-              />
+                const finalYPos = isEmpty ? PAD_BOTTOM - 2 : yPos;
+                const finalHeight = isEmpty ? 2 : barHeight;
+                const radius = Math.min(barWidth / 2, 4);
 
-              {/* Rounded End Caps */}
-              {firstPoint && (
-                <>
-                  <circle cx={firstPoint.x} cy={firstPoint.y} r={baseWidth} fill="white" />
-                  <circle cx={lastPoint.x} cy={lastPoint.y} r={baseWidth} fill="white" />
-                </>
-              )}
+                return (
+                  <g 
+                    key={i} 
+                    className="group cursor-pointer"
+                    onMouseEnter={() => setHoveredDay(d)}
+                    onMouseLeave={() => setHoveredDay(null)}
+                  >
+                    {/* Interaction Area / Hover Background (Invisible) */}
+                    <rect 
+                      x={getX(i) - barWidth/2} 
+                      y={PAD_TOP - 20} 
+                      width={barWidth} 
+                      height={DRAW_HEIGHT + 20} 
+                      fill="transparent"
+                      className="cursor-pointer"
+                    />
 
-              {/* Data Points */}
-              {chartData.map((d, i) => (
-                <g 
-                  key={i} 
-                  className="group cursor-pointer"
-                  onMouseEnter={() => setHoveredDay(d)}
-                  onMouseLeave={() => setHoveredDay(null)}
-                >
-                  {/* Vertical Guide Line */}
-                  <line 
-                    x1={getX(i)} y1={PAD_TOP} x2={getX(i)} y2={getY(0)} 
-                    stroke="var(--theme-glass-border)" 
-                    strokeWidth="1" 
-                    strokeDasharray="4 4"
-                    className="opacity-20 group-hover:opacity-100 transition-opacity duration-300"
-                  />
-
-                  {/* Glow Effect on Hover */}
-                  <circle
-                    cx={getX(i)}
-                    cy={getY(d.value)}
-                    r={16}
-                    className="fill-white opacity-0 group-hover:opacity-10 transition-opacity duration-300 blur-md pointer-events-none"
-                  />
-                  <circle
-                    cx={getX(i)}
-                    cy={getY(d.value)}
-                    r={8}
-                    className="fill-white opacity-0 group-hover:opacity-30 transition-opacity duration-300 blur-[3px] pointer-events-none"
-                  />
-
-                  {/* Organic Variable Stroke completely replaces external nodes. */}
-                  {/* Invisible larger hover area for tooltips */}
-                  <rect
-                    x={getX(i) - 20}
-                    y={getY(d.value) - 20}
-                    width="40"
-                    height="40"
-                    fill="transparent"
-                  />
-
-                </g>
-              ))}
+                    {/* The actual Bar */}
+                    <rect 
+                      x={getX(i) - barWidth/2}
+                      y={finalYPos}
+                      width={barWidth}
+                      height={finalHeight}
+                      rx={radius}
+                      fill={isHovered ? "url(#barHoverGradient)" : isEmpty ? "var(--theme-glass-border)" : "url(#barGradient)"}
+                      className="transition-all duration-300 pointer-events-none"
+                    />
+                    
+                    {/* Glowing Accent for Hovered Bar */}
+                    {!isEmpty && (
+                      <rect 
+                        x={getX(i) - barWidth/2}
+                        y={finalYPos}
+                        width={barWidth}
+                        height={finalHeight}
+                        rx={radius}
+                        fill="url(#barHoverGradient)"
+                        filter="blur(6px)"
+                        className={`transition-opacity duration-300 pointer-events-none ${isHovered ? 'opacity-50' : 'opacity-0'}`}
+                      />
+                    )}
+                  </g>
+                );
+              })}
             </svg>
 
             {/* X-Axis Labels (Exact absolute positioning to match SVG points) */}
             <div className="absolute inset-x-0 -bottom-8 h-10 pointer-events-none">
               {chartData.map((day, idx) => {
                 const xPercent = (getX(idx) / 600) * 100;
+                
+                // Hide labels if there are too many (e.g. Month view) to prevent overlap
+                const shouldHide = chartData.length > 15 && idx % 2 !== 0 && chartData.length - 1 !== idx;
+                
                 return (
                   <div 
                     key={idx} 
-                    className="absolute flex flex-col items-center top-0 origin-center"
+                    className={`absolute flex flex-col items-center top-0 origin-center transition-opacity ${shouldHide ? 'opacity-0 md:opacity-100' : 'opacity-100'}`}
                     style={{ left: `${xPercent}%`, transform: 'translateX(-50%)' }}
                   >
                     <div className="w-[1px] h-2 bg-[var(--theme-glass-border)] mb-2"></div>

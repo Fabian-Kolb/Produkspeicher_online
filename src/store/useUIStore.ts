@@ -7,6 +7,7 @@ interface UIState {
   isThemeManagerOpen: boolean;
   isProfileModalOpen: boolean;
   isCategoryMenuOpen: boolean;
+  isAppInfoModalOpen: boolean;
 
   // Products View State
   mainCat: string;
@@ -22,10 +23,10 @@ interface UIState {
   toggleProfileModal: () => void;
   toggleCategoryMenu: () => void;
   closeCategoryMenu: () => void;
+  toggleAppInfoModal: () => void;
 
   isProductModalOpen: boolean;
   editingProductId: string | null;
-  productDraft: Partial<import('../types').Product> | null;
   bundleDraft: { name: string; items: import('../types').BundleItem[] } | null;
   activeBundleId: string | null;
   openProductModal: (productId?: string) => void;
@@ -34,7 +35,6 @@ interface UIState {
   viewingProductId: string | null;
   openProductDetailModal: (productId: string) => void;
   closeProductDetailModal: () => void;
-  setProductDraft: (draft: Partial<import('../types').Product> | null) => void;
   setBundleDraft: (draft: { name: string; items: import('../types').BundleItem[] } | null) => void;
   setActiveBundleId: (id: string | null) => void;
 
@@ -53,11 +53,11 @@ export const useUIStore = create<UIState>((set) => ({
   isCategoryMenuOpen: false,
   isProductModalOpen: false,
   editingProductId: null,
-  productDraft: null,
   bundleDraft: null,
   activeBundleId: null,
   isProductDetailModalOpen: false,
   viewingProductId: null,
+  isAppInfoModalOpen: false,
 
   mainCat: 'Alle',
   selectedSubCats: [],
@@ -71,10 +71,10 @@ export const useUIStore = create<UIState>((set) => ({
   toggleProfileModal: () => set((state) => ({ isProfileModalOpen: !state.isProfileModalOpen })),
   toggleCategoryMenu: () => set((state) => ({ isCategoryMenuOpen: !state.isCategoryMenuOpen, isThemeManagerOpen: false })),
   closeCategoryMenu: () => set({ isCategoryMenuOpen: false }),
+  toggleAppInfoModal: () => set((state) => ({ isAppInfoModalOpen: !state.isAppInfoModalOpen })),
 
-  openProductModal: (productId?: string) => set({ isProductModalOpen: true, editingProductId: productId || null }),
+  openProductModal: (productId) => set({ isProductModalOpen: true, editingProductId: productId || null }),
   closeProductModal: () => set({ isProductModalOpen: false, editingProductId: null }),
-  setProductDraft: (draft) => set({ productDraft: draft }),
   setBundleDraft: (draft) => set({ bundleDraft: draft }),
   setActiveBundleId: (id) => set({ activeBundleId: id }),
   openProductDetailModal: (productId) => set({ isProductDetailModalOpen: true, viewingProductId: productId }),

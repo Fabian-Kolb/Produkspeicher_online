@@ -36,32 +36,4 @@ describe('useAppStore', () => {
     // Prüfen, ob ein leeres Array für Unterkategorien angelegt wurde
     expect(updatedStore.subCats['Furniture']).toEqual([]);
   });
-
-  it('sollte ein Produkt im Demo-Modus hinzufügen können', async () => {
-    const store = useAppStore.getState();
-
-    await store.addProduct({
-      name: 'Test MacBook',
-      shop: 'Apple',
-      price: 1500,
-      status: 'active',
-      discount: 0,
-      finalPrice: 1500,
-      url: '',
-      details: '',
-      rating: 0,
-      mainCat: 'Hardware',
-      subCats: ['Laptops'],
-      imgs: [],
-      isFavorite: false,
-      dateAdded: new Date().toISOString()
-    });
-
-    const updatedStore = useAppStore.getState();
-    // Danach sollte genau ein Produkt existieren
-    expect(updatedStore.products.length).toBe(1);
-    expect(updatedStore.products[0].name).toBe('Test MacBook');
-    // Die ID sollte von crypto.randomUUID() generiert worden sein
-    expect(updatedStore.products[0].id).toBeDefined();
-  });
 });

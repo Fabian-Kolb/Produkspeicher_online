@@ -26,7 +26,6 @@ interface AppState {
   toggleDemoMode: () => void;
   _refreshView: () => void;
 
-  addProduct: (product: Omit<Product, 'id'>) => Promise<void>;
   updateProduct: (id: string, product: Partial<Product>) => Promise<void>;
   deleteProduct: (id: string) => Promise<void>;
 
@@ -156,21 +155,6 @@ export const useAppStore = create<AppState>()((set, get) => ({
     }
   },
 
-  addProduct: async (product) => {
-    const { userId, isDemoMode } = get();
-    if (!userId) return;
-    const newProduct = { ...product, id: crypto.randomUUID() };
-    if (isDemoMode) {
-      set((state) => ({ products: [...state.products, newProduct as Product] }));
-      return;
-    }
-    set((state) => ({ 
-      products: [...state.products, newProduct as Product],
-      _dbProducts: [...state._dbProducts, newProduct as Product]
-    }));
-    await supabase.from('products').insert([{ ...newProduct, user_id: userId }]);
-  },
-  
   updateProduct: async (id, updated) => {
     const { isDemoMode } = get();
     const updateData = { ...updated };

@@ -6,22 +6,12 @@
  export const SubNavigation: React.FC<{
    categories: string[];
  }> = ({ categories }) => {
-   const { mainCat, setMainCat, openProductModal, toggleCategoryMenu, isCategoryMenuOpen } = useUIStore();
-   const settingsBtnRef = useRef<HTMLButtonElement>(null);
+  const { mainCat, setMainCat, toggleCategoryMenu, isCategoryMenuOpen } = useUIStore();
+  const settingsBtnRef = useRef<HTMLButtonElement>(null);
 
   return (
     <div className="w-full mt-2 mb-6 md:mb-12 flex justify-center px-0">
       <div className="bg-[var(--theme-glass-bg)] border border-[var(--theme-glass-border)] backdrop-blur-md px-4 py-1 md:px-1.5 md:py-1.5 flex items-center gap-1 md:gap-2 rounded-full overflow-x-auto no-scrollbar shadow-sm w-full md:w-auto pb-1.5 md:pb-1">
-        <NavPill
-          active={false}
-          onClick={() => openProductModal()}
-          className="font-bold text-text-primary mr-1 ml-1 md:mr-2 md:ml-2"
-        >
-          Hinzufügen
-        </NavPill>
-        
-        <div className="w-[1px] h-6 md:h-7 bg-border-primary/50 mx-0.5 md:mx-1 shrink-0"></div>
-
         <NavPill
           active={mainCat === 'Alle'}
           onClick={() => setMainCat('Alle')}

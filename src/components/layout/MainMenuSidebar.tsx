@@ -1,5 +1,4 @@
-import React from 'react';
-import { Settings, Play, Download, Upload, Info, Trash2, X, Sparkles, User } from 'lucide-react';
+import { Settings, Play, Info, Trash2, X, Sparkles, User } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { useUIStore } from '../../store/useUIStore';
 import { useAppStore } from '../../store/useAppStore';
@@ -7,16 +6,13 @@ import logoDark from '../../assets/logo/logo_dark.png';
 import logoWhite from '../../assets/logo/logo_white.png';
 
 export const MainMenuSidebar: React.FC = () => {
-  const { isMainMenuOpen, toggleMainMenu, toggleThemeManager, openProductModal, toggleProfileModal } = useUIStore();
+  const { isMainMenuOpen, toggleMainMenu, toggleThemeManager, toggleProfileModal, toggleAppInfoModal } = useUIStore();
   const { settings, isDemoMode, toggleDemoMode } = useAppStore();
 
   
-  // Dummy functions for now
-  const handleExport = () => console.log('Export triggered');
-  const handleImport = () => console.log('Import triggered');
-  
   const handleInfo = () => {
-    alert("Ventory\nVersion 1.0.0\nBuilt with ❤️ by Vibe-Coding.");
+    toggleMainMenu();
+    toggleAppInfoModal();
   };
 
   const handleReset = async () => {
@@ -77,17 +73,8 @@ export const MainMenuSidebar: React.FC = () => {
           <MenuButton icon={<Settings size={18} />} onClick={() => { toggleMainMenu(); toggleThemeManager(); }}>
             Design & Themes
           </MenuButton>
-          <MenuButton icon={<Play size={18} />} onClick={() => { toggleMainMenu(); openProductModal(); }}>
-            + Neues Produkt
-          </MenuButton>
           <MenuButton icon={<Sparkles size={18} />} onClick={handleDemoMode} isActive={isDemoMode}>
             {isDemoMode ? 'Demo-Modus: AN' : 'Demo-Modus aktivieren'}
-          </MenuButton>
-          <MenuButton icon={<Download size={18} />} onClick={handleExport}>
-            Exportieren
-          </MenuButton>
-          <MenuButton icon={<Upload size={18} />} onClick={handleImport}>
-            Importieren
           </MenuButton>
           <MenuButton icon={<Info size={18} />} onClick={handleInfo}>
             Info / Version

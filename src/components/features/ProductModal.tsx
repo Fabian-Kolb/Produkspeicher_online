@@ -8,8 +8,8 @@ import { cn } from '../../utils/cn';
 import type { Product } from '../../types';
 
 export const ProductModal: React.FC = () => {
-  const { isProductModalOpen, editingProductId, closeProductModal, productDraft, setProductDraft } = useUIStore();
-  const { products, addProduct, updateProduct, categories, subCats, settings } = useAppStore();
+  const { isProductModalOpen, editingProductId, closeProductModal } = useUIStore();
+  const { products, updateProduct, categories, subCats, settings } = useAppStore();
 
   const [formData, setFormData] = useState<Partial<Product>>({
     name: '',
@@ -29,29 +29,14 @@ export const ProductModal: React.FC = () => {
 
   const [imgInput, setImgInput] = useState('');
 
-  // Sync formData changes back to UIStore's productDraft (for persistence across view switches)
-  useEffect(() => {
-    if (isProductModalOpen && !editingProductId) {
-      setProductDraft(formData);
-    }
-  }, [formData, isProductModalOpen, editingProductId, setProductDraft]);
-
   useEffect(() => {
     if (isProductModalOpen && editingProductId) {
       const p = products.find(prod => prod.id === editingProductId);
       if (p) setFormData(p);
-    } else if (isProductModalOpen && !editingProductId) {
-      // Use existing draft or defaults
-      setFormData(productDraft || {
-        name: '', shop: '', url: '', price: 0, discount: 0, finalPrice: 0,
-        rating: 0, details: '', imgs: [], mainCat: categories[0] || 'Setup', subCats: [],
-        status: 'active', isFavorite: false, dateAdded: new Date().toISOString()
-      });
-      setImgInput('');
     }
-  }, [isProductModalOpen, editingProductId, products, categories]);
+  }, [isProductModalOpen, editingProductId, products]);
 
-  if (!isProductModalOpen) return null;
+  if (!isProductModalOpen || !editingProductId) return null;
 
   const handleSave = () => {
     const isNowBought = (formData.status || 'active') === 'bought';
@@ -74,17 +59,11 @@ export const ProductModal: React.FC = () => {
       dateBought: isNowBought ? (formData.dateBought || new Date().toISOString()) : null
     };
 
-    if (editingProductId) {
-      updateProduct(editingProductId, p);
-    } else {
-      addProduct(p);
-      setProductDraft(null); // Clear draft after creating new product
-    }
+    updateProduct(editingProductId, p);
     closeProductModal();
   };
 
   const handleCancel = () => {
-    setProductDraft(null);
     closeProductModal();
   };
 
@@ -112,7 +91,7 @@ export const ProductModal: React.FC = () => {
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-border-primary shrink-0">
           <h2 className="text-2xl font-playfair font-bold">
-            {editingProductId ? 'Produkt bearbeiten' : 'Neues Produkt'}
+            Produkt bearbeiten
           </h2>
           <button onClick={handleCancel} className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-black/10 transition-colors">
             <X size={24} />

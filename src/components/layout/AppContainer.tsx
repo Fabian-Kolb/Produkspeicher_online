@@ -7,6 +7,7 @@ import { BottomNav } from './BottomNav';
 import { ThemeCreatorModal } from '../features/ThemeCreatorModal';
 import { ProductModal } from '../features/ProductModal';
 import { ProductDetailModal } from '../features/ProductDetailModal';
+import { AppInfoModal } from '../features/AppInfoModal';
 import { ProfileSettingsModal } from '../auth/ProfileSettingsModal';
 import { useAppStore } from '../../store/useAppStore';
 import { applyGlobalTheme, applyBaseMode } from '../../utils/themeHelpers';
@@ -97,6 +98,7 @@ export const AppContainer: React.FC = () => {
       <ThemeCreatorModal />
       <ProductModal />
       <ProductDetailModal />
+      <AppInfoModal />
       <ProfileSettingsModal />
       
       {/* Main Content Area */}

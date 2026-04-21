@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAppStore } from '../store/useAppStore';
 import { FilterChip } from '../components/common/FilterChip';
 import { Bell, Euro, Heart, Settings, Plus, X, ExternalLink, Globe, Tag, Link2, Store } from 'lucide-react';
+import { cn } from '../utils/cn';
 import type { Product, Website } from '../types';
 
 /* ── Default/Standard Shops ────────────────────────────────── */
@@ -403,7 +404,12 @@ export const DashboardView: React.FC = () => {
           <h2 className="text-xl md:text-2xl font-playfair font-bold">Deine Shops</h2>
           <button
             onClick={() => setShowAddShopModal(true)}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium bg-text-primary text-bg-primary hover:opacity-90 active:scale-95 transition-all duration-200 shadow-md"
+            className={cn(
+              "flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium active:scale-95 transition-all duration-200 shadow-md",
+              settings.isGlassEnabled
+                ? "bg-text-primary text-bg-primary hover:opacity-90 shadow-black/10 dark:shadow-white/5"
+                : "bg-blue-600 dark:bg-blue-500 text-white hover:bg-blue-700 dark:hover:bg-blue-600 shadow-blue-500/20"
+            )}
           >
             <Plus size={14} />
             Shop hinzufügen

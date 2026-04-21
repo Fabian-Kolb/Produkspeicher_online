@@ -5,9 +5,11 @@ import { useUIStore } from '../store/useUIStore';
 import { SubNavigation } from '../components/layout/SubNavigation';
 import { ProductCard } from '../components/features/ProductCard';
 import type { Product } from '../types';
+import { cn } from '../utils/cn';
+
 
 export const KatalogView: React.FC = () => {
-  const { products, categories, subCats } = useAppStore();
+  const { products, categories, subCats, settings } = useAppStore();
   const {
     mainCat, selectedSubCats, sortMode, searchQuery, statusFilter,
     setSearchQuery, setSortMode, setStatusFilter
@@ -89,13 +91,27 @@ export const KatalogView: React.FC = () => {
 
           <button
             onClick={() => setStatusFilter(statusFilter === 'bought' ? 'active' : 'bought')}
-            className={`px-5 py-2 rounded-full text-sm font-medium transition-all duration-300 shadow-sm ${statusFilter === 'bought' ? 'bg-bg-primary text-text-primary border border-transparent' : 'bg-[var(--theme-glass-bg)] border border-[var(--theme-glass-border)] backdrop-blur-md text-text-secondary hover:text-text-primary hover:scale-105 hover:shadow-md'}`}
+            className={cn(
+              "px-5 py-2 rounded-full text-sm font-medium transition-all duration-300 shadow-sm",
+              statusFilter === 'bought' 
+                ? (settings.isGlassEnabled 
+                    ? "bg-text-primary text-bg-primary" 
+                    : "bg-blue-600 dark:bg-blue-500 text-white border border-transparent")
+                : 'bg-[var(--theme-glass-bg)] border border-[var(--theme-glass-border)] backdrop-blur-md text-text-secondary hover:text-text-primary hover:scale-105 hover:shadow-md'
+            )}
           >
             Gekauft
           </button>
           <button
             onClick={() => setStatusFilter(statusFilter === 'reduced' ? 'active' : 'reduced')}
-            className={`px-5 py-2 rounded-full text-sm font-medium transition-all duration-300 shadow-sm ${statusFilter === 'reduced' ? 'bg-bg-primary text-text-primary border border-transparent' : 'bg-[var(--theme-glass-bg)] border border-[var(--theme-glass-border)] backdrop-blur-md text-text-secondary hover:text-text-primary hover:scale-105 hover:shadow-md'}`}
+            className={cn(
+              "px-5 py-2 rounded-full text-sm font-medium transition-all duration-300 shadow-sm",
+              statusFilter === 'reduced' 
+                ? (settings.isGlassEnabled 
+                    ? "bg-text-primary text-bg-primary" 
+                    : "bg-blue-600 dark:bg-blue-500 text-white border border-transparent")
+                : 'bg-[var(--theme-glass-bg)] border border-[var(--theme-glass-border)] backdrop-blur-md text-text-secondary hover:text-text-primary hover:scale-105 hover:shadow-md'
+            )}
           >
             Reduziert
           </button>
@@ -114,10 +130,14 @@ export const KatalogView: React.FC = () => {
                   return { selectedSubCats: newSubCats };
                 })
               }}
-              className={`px-5 py-2 rounded-full text-sm font-medium transition-colors border shadow-sm ${selectedSubCats.includes(sub)
-                  ? 'bg-text-primary text-bg-primary border-transparent'
+              className={cn(
+                "px-5 py-2 rounded-full text-sm font-medium transition-colors border shadow-sm",
+                selectedSubCats.includes(sub)
+                  ? (settings.isGlassEnabled 
+                      ? "bg-text-primary text-bg-primary border-transparent" 
+                      : "bg-blue-600 dark:bg-blue-500 text-white border-transparent")
                   : 'bg-[var(--theme-glass-bg)]/50 backdrop-blur-md text-text-secondary border-border-primary/30 hover:text-text-primary hover:bg-[var(--theme-glass-bg)]'
-                }`}
+              )}
             >
               {sub}
             </button>

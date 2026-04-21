@@ -60,6 +60,8 @@ const defaultSettings: AppSettings = {
   theme: 'dark',
   monthlyBudget: 2000,
   isGlassEnabled: true,
+  modalStyle: 'glass',
+  modalTheme: 'auto',
   customThemes: [
     {
       id: 'default',

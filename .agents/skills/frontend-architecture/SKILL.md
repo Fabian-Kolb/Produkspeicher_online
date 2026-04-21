@@ -1,6 +1,6 @@
 ---
-name: frontend-development
-description: Guidelines for building the React frontend with Tailwind CSS, Zustand, and premium aesthetics.
+name: frontend-architecture
+description: Guidelines for architecture, state management, and basic styling standards.
 ---
 
 # Frontend Development

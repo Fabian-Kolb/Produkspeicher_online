@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { useAppStore } from '../store/useAppStore';
 import { useUIStore } from '../store/useUIStore';
 import type { Product } from '../types';
+import { cn } from '../utils/cn';
 
 export const BudgetView: React.FC = () => {
   const { products, settings, updateSettings } = useAppStore();
@@ -167,29 +168,22 @@ export const BudgetView: React.FC = () => {
         <h1 className="text-2xl md:text-3xl font-playfair font-bold">Budget</h1>
         
         <div className="bg-[var(--theme-glass-bg)] border border-[var(--theme-glass-border)] backdrop-blur-md px-1 py-1 flex items-center rounded-full shadow-sm self-start sm:self-auto">
-          <button 
-            onClick={() => setTimeRange('7d')}
-            className={`px-3 md:px-4 py-1.5 rounded-full text-xs font-bold ${timeRange === '7d' ? 'bg-text-primary text-bg-primary shadow-md' : 'text-text-secondary hover:text-text-primary'}`}
-          >
-            7 Tage
-          </button>
-          <button 
-            onClick={() => setTimeRange('month')}
-            className={`px-3 md:px-4 py-1.5 rounded-full text-xs font-bold ${timeRange === 'month' ? 'bg-text-primary text-bg-primary shadow-md' : 'text-text-secondary hover:text-text-primary'}`}
-          >
-            <span className="hidden sm:inline">Dieser Monat</span>
-            <span className="sm:hidden">Monat</span>
-          </button>
-          <button 
-            onClick={() => setTimeRange('total')}
-            className={`px-3 md:px-4 py-1.5 rounded-full text-xs font-bold ${timeRange === 'total' ? 'bg-text-primary text-bg-primary shadow-md' : 'text-text-secondary hover:text-text-primary'}`}
-          >
-            Gesamt
-          </button>
-          <button className="px-3 md:px-4 py-1.5 rounded-full text-text-secondary hover:text-text-primary text-xs font-bold">
-            <span className="hidden sm:inline">Benutzerdefiniert</span>
-            <span className="sm:hidden">Eigene</span>
-          </button>
+          {['7d', 'month', 'total'].map((range) => (
+            <button
+              key={range}
+              onClick={() => setTimeRange(range as any)}
+              className={cn(
+                "px-4 py-1.5 rounded-full text-xs font-bold transition-all duration-300 whitespace-nowrap",
+                timeRange === range 
+                  ? (settings.isGlassEnabled 
+                      ? "bg-text-primary text-bg-primary shadow-md"
+                      : "bg-blue-600 dark:bg-blue-500 text-white shadow-md")
+                  : "text-text-secondary hover:text-text-primary bg-black/5 dark:bg-white/5"
+              )}
+            >
+              {range === '7d' ? '7 Tage' : range === 'month' ? 'Monat' : 'Gesamt'}
+            </button>
+          ))}
         </div>
       </div>
 
@@ -235,7 +229,12 @@ export const BudgetView: React.FC = () => {
             </div>
           ) : (
             <p 
-              className="text-2xl font-bold cursor-pointer transition-colors hover:text-emerald-500" 
+              className={cn(
+                "text-2xl font-bold cursor-pointer transition-colors",
+                settings.isGlassEnabled 
+                  ? "hover:text-emerald-500 dark:hover:text-emerald-400"
+                  : "hover:text-blue-500 dark:hover:text-blue-400"
+              )}
               onClick={() => { setIsEditingBudget(true); setTempBudget(String(settings.monthlyBudget)); }}
             >
               {settings.monthlyBudget.toLocaleString('de-DE')} €
@@ -262,12 +261,32 @@ export const BudgetView: React.FC = () => {
             >
               <defs>
                 <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="currentColor" stopOpacity="0.85" className="text-text-primary" />
-                  <stop offset="100%" stopColor="currentColor" stopOpacity="0.2" className="text-text-primary" />
+                  <stop 
+                    offset="0%" 
+                    stopColor="currentColor" 
+                    stopOpacity="0.8" 
+                    className={settings.isGlassEnabled ? "text-text-primary" : "text-blue-600 dark:text-blue-500"} 
+                  />
+                  <stop 
+                    offset="100%" 
+                    stopColor="currentColor" 
+                    stopOpacity="0.2" 
+                    className={settings.isGlassEnabled ? "text-text-primary" : "text-blue-600 dark:text-blue-500"} 
+                  />
                 </linearGradient>
                 <linearGradient id="barHoverGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="currentColor" stopOpacity="1" className="text-text-primary" />
-                  <stop offset="100%" stopColor="currentColor" stopOpacity="1" className="text-text-primary" />
+                  <stop 
+                    offset="0%" 
+                    stopColor="currentColor" 
+                    stopOpacity="1" 
+                    className={settings.isGlassEnabled ? "text-text-primary" : "text-blue-500 dark:text-blue-400"} 
+                  />
+                  <stop 
+                    offset="100%" 
+                    stopColor="currentColor" 
+                    stopOpacity="0.8" 
+                    className={settings.isGlassEnabled ? "text-text-primary" : "text-blue-600 dark:text-blue-500"} 
+                  />
                 </linearGradient>
               </defs>
 
@@ -367,7 +386,6 @@ export const BudgetView: React.FC = () => {
         </div>
         
         {/* Right Column */}
-        {/* Right Column */}
         <div className="flex flex-col gap-6 h-full">
           
           <div className="flex flex-col sm:flex-row gap-4">
@@ -426,7 +444,10 @@ export const BudgetView: React.FC = () => {
                       </div>
                       <div className="w-full h-2 bg-black/5 dark:bg-white/10 rounded-full overflow-hidden flex-shrink-0">
                         <div 
-                          className="h-full bg-[var(--text-dark)] rounded-full opacity-60 transition-all duration-1000 ease-out"
+                          className={cn(
+                            "h-2.5 rounded-full transition-all duration-1000",
+                            settings.isGlassEnabled ? "bg-text-primary" : "bg-blue-600 dark:bg-blue-500"
+                          )}
                           style={{ width: `${Math.min((cat.amount / maxCategorySpend) * 100, 100)}%` }}
                         ></div>
                       </div>
@@ -472,7 +493,7 @@ export const BudgetView: React.FC = () => {
                           </div>
                         )}
                         <div className="flex flex-col flex-1 min-w-0">
-                          <span className="text-sm font-semibold truncate text-text-primary group-hover/item:text-emerald-500 transition-colors">{p.name}</span>
+                          <span className="text-sm font-semibold truncate text-text-primary group-hover/item:text-blue-600 dark:group-hover/item:text-blue-400 transition-colors uppercase tracking-tight">{p.name}</span>
                           <span className="text-[10px] text-text-secondary truncate">{p.mainCat || 'Ohne Kategorie'}</span>
                         </div>
                         <span className="text-sm font-bold font-mono opacity-90 shrink-0">{(p.finalPrice || 0).toLocaleString('de-DE', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
@@ -502,7 +523,7 @@ export const BudgetView: React.FC = () => {
                       </div>
                       <div className="flex items-baseline gap-1">
                         <span className="text-sm font-bold text-text-secondary">€</span>
-                        <span className="text-3xl font-bold font-mono tracking-tight text-text-primary group-hover:text-emerald-500 transition-colors duration-500">
+                        <span className="text-3xl font-bold font-mono tracking-tight text-text-primary group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-500">
                           {hoveredDay.value.toLocaleString('de-DE', {minimumFractionDigits: 2, maximumFractionDigits: 2})}
                         </span>
                       </div>
@@ -552,7 +573,7 @@ export const BudgetView: React.FC = () => {
                           setStatusFilter('bought');
                           setSearchQuery(p.name);
                         }}
-                        className="bg-[var(--theme-glass-bg)] border border-[var(--theme-glass-border)] backdrop-blur-xl p-4 md:p-5 rounded-3xl shadow-sm flex items-center gap-5 cursor-pointer hover:shadow-md hover:border-emerald-500/50 transition-all duration-300 group"
+                        className="bg-[var(--theme-glass-bg)] border border-[var(--theme-glass-border)] backdrop-blur-xl p-4 md:p-5 rounded-3xl shadow-sm flex items-center gap-5 cursor-pointer hover:shadow-lg hover:border-blue-500/50 transition-all duration-300 group"
                       >
                         {p.imgs && p.imgs.length > 0 ? (
                           <img src={p.imgs[p.mainImgIdx || 0]} alt={p.name} className="w-16 h-16 md:w-20 md:h-20 rounded-2xl object-cover shadow-sm bg-black/10 dark:bg-white/10 shrink-0" />
@@ -562,7 +583,14 @@ export const BudgetView: React.FC = () => {
                           </div>
                         )}
                         <div className="flex flex-col flex-1 min-w-0 justify-center">
-                          <span className="text-lg md:text-xl font-bold truncate text-text-primary group-hover:text-emerald-500 transition-colors">{p.name}</span>
+                          <span className={cn(
+                            "text-lg md:text-xl font-bold truncate text-text-primary transition-colors",
+                            settings.isGlassEnabled 
+                              ? "group-hover:text-text-primary" 
+                              : "group-hover:text-blue-600 dark:group-hover:text-blue-400"
+                          )}>
+                            {p.name}
+                          </span>
                           <span className="text-xs md:text-sm text-text-secondary mt-1 font-medium">{dateStr} {p.mainCat ? `• ${p.mainCat}` : ''}</span>
                         </div>
                         <span className="text-xl md:text-2xl font-bold font-mono tracking-tight shrink-0 whitespace-nowrap pr-2 md:pr-4 text-text-primary">{(p.finalPrice || 0).toLocaleString('de-DE', {minimumFractionDigits: 2, maximumFractionDigits: 2})} €</span>

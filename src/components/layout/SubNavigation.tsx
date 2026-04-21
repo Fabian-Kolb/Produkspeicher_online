@@ -1,13 +1,19 @@
  import { Settings } from 'lucide-react';
  import { useUIStore } from '../../store/useUIStore';
+ import { useAppStore } from '../../store/useAppStore';
  import { CategoryMenu } from '../features/CategoryMenu';
  import React, { useRef } from 'react';
 
  export const SubNavigation: React.FC<{
    categories: string[];
  }> = ({ categories }) => {
-  const { mainCat, setMainCat, toggleCategoryMenu, isCategoryMenuOpen } = useUIStore();
-  const settingsBtnRef = useRef<HTMLButtonElement>(null);
+   const { mainCat, setMainCat, toggleCategoryMenu, isCategoryMenuOpen } = useUIStore();
+   const isGlassEnabled = useAppStore(state => state.settings.isGlassEnabled);
+   const settingsBtnRef = useRef<HTMLButtonElement>(null);
+ 
+   const activeClass = isGlassEnabled
+     ? "bg-text-primary text-bg-primary shadow-lg scale-110"
+     : "bg-blue-600 dark:bg-blue-500 text-white shadow-lg scale-110";
 
   return (
     <div className="w-full mt-2 mb-6 md:mb-12 flex justify-center px-0">
@@ -34,11 +40,11 @@
            <button 
              ref={settingsBtnRef}
              onClick={toggleCategoryMenu}
-             className={`w-9 h-9 md:w-10 md:h-10 flex items-center justify-center rounded-full transition-all mr-1 ${
-               isCategoryMenuOpen 
-                 ? 'bg-text-primary text-bg-primary scale-110 shadow-lg' 
-                 : 'text-text-secondary hover:text-text-primary hover:bg-black/5 dark:hover:bg-white/5'
-             }`}
+              className={`w-9 h-9 md:w-10 md:h-10 flex items-center justify-center rounded-full transition-all mr-1 ${
+                isCategoryMenuOpen 
+                  ? activeClass 
+                  : 'text-text-secondary hover:text-text-primary hover:bg-black/5 dark:hover:bg-white/5'
+              }`}
            >
              <Settings size={17} className="md:w-[18px] md:h-[18px]" />
            </button>
@@ -60,12 +66,17 @@ interface NavPillProps {
 }
 
 const NavPill: React.FC<NavPillProps> = ({ active, onClick, children, className = '' }) => {
+  const isGlassEnabled = useAppStore(state => state.settings.isGlassEnabled);
+  const activeClass = isGlassEnabled
+    ? 'bg-text-primary text-bg-primary shadow-md font-bold'
+    : 'bg-blue-600 dark:bg-blue-500 text-white shadow-md font-bold';
+
   return (
     <button
       onClick={onClick}
       className={`px-3.5 py-2 md:px-5 md:py-2.5 rounded-full text-xs md:text-sm font-medium transition-all duration-300 whitespace-nowrap outline-none flex items-center justify-center shrink-0 ${
         active 
-          ? 'bg-bg-primary text-text-primary shadow-sm font-bold' 
+          ? activeClass 
           : 'bg-transparent text-text-secondary hover:text-text-primary hover:bg-black/5 dark:hover:bg-white/5 hover:scale-105'
       } ${className}`}
     >

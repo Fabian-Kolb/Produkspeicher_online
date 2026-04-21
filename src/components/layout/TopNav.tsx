@@ -4,12 +4,17 @@ import { Menu, Moon, Sun, LogOut } from 'lucide-react';
 import { useUIStore } from '../../store/useUIStore';
 import { useAppStore } from '../../store/useAppStore';
 import { supabase } from '../../lib/supabase';
+import { cn } from '../../utils/cn';
 import logoDark from '../../assets/logo/logo_dark.png';
 import logoWhite from '../../assets/logo/logo_white.png';
 
 export const TopNav: React.FC = () => {
   const toggleMainMenu = useUIStore((s) => s.toggleMainMenu);
   const { settings, updateSettings } = useAppStore();
+  const isGlassEnabled = settings.isGlassEnabled;
+  const activeClass = isGlassEnabled
+    ? "bg-text-primary text-bg-primary shadow-md"
+    : "bg-blue-600 dark:bg-blue-500 text-white shadow-md";
 
   const navItems = [
     { to: '/', label: 'Dashboard' },
@@ -42,10 +47,12 @@ export const TopNav: React.FC = () => {
             to={item.to}
             end={item.to === '/'}
             className={({ isActive }) =>
-              `px-5 py-2 rounded-full text-sm font-medium transition-all duration-300 ${isActive
-                ? 'bg-bg-primary text-text-primary shadow-sm'
-                : 'text-text-secondary hover:text-text-primary hover:bg-black/5 dark:hover:bg-white/5'
-              }`
+              cn(
+                "px-5 py-2 rounded-full text-sm font-medium transition-all duration-300",
+                isActive
+                  ? activeClass
+                  : 'text-text-secondary hover:text-text-primary hover:bg-black/5 dark:hover:bg-white/5'
+              )
             }
           >
             {item.label}

@@ -38,7 +38,7 @@ const MarqueeOverflow: React.FC<{ children: React.ReactNode; className?: string 
 };
 
 export const BundlesView: React.FC = () => {
-  const { bundles, products, categories, subCats, addBundle, updateBundle, deleteBundle } = useAppStore();
+  const { bundles, products, categories, subCats, addBundle, updateBundle, deleteBundle, settings } = useAppStore();
   const { activeBundleId, setActiveBundleId, bundleDraft, setBundleDraft } = useUIStore();
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -180,7 +180,12 @@ export const BundlesView: React.FC = () => {
         </h1>
         <button
           onClick={() => setActiveBundleId('new')}
-          className="bg-[var(--theme-glass-bg)] border border-[var(--theme-glass-border)] backdrop-blur-md px-3 md:px-5 py-2 md:py-2.5 rounded-full font-medium text-sm hover:bg-white/10 transition-colors shadow-sm text-text-primary flex items-center gap-1.5 md:gap-2"
+          className={cn(
+            "border border-transparent backdrop-blur-md px-3 md:px-5 py-2 md:py-2.5 rounded-full font-medium text-sm transition-all duration-200 shadow-md flex items-center gap-1.5 md:gap-2",
+            settings.isGlassEnabled
+              ? "bg-text-primary text-bg-primary hover:opacity-90 shadow-black/10 dark:shadow-white/5"
+              : "bg-blue-600 dark:bg-blue-500 text-white hover:bg-blue-700 dark:hover:bg-blue-600 shadow-blue-500/20"
+          )}
         >
           <Plus size={15} /> <span>Neues Bundle</span>
         </button>
@@ -335,7 +340,11 @@ export const BundlesView: React.FC = () => {
                     onClick={() => setEditorMainCat('Alle')}
                     className={cn(
                       'px-3 py-1.5 rounded-full text-xs font-medium transition-all shadow-sm whitespace-nowrap shrink-0',
-                      editorMainCat === 'Alle' ? 'bg-text-primary text-bg-primary border border-transparent' : 'bg-[var(--theme-glass-bg)] border border-[var(--theme-glass-border)] text-text-secondary hover:text-text-primary'
+                      editorMainCat === 'Alle' 
+                        ? (settings.isGlassEnabled 
+                            ? "bg-text-primary text-bg-primary" 
+                            : "bg-blue-600 dark:bg-blue-500 text-white border border-transparent")
+                        : 'bg-[var(--theme-glass-bg)] border border-[var(--theme-glass-border)] text-text-secondary hover:text-text-primary'
                     )}
                   >
                     Alle
@@ -346,7 +355,11 @@ export const BundlesView: React.FC = () => {
                       onClick={() => setEditorMainCat(cat)}
                       className={cn(
                         'px-3 py-1.5 rounded-full text-xs font-medium transition-all shadow-sm whitespace-nowrap shrink-0',
-                        editorMainCat === cat ? 'bg-text-primary text-bg-primary border border-transparent' : 'bg-[var(--theme-glass-bg)] border border-[var(--theme-glass-border)] text-text-secondary hover:text-text-primary'
+                        editorMainCat === cat 
+                          ? (settings.isGlassEnabled 
+                              ? "bg-text-primary text-bg-primary" 
+                              : "bg-blue-600 dark:bg-blue-500 text-white border border-transparent")
+                          : 'bg-[var(--theme-glass-bg)] border border-[var(--theme-glass-border)] text-text-secondary hover:text-text-primary'
                       )}
                     >
                       {cat}

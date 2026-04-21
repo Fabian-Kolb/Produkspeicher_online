@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { X, Check, Trash2 } from 'lucide-react';
+import { X, Check, Trash2, Square, Layers, Sun, Moon, Zap } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useUIStore } from '../../store/useUIStore';
 import { useAppStore } from '../../store/useAppStore';
 import { applyGlobalTheme, applyBaseMode } from '../../utils/themeHelpers';
@@ -53,18 +54,30 @@ export const ThemeCreatorModal: React.FC = () => {
       addCustomTheme(draftTheme as Omit<CustomTheme, 'id'>);
     }
     setEditingThemeId(null);
-    setActiveTab('presets'); // Return to presets after save? Or stay? Let's stay.
+    setActiveTab('presets');
   };
+
+  const isModalDark = settings.modalTheme === 'dark' || (settings.modalTheme === 'auto' && settings.theme === 'dark');
+  const isModalGlass = settings.modalStyle === 'glass';
 
   return (
     <div className={cn(
-      "fixed inset-0 z-[200] flex items-center justify-center p-4 sm:p-6 bg-black/60 animate-in fade-in duration-300",
-      settings.isGlassEnabled && "backdrop-blur-sm"
-    )}>
-      <div className={cn(
-        "w-full max-w-4xl max-h-[90vh] glass-panel border border-border-primary rounded-3xl overflow-hidden flex flex-col shadow-2xl animate-in zoom-in-95 duration-300",
-        settings.isGlassEnabled ? "bg-bg-card/95" : "bg-bg-card"
-      )}>
+      "fixed inset-0 z-[200] flex items-center justify-center p-4 sm:p-6 bg-black/60 transition-all duration-300",
+      settings.isGlassEnabled && "backdrop-blur-sm shadow-2xl"
+    )} onClick={toggleThemeManager}>
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.95, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.95, y: 20 }}
+        className={cn(
+          "w-full max-w-4xl max-h-[90vh] rounded-[2.5rem] overflow-hidden flex flex-col shadow-2xl transition-all duration-500",
+          isModalDark 
+            ? (isModalGlass ? "bg-[#1a1a1a]/80 backdrop-blur-2xl border border-white/10" : "bg-[#2a2a2a] border border-border-primary/50 text-white")
+            : (isModalGlass ? "bg-white/70 backdrop-blur-2xl border border-white/40" : "bg-white border border-black/5 text-[#111827]"),
+          isModalDark ? "shadow-black/40" : "shadow-black/10"
+        )}
+        onClick={(e) => e.stopPropagation()}
+      >
         
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-border-primary shrink-0">
@@ -146,10 +159,75 @@ export const ThemeCreatorModal: React.FC = () => {
               </div>
             </div>
             
-            {/* Glass Toggle */}
+            {/* Modal Styles */}
+            <div className="mt-6 pt-6 border-t border-border-primary">
+              <h3 className="text-[10px] font-black text-text-secondary uppercase tracking-[0.2em] mb-4">Modal Style</h3>
+              <div className="grid grid-cols-2 gap-2">
+                <button 
+                  onClick={() => updateSettings({ modalStyle: 'solid' })}
+                  className={cn(
+                    "flex flex-col items-center gap-2 p-3 rounded-2xl border transition-all",
+                    settings.modalStyle === 'solid' ? "border-text-primary bg-text-primary/5" : "border-border-primary/50 hover:border-text-secondary"
+                  )}
+                >
+                  <Square size={20} className={settings.modalStyle === 'solid' ? "text-text-primary" : "text-text-secondary"} />
+                  <span className="text-[10px] font-bold uppercase tracking-wider">Solid</span>
+                </button>
+                <button 
+                  onClick={() => updateSettings({ modalStyle: 'glass' })}
+                  className={cn(
+                    "flex flex-col items-center gap-2 p-3 rounded-2xl border transition-all",
+                    settings.modalStyle === 'glass' ? "border-text-primary bg-text-primary/5" : "border-border-primary/50 hover:border-text-secondary"
+                  )}
+                >
+                  <Layers size={20} className={settings.modalStyle === 'glass' ? "text-text-primary" : "text-text-secondary"} />
+                  <span className="text-[10px] font-bold uppercase tracking-wider">Glass</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Modal Theme */}
+            <div className="mt-4">
+              <h3 className="text-[10px] font-black text-text-secondary uppercase tracking-[0.2em] mb-4">Modal Theme</h3>
+              <div className="grid grid-cols-3 gap-2">
+                <button 
+                  onClick={() => updateSettings({ modalTheme: 'light' })}
+                  className={cn(
+                    "flex flex-col items-center gap-2 p-2 rounded-2xl border transition-all",
+                    settings.modalTheme === 'light' ? "border-text-primary bg-text-primary/5" : "border-border-primary/50 hover:border-text-secondary"
+                  )}
+                >
+                  <Sun size={18} className={settings.modalTheme === 'light' ? "text-text-primary" : "text-text-secondary"} />
+                  <span className="text-[9px] font-bold uppercase tracking-tight">Light</span>
+                </button>
+                <button 
+                  onClick={() => updateSettings({ modalTheme: 'dark' })}
+                  className={cn(
+                    "flex flex-col items-center gap-2 p-2 rounded-2xl border transition-all",
+                    settings.modalTheme === 'dark' ? "border-text-primary bg-text-primary/5" : "border-border-primary/50 hover:border-text-secondary"
+                  )}
+                >
+                  <Moon size={18} className={settings.modalTheme === 'dark' ? "text-text-primary" : "text-text-secondary"} />
+                  <span className="text-[9px] font-bold uppercase tracking-tight">Dark</span>
+                </button>
+                <button 
+                  onClick={() => updateSettings({ modalTheme: 'auto' })}
+                  className={cn(
+                    "flex flex-col items-center gap-2 p-2 rounded-2xl border transition-all",
+                    settings.modalTheme === 'auto' ? "border-text-primary bg-text-primary/5" : "border-border-primary/50 hover:border-text-secondary"
+                  )}
+                >
+                  <Zap size={18} className={settings.modalTheme === 'auto' ? "text-text-primary" : "text-text-secondary"} />
+                  <span className="text-[9px] font-bold uppercase tracking-tight">Auto</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Global Settings */}
             <div className="mt-auto pt-6 border-t border-border-primary">
-              <label className="flex items-center justify-between cursor-pointer">
-                <span className="font-medium">Glassmorphism</span>
+              <h3 className="text-[10px] font-black text-text-secondary uppercase tracking-[0.2em] mb-4">Global</h3>
+              <label className="flex items-center justify-between cursor-pointer p-2 rounded-xl hover:bg-black/5 transition-colors">
+                <span className="text-sm font-medium">Glassmorphism</span>
                 <input 
                   type="checkbox" 
                   checked={settings.isGlassEnabled}
@@ -228,7 +306,7 @@ export const ThemeCreatorModal: React.FC = () => {
             )}
           </div>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 };

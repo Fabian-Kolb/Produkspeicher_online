@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
+import { motion } from 'framer-motion';
 import { supabase } from '../../lib/supabase';
 import { useUIStore } from '../../store/useUIStore';
 import { useAppStore } from '../../store/useAppStore';
@@ -112,31 +113,47 @@ export const ProfileSettingsModal: React.FC = () => {
     }
   };
 
+  const isModalDark = settings.modalTheme === 'dark' || (settings.modalTheme === 'auto' && settings.theme === 'dark');
+  const isModalGlass = settings.modalStyle === 'glass';
+
   if (!isProfileModalOpen) return null;
 
   return (
     <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
       <div 
         className={cn(
-          "absolute inset-0 bg-black/60 transition-all",
+          "absolute inset-0 bg-black/60 transition-opacity duration-300",
           settings.isGlassEnabled && "backdrop-blur-sm"
         )}
         onClick={toggleProfileModal}
       />
 
-      <div className={cn(
-        "relative z-10 w-full max-w-md border border-border-primary rounded-3xl p-6 md:p-8 shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200",
-        settings.isGlassEnabled ? "bg-bg-card/95 backdrop-blur-xl" : "bg-bg-card"
-      )}>
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.95, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.95, y: 20 }}
+        className={cn(
+          "relative z-10 w-full max-w-md rounded-[2.5rem] p-8 shadow-2xl overflow-hidden transition-all duration-500",
+          isModalDark 
+            ? (isModalGlass ? "bg-[#1a1a1a]/80 backdrop-blur-2xl border border-white/10 text-white" : "bg-[#2a2a2a] border border-border-primary/50 text-white")
+            : (isModalGlass ? "bg-white/70 backdrop-blur-2xl border border-white/40 text-[#111827]" : "bg-white border border-black/5 text-[#111827]"),
+          isModalDark ? "shadow-black/40" : "shadow-black/10"
+        )}
+      >
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
-          <h2 className="text-2xl font-bold font-playfair flex items-center gap-2">
-            <User className="text-text-secondary" />
-            Profil-Einstellungen
+          <h2 className="text-2xl font-bold font-playfair flex items-center gap-3">
+            <User className={cn("transition-colors", isModalDark ? "text-white/40" : "text-black/20")} />
+            Profil
           </h2>
           <button 
             onClick={toggleProfileModal}
-            className="w-8 h-8 flex items-center justify-center rounded-full bg-border-primary/50 hover:bg-border-primary text-text-secondary transition-colors"
+            className={cn(
+              "w-10 h-10 flex items-center justify-center rounded-xl transition-all",
+              isModalDark 
+                ? "bg-white/5 hover:bg-white/10 text-white/40 hover:text-white" 
+                : "bg-black/5 hover:bg-black/10 text-black/20 hover:text-black"
+            )}
           >
             <X size={18} />
           </button>
@@ -154,13 +171,21 @@ export const ProfileSettingsModal: React.FC = () => {
           <div className="flex flex-col items-center gap-4">
             <div 
               onClick={() => fileInputRef.current?.click()}
-              className="relative w-28 h-28 rounded-full border-2 border-border-primary flex items-center justify-center bg-bg-secondary cursor-pointer hover:border-text-primary transition-colors group overflow-hidden"
+              className={cn(
+                "relative w-28 h-28 rounded-full border-2 flex items-center justify-center cursor-pointer transition-all group overflow-hidden",
+                isModalDark 
+                  ? "bg-white/5 border-white/10 hover:border-white/30 shadow-inner" 
+                  : "bg-black/5 border-black/5 hover:border-black/10 shadow-inner"
+              )}
             >
               {avatarUrl ? (
                 <img src={avatarUrl} alt="Profil" className="w-full h-full object-cover" />
               ) : (
                 <div className="flex flex-col items-center gap-2">
-                  <ImagePlus className="w-8 h-8 text-text-muted group-hover:text-text-secondary transition-colors" />
+                  <ImagePlus className={cn(
+                    "w-8 h-8 transition-colors",
+                    isModalDark ? "text-white/20 group-hover:text-white/40" : "text-black/10 group-hover:text-black/20"
+                  )} />
                 </div>
               )}
               {isUploading && (
@@ -170,8 +195,8 @@ export const ProfileSettingsModal: React.FC = () => {
               )}
             </div>
             <div className="text-center">
-              <p className="text-sm font-medium text-text-primary">Profilbild</p>
-              <p className="text-xs text-text-muted">Klicken zum Ändern</p>
+              <p className="text-xs font-black uppercase tracking-[0.2em] opacity-40">Profilbild</p>
+              <p className="text-[10px] font-bold opacity-20 uppercase tracking-tight">Klicken zum Ändern</p>
             </div>
             <input 
               type="file" 
@@ -184,13 +209,21 @@ export const ProfileSettingsModal: React.FC = () => {
 
           {/* Name Section */}
           <div>
-            <label className="block text-sm font-medium text-text-secondary mb-2">Display Name</label>
+            <label className={cn(
+              "block text-[10px] font-black uppercase tracking-[0.2em] mb-3 opacity-40",
+              isModalDark ? "text-white" : "text-black"
+            )}>Display Name</label>
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Dein Vorname"
-              className="w-full bg-bg-secondary border border-border-primary rounded-xl px-4 py-3 text-text-primary focus:outline-none focus:border-text-primary transition-colors"
+              className={cn(
+                "w-full rounded-2xl px-5 py-4 text-sm font-medium focus:outline-none transition-all",
+                isModalDark 
+                  ? "bg-white/5 border border-white/5 focus:bg-white/10 focus:border-white/10 text-white placeholder:text-white/20" 
+                  : "bg-black/5 border border-black/5 focus:bg-black/[0.08] focus:border-black/5 text-black placeholder:text-black/20"
+              )}
             />
           </div>
 
@@ -199,26 +232,34 @@ export const ProfileSettingsModal: React.FC = () => {
             <button
               onClick={handleSave}
               disabled={isSubmitting || isUploading || !name.trim()}
-              className="w-full py-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-colors disabled:opacity-50
-                         bg-text-primary text-bg-primary hover:opacity-90"
+              className={cn(
+                "w-full py-4 rounded-2xl font-black text-xs uppercase tracking-[0.2em] flex items-center justify-center gap-3 transition-all disabled:opacity-50 shadow-lg",
+                isModalDark 
+                  ? "bg-white text-[#1a1a1a] hover:bg-white/90 shadow-white/5" 
+                  : "bg-black text-white hover:bg-black/90 shadow-black/10"
+              )}
             >
               {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
-              Änderungen speichern
+              Speichern
             </button>
             
             <button
               onClick={handleClearName}
               disabled={isSubmitting}
-              className="w-full py-3 rounded-xl font-medium flex items-center justify-center gap-2 transition-colors
-                         text-heart hover:bg-heart/10 border border-transparent hover:border-heart/20"
+              className={cn(
+                "w-full py-4 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] flex items-center justify-center gap-2 transition-all",
+                isModalDark 
+                  ? "text-heart/60 hover:text-heart hover:bg-heart/10" 
+                  : "text-heart/80 hover:text-heart hover:bg-heart/5"
+              )}
             >
               <Trash2 className="w-4 h-4" />
-              Namen löschen / Reset
+              Reset & Onboarding
             </button>
           </div>
 
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 };

@@ -50,6 +50,8 @@ export interface AppSettings {
   theme: 'dark' | 'light' | string;
   monthlyBudget: number;
   isGlassEnabled: boolean;
+  modalStyle: 'glass' | 'solid';
+  modalTheme: 'dark' | 'light' | 'auto';
   customThemes: CustomTheme[];
   activeThemeId: string;
   mobileGrid?: 'single' | 'multi';

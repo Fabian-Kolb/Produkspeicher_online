@@ -9,7 +9,7 @@ import { cn } from '../utils/cn';
 
 
 export const FavoritenView: React.FC = () => {
-  const { products, categories, subCats, settings } = useAppStore();
+  const { products, categories, subCats } = useAppStore();
   const {
     mainCat, selectedSubCats, sortMode, searchQuery, statusFilter,
     setSearchQuery, setSortMode, setStatusFilter
@@ -92,7 +92,7 @@ export const FavoritenView: React.FC = () => {
             onClick={() => setStatusFilter(statusFilter === 'bought' ? 'active' : 'bought')}
             className={cn(
               "px-5 py-2 rounded-full text-sm font-medium transition-all duration-300 shadow-sm border",
-              statusFilter === 'bought' 
+              statusFilter === 'bought'
                 ? "bg-blue-600 dark:bg-blue-500 text-white border-transparent"
                 : 'bg-slate-50/40 dark:bg-slate-800/20 border-slate-50 dark:border-slate-700/10 text-text-secondary hover:text-text-primary hover:scale-105 hover:shadow-md'
             )}
@@ -103,7 +103,7 @@ export const FavoritenView: React.FC = () => {
             onClick={() => setStatusFilter(statusFilter === 'reduced' ? 'active' : 'reduced')}
             className={cn(
               "px-5 py-2 rounded-full text-sm font-medium transition-all duration-300 shadow-sm border",
-              statusFilter === 'reduced' 
+              statusFilter === 'reduced'
                 ? "bg-blue-600 dark:bg-blue-500 text-white border-transparent"
                 : 'bg-slate-50/40 dark:bg-slate-800/20 border-slate-50 dark:border-slate-700/10 text-text-secondary hover:text-text-primary hover:scale-105 hover:shadow-md'
             )}

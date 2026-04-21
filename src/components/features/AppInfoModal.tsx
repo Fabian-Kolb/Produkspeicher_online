@@ -17,6 +17,15 @@ interface LogEntry {
 
 const CHANGELOG: LogEntry[] = [
   {
+    version: '0.5.8',
+    date: '21. April 2026',
+    changes: {
+      fixed: [
+        'TypeScript-Fehler "unused variable settings" in FavoritenView behoben'
+      ]
+    }
+  },
+  {
     version: '0.5.7',
     date: '21. April 2026',
     changes: {

@@ -17,6 +17,21 @@ interface LogEntry {
 
 const CHANGELOG: LogEntry[] = [
   {
+    version: '0.5.7',
+    date: '21. April 2026',
+    changes: {
+      improved: [
+        'Solid Blue Interaction Standard für den Solid-Modus verfeinert',
+        'Bundle-Editor Buttons (+, -, ×) jetzt mit blauem Rand und weißem Inhalt',
+        'Status-Filter (Gekauft/Reduziert) nutzen jetzt konsistent das Blue-Interaction Design',
+        'Optimierte Sichtbarkeit der Preis-Anzeige (dezentes Grau im Solid-Modus)',
+        'Filter-Chips (Kategorien, Status, Sub-Cats) jetzt deutlich grau wenn nicht ausgewählt',
+        'Trash-Icon Standard: Solid Blau + Weißes Icon standardmäßig im Solid-Modus',
+        'Trash-Icon Farbumschlag zu Solid Rot (bg-heart) nur auf Hover'
+      ]
+    }
+  },
+  {
     version: '0.5.4',
     date: '21. April 2026',
     changes: {

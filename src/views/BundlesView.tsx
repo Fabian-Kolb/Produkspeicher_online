@@ -203,7 +203,12 @@ export const BundlesView: React.FC = () => {
               <p className="text-text-secondary text-sm mb-8">Erstelle dein erstes Bundle um Produkte zu gruppieren.</p>
               <button
                 onClick={() => setActiveBundleId('new')}
-                className="bg-text-primary text-bg-primary px-6 py-3 rounded-full text-sm font-semibold hover:opacity-90 transition-opacity shadow-md"
+                className={cn(
+                  "px-6 py-3 rounded-full text-sm font-semibold transition-all shadow-md",
+                  settings.isGlassEnabled
+                    ? "bg-text-primary text-bg-primary hover:opacity-90"
+                    : "bg-blue-600 dark:bg-blue-500 text-white hover:bg-blue-700 dark:hover:bg-blue-600 shadow-blue-500/20"
+                )}
               >
                 Jetzt erstellen
               </button>
@@ -230,18 +235,33 @@ export const BundlesView: React.FC = () => {
                       </div>
 
                       {/* Right side: Price + Actions */}
-                      <div className="bg-white/10 border border-white/20 backdrop-blur-md rounded-2xl md:rounded-3xl p-3 md:p-4 flex flex-col items-end gap-2 md:gap-3 shrink-0 self-end md:self-start">
+                      <div className={cn(
+                        "backdrop-blur-md rounded-2xl md:rounded-3xl p-3 md:p-4 flex flex-col items-end gap-2 md:gap-3 shrink-0 self-end md:self-start border transition-all",
+                        settings.isGlassEnabled
+                          ? "bg-white/10 border-white/20"
+                          : "bg-slate-500/10 border-slate-500/20 shadow-sm"
+                      )}>
                         <span className="text-lg md:text-2xl font-bold text-text-primary">{totalPrice.toFixed(2)} €</span>
                         <div className="flex items-center gap-1.5 md:gap-2">
                           <button
                             onClick={() => setActiveBundleId(bundle.id)}
-                            className="bg-[var(--theme-glass-bg)] border border-[var(--theme-glass-border)] backdrop-blur-md px-2.5 md:px-4 py-1.5 rounded-full text-xs font-medium hover:bg-white/10 transition-colors"
+                            className={cn(
+                              "backdrop-blur-md px-2.5 md:px-4 py-1.5 rounded-full text-xs font-medium transition-all shadow-sm",
+                              settings.isGlassEnabled
+                                ? "bg-[var(--theme-glass-bg)] border border-[var(--theme-glass-border)] hover:bg-white/10"
+                                : "bg-blue-600 dark:bg-blue-500 text-white hover:bg-blue-700 dark:hover:bg-blue-600 shadow-blue-500/20"
+                            )}
                           >
                             Bearbeiten
                           </button>
                           <button
                             onClick={() => deleteBundle(bundle.id)}
-                            className="w-7 h-7 md:w-8 md:h-8 bg-[var(--theme-glass-bg)] border border-[var(--theme-glass-border)] rounded-full flex items-center justify-center text-text-secondary hover:text-heart transition-colors"
+                            className={cn(
+                              "w-7 h-7 md:w-8 md:h-8 rounded-full flex items-center justify-center transition-all shadow-sm group/trash border",
+                              settings.isGlassEnabled
+                                ? "bg-[var(--theme-glass-bg)] border-[var(--theme-glass-border)] text-text-secondary hover:text-heart hover:border-heart"
+                                : "bg-blue-600 dark:bg-blue-500 border-transparent text-white hover:bg-heart shadow-blue-500/20 shadow-md"
+                            )}
                           >
                             <Trash2 size={13} />
                           </button>
@@ -275,7 +295,12 @@ export const BundlesView: React.FC = () => {
 
                     {/* Bottom right: Kaufen button */}
                     <div className="flex justify-end">
-                      <button className="bg-text-primary text-bg-primary px-4 md:px-6 py-2 md:py-2.5 rounded-full text-sm font-semibold hover:opacity-90 transition-opacity shadow-md">
+                      <button className={cn(
+                        "px-4 md:px-6 py-2 md:py-2.5 rounded-full text-sm font-semibold transition-all shadow-md",
+                        settings.isGlassEnabled
+                          ? "bg-text-primary text-bg-primary hover:opacity-90"
+                          : "bg-blue-600 dark:bg-blue-500 text-white hover:bg-blue-700 dark:hover:bg-blue-600 shadow-blue-500/20"
+                      )}>
                         Kaufen
                       </button>
                     </div>
@@ -339,12 +364,10 @@ export const BundlesView: React.FC = () => {
                   <button
                     onClick={() => setEditorMainCat('Alle')}
                     className={cn(
-                      'px-3 py-1.5 rounded-full text-xs font-medium transition-all shadow-sm whitespace-nowrap shrink-0',
+                      'px-3 py-1.5 rounded-full text-xs font-medium transition-all shadow-sm border whitespace-nowrap shrink-0',
                       editorMainCat === 'Alle' 
-                        ? (settings.isGlassEnabled 
-                            ? "bg-text-primary text-bg-primary" 
-                            : "bg-blue-600 dark:bg-blue-500 text-white border border-transparent")
-                        : 'bg-[var(--theme-glass-bg)] border border-[var(--theme-glass-border)] text-text-secondary hover:text-text-primary'
+                        ? "bg-blue-600 dark:bg-blue-500 text-white border-transparent"
+                        : 'bg-slate-50/40 dark:bg-slate-800/20 border-slate-50 dark:border-slate-700/10 text-text-secondary hover:text-text-primary'
                     )}
                   >
                     Alle
@@ -354,12 +377,10 @@ export const BundlesView: React.FC = () => {
                       key={cat}
                       onClick={() => setEditorMainCat(cat)}
                       className={cn(
-                        'px-3 py-1.5 rounded-full text-xs font-medium transition-all shadow-sm whitespace-nowrap shrink-0',
+                        'px-3 py-1.5 rounded-full text-xs font-medium transition-all shadow-sm border whitespace-nowrap shrink-0',
                         editorMainCat === cat 
-                          ? (settings.isGlassEnabled 
-                              ? "bg-text-primary text-bg-primary" 
-                              : "bg-blue-600 dark:bg-blue-500 text-white border border-transparent")
-                          : 'bg-[var(--theme-glass-bg)] border border-[var(--theme-glass-border)] text-text-secondary hover:text-text-primary'
+                          ? "bg-blue-600 dark:bg-blue-500 text-white border-transparent"
+                          : 'bg-slate-50/40 dark:bg-slate-800/20 border-slate-50 dark:border-slate-700/10 text-text-secondary hover:text-text-primary'
                       )}
                     >
                       {cat}
@@ -372,8 +393,10 @@ export const BundlesView: React.FC = () => {
                   <button
                     onClick={() => setEditorStatusFilter(editorStatusFilter === 'bought' ? 'all' : 'bought')}
                     className={cn(
-                      'flex-1 py-1.5 rounded-full text-xs font-medium transition-all shadow-sm',
-                      editorStatusFilter === 'bought' ? 'bg-text-primary text-bg-primary border border-transparent' : 'bg-[var(--theme-glass-bg)] border border-[var(--theme-glass-border)] text-text-secondary hover:text-text-primary'
+                      'flex-1 py-1.5 rounded-full text-xs font-medium transition-all shadow-sm border',
+                      editorStatusFilter === 'bought' 
+                        ? "bg-blue-600 dark:bg-blue-500 text-white border-transparent" 
+                        : 'bg-slate-50/40 dark:bg-slate-800/20 border-slate-50 dark:border-slate-700/10 text-text-secondary hover:text-text-primary'
                     )}
                   >
                     Gekauft
@@ -381,8 +404,10 @@ export const BundlesView: React.FC = () => {
                   <button
                     onClick={() => setEditorStatusFilter(editorStatusFilter === 'reduced' ? 'all' : 'reduced')}
                     className={cn(
-                      'flex-1 py-1.5 rounded-full text-xs font-medium transition-all shadow-sm',
-                      editorStatusFilter === 'reduced' ? 'bg-text-primary text-bg-primary border border-transparent' : 'bg-[var(--theme-glass-bg)] border border-[var(--theme-glass-border)] text-text-secondary hover:text-text-primary'
+                      'flex-1 py-1.5 rounded-full text-xs font-medium transition-all shadow-sm border',
+                      editorStatusFilter === 'reduced' 
+                        ? "bg-blue-600 dark:bg-blue-500 text-white border-transparent" 
+                        : 'bg-slate-50/40 dark:bg-slate-800/20 border-slate-50 dark:border-slate-700/10 text-text-secondary hover:text-text-primary'
                     )}
                   >
                     Reduziert
@@ -395,8 +420,10 @@ export const BundlesView: React.FC = () => {
                     <button
                       onClick={() => setEditorSubCats([])}
                       className={cn(
-                        'px-3 py-1.5 rounded-full text-xs font-medium transition-all shadow-sm',
-                        editorSelectedSubCats.length === 0 ? 'bg-text-primary text-bg-primary border border-transparent' : 'bg-[var(--theme-glass-bg)] border border-[var(--theme-glass-border)] text-text-secondary hover:text-text-primary'
+                        'px-3 py-1.5 rounded-full text-xs font-medium transition-all shadow-sm border',
+                        editorSelectedSubCats.length === 0 
+                          ? "bg-blue-600 dark:bg-blue-500 text-white border-transparent" 
+                          : 'bg-slate-50/40 dark:bg-slate-800/20 border-slate-50 dark:border-slate-700/10 text-text-secondary hover:text-text-primary'
                       )}
                     >
                       Alle
@@ -412,8 +439,10 @@ export const BundlesView: React.FC = () => {
                           );
                         }}
                         className={cn(
-                          'px-3 py-1.5 rounded-full text-xs font-medium transition-all shadow-sm',
-                          editorSelectedSubCats.includes(sub) ? 'bg-text-primary text-bg-primary border border-transparent' : 'bg-[var(--theme-glass-bg)] border border-[var(--theme-glass-border)] text-text-secondary hover:text-text-primary'
+                          'px-3 py-1.5 rounded-full text-xs font-medium transition-all shadow-sm border',
+                          editorSelectedSubCats.includes(sub) 
+                            ? "bg-blue-600 dark:bg-blue-500 text-white border-transparent" 
+                            : 'bg-slate-50/40 dark:bg-slate-800/20 border-slate-50 dark:border-slate-700/10 text-text-secondary hover:text-text-primary'
                         )}
                       >
                         {sub}
@@ -500,19 +529,34 @@ export const BundlesView: React.FC = () => {
                         <div className="flex items-center gap-1.5 shrink-0 ml-2">
                           <button
                             onClick={() => handleDecreaseItem(item.id)}
-                            className="w-7 h-7 md:w-9 md:h-9 rounded-full bg-[var(--theme-glass-bg)] border border-[var(--theme-glass-border)] flex items-center justify-center text-text-primary hover:bg-white/20 transition-colors text-sm font-bold"
+                            className={cn(
+                              "w-7 h-7 md:w-9 md:h-9 rounded-full flex items-center justify-center transition-all text-sm font-bold shadow-sm",
+                              settings.isGlassEnabled
+                                ? "bg-[var(--theme-glass-bg)] border border-[var(--theme-glass-border)] text-text-primary hover:bg-white/20"
+                                : "bg-blue-600 dark:bg-blue-500 border-blue-600 dark:border-blue-500 text-white hover:bg-blue-700 dark:hover:bg-blue-600"
+                            )}
                           >
                             −
                           </button>
                           <button
                             onClick={() => handleAddItem(item.id)}
-                            className="w-7 h-7 md:w-9 md:h-9 rounded-full bg-[var(--theme-glass-bg)] border border-[var(--theme-glass-border)] flex items-center justify-center text-text-primary hover:bg-white/20 transition-colors text-sm font-bold"
+                            className={cn(
+                              "w-7 h-7 md:w-9 md:h-9 rounded-full flex items-center justify-center transition-all text-sm font-bold shadow-sm",
+                              settings.isGlassEnabled
+                                ? "bg-[var(--theme-glass-bg)] border border-[var(--theme-glass-border)] text-text-primary hover:bg-white/20"
+                                : "bg-blue-600 dark:bg-blue-500 border-blue-600 dark:border-blue-500 text-white hover:bg-blue-700 dark:hover:bg-blue-600"
+                            )}
                           >
                             +
                           </button>
                           <button
                             onClick={() => handleRemoveItem(item.id)}
-                            className="w-7 h-7 md:w-9 md:h-9 rounded-full bg-[var(--theme-glass-bg)] border border-[var(--theme-glass-border)] flex items-center justify-center text-text-primary hover:text-heart transition-colors text-sm font-bold"
+                            className={cn(
+                              "w-7 h-7 md:w-9 md:h-9 rounded-full flex items-center justify-center transition-all text-sm font-bold shadow-sm",
+                              settings.isGlassEnabled
+                                ? "bg-[var(--theme-glass-bg)] border border-[var(--theme-glass-border)] text-text-primary hover:text-heart"
+                                : "bg-blue-600 dark:bg-blue-500 border-blue-600 dark:border-blue-500 text-white hover:bg-blue-700 dark:hover:bg-blue-600 hover:text-white"
+                            )}
                           >
                             ×
                           </button>
@@ -530,7 +574,12 @@ export const BundlesView: React.FC = () => {
                 </div>
                 <button
                   onClick={handleCreateOrUpdate}
-                  className="w-full bg-[var(--theme-glass-bg)] border border-[var(--theme-glass-border)] py-2.5 md:py-3 rounded-xl text-sm font-medium hover:bg-black/5 dark:hover:bg-white/10 transition-colors shadow-sm"
+                  className={cn(
+                    "w-full py-2.5 md:py-3 rounded-xl text-sm font-medium transition-all shadow-sm",
+                    settings.isGlassEnabled
+                      ? "bg-[var(--theme-glass-bg)] border border-[var(--theme-glass-border)] hover:bg-black/5 dark:hover:bg-white/10"
+                      : "bg-blue-600 dark:bg-blue-500 text-white hover:bg-blue-700 dark:hover:bg-blue-600 shadow-blue-500/20"
+                  )}
                 >
                   Zusammenstellung speichern
                 </button>

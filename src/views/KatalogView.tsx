@@ -92,12 +92,10 @@ export const KatalogView: React.FC = () => {
           <button
             onClick={() => setStatusFilter(statusFilter === 'bought' ? 'active' : 'bought')}
             className={cn(
-              "px-5 py-2 rounded-full text-sm font-medium transition-all duration-300 shadow-sm",
+              "px-5 py-2 rounded-full text-sm font-medium transition-all duration-300 shadow-sm border",
               statusFilter === 'bought' 
-                ? (settings.isGlassEnabled 
-                    ? "bg-text-primary text-bg-primary" 
-                    : "bg-blue-600 dark:bg-blue-500 text-white border border-transparent")
-                : 'bg-[var(--theme-glass-bg)] border border-[var(--theme-glass-border)] backdrop-blur-md text-text-secondary hover:text-text-primary hover:scale-105 hover:shadow-md'
+                ? "bg-blue-600 dark:bg-blue-500 text-white border-transparent"
+                : 'bg-slate-50/40 dark:bg-slate-800/20 border-slate-50 dark:border-slate-700/10 text-text-secondary hover:text-text-primary hover:scale-105 hover:shadow-md'
             )}
           >
             Gekauft
@@ -105,12 +103,10 @@ export const KatalogView: React.FC = () => {
           <button
             onClick={() => setStatusFilter(statusFilter === 'reduced' ? 'active' : 'reduced')}
             className={cn(
-              "px-5 py-2 rounded-full text-sm font-medium transition-all duration-300 shadow-sm",
+              "px-5 py-2 rounded-full text-sm font-medium transition-all duration-300 shadow-sm border",
               statusFilter === 'reduced' 
-                ? (settings.isGlassEnabled 
-                    ? "bg-text-primary text-bg-primary" 
-                    : "bg-blue-600 dark:bg-blue-500 text-white border border-transparent")
-                : 'bg-[var(--theme-glass-bg)] border border-[var(--theme-glass-border)] backdrop-blur-md text-text-secondary hover:text-text-primary hover:scale-105 hover:shadow-md'
+                ? "bg-blue-600 dark:bg-blue-500 text-white border-transparent"
+                : 'bg-slate-50/40 dark:bg-slate-800/20 border-slate-50 dark:border-slate-700/10 text-text-secondary hover:text-text-primary hover:scale-105 hover:shadow-md'
             )}
           >
             Reduziert
@@ -133,10 +129,8 @@ export const KatalogView: React.FC = () => {
               className={cn(
                 "px-5 py-2 rounded-full text-sm font-medium transition-colors border shadow-sm",
                 selectedSubCats.includes(sub)
-                  ? (settings.isGlassEnabled 
-                      ? "bg-text-primary text-bg-primary border-transparent" 
-                      : "bg-blue-600 dark:bg-blue-500 text-white border-transparent")
-                  : 'bg-[var(--theme-glass-bg)]/50 backdrop-blur-md text-text-secondary border-border-primary/30 hover:text-text-primary hover:bg-[var(--theme-glass-bg)]'
+                  ? "bg-blue-600 dark:bg-blue-500 text-white border-transparent"
+                  : 'bg-slate-50/40 dark:bg-slate-800/20 border-slate-50 dark:border-slate-700/10 text-text-secondary hover:text-text-primary'
               )}
             >
               {sub}

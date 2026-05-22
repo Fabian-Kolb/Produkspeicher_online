@@ -149,18 +149,28 @@ export const AppContainer: React.FC = () => {
       if (Math.abs(dx) > threshold) {
         if (dx > 0 && currentIndex > 0) {
           // Swipe Right -> Slide to previous route
-          navigate(ROUTES[currentIndex - 1]);
+          const targetIndex = currentIndex - 1;
+          carouselRef.current.style.transition = 'transform 0.4s cubic-bezier(0.16, 1, 0.3, 1)';
+          carouselRef.current.offsetHeight; // Force reflow
+          carouselRef.current.style.transform = `translateX(-${targetIndex * (100 / 6)}%)`;
+          navigate(ROUTES[targetIndex]);
         } else if (dx < 0 && currentIndex < ROUTES.length - 1) {
           // Swipe Left -> Slide to next route
-          navigate(ROUTES[currentIndex + 1]);
+          const targetIndex = currentIndex + 1;
+          carouselRef.current.style.transition = 'transform 0.4s cubic-bezier(0.16, 1, 0.3, 1)';
+          carouselRef.current.offsetHeight; // Force reflow
+          carouselRef.current.style.transform = `translateX(-${targetIndex * (100 / 6)}%)`;
+          navigate(ROUTES[targetIndex]);
         } else {
           // Dragged boundary -> Snap back
           carouselRef.current.style.transition = 'transform 0.4s cubic-bezier(0.16, 1, 0.3, 1)';
+          carouselRef.current.offsetHeight; // Force reflow
           carouselRef.current.style.transform = `translateX(-${currentIndex * (100 / 6)}%)`;
         }
       } else {
         // Did not meet swipe threshold -> Snap back
         carouselRef.current.style.transition = 'transform 0.4s cubic-bezier(0.16, 1, 0.3, 1)';
+        carouselRef.current.offsetHeight; // Force reflow
         carouselRef.current.style.transform = `translateX(-${currentIndex * (100 / 6)}%)`;
       }
     }

@@ -17,6 +17,15 @@ interface LogEntry {
 
 const CHANGELOG: LogEntry[] = [
   {
+    version: '0.6.1',
+    date: '22. Mai 2026',
+    changes: {
+      fixed: [
+        'Übergangsanimation bei mobilen Wischgesten auf Release-Ebene flüssig animiert (Reflow-getriggert)'
+      ]
+    }
+  },
+  {
     version: '0.6.0',
     date: '22. Mai 2026',
     changes: {

@@ -5,8 +5,10 @@
   --color-brand-light: #f4f4f5;
   --color-brand-dark: #121212;
 
-  --color-accent-light: #3b82f6;
-  --color-accent-dark: #60a5fa;
+  --color-accent: var(--accent-color);
+  --color-accent-hover: var(--accent-hover-color);
+  --color-inactive-btn-bg: var(--inactive-btn-bg);
+  --color-inactive-btn-text: var(--inactive-btn-text);
 
   --color-bg-primary: var(--bg-color);
   --color-bg-card: var(--card-bg);
@@ -37,6 +39,10 @@
     --text-grey: #a0a0a0;
     --input-border: #404040;
     --heart-color: #ef4444;
+    --accent-color: #3b82f6;
+    --accent-hover-color: #2563eb;
+    --inactive-btn-bg: #333333;
+    --inactive-btn-text: #888888;
     --theme-glass-bg: rgba(42, 42, 42, 0.7);
     --theme-glass-border: rgba(255, 255, 255, 0.1);
   }
@@ -56,16 +62,20 @@
 
 @layer utilities {
   .glass-panel {
-    @apply border border-[var(--theme-glass-border)] rounded-3xl shadow-[0_8px_32px_rgba(0,0,0,0.05)];
+    border: 1px solid var(--input-border);
+    border-radius: 1.5rem;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.05);
     background-color: var(--card-bg);
-    transition: background-color 0.3s ease, backdrop-filter 0.3s ease;
+    transition: background-color 0.3s ease, border-color 0.3s ease, backdrop-filter 0.3s ease;
   }
 
   :root.glass-enabled .glass-panel,
   body.glass-enabled .glass-panel {
-    @apply bg-[var(--theme-glass-bg)] backdrop-blur-xl;
+    background-color: var(--theme-glass-bg);
+    border-color: var(--theme-glass-border);
+    backdrop-filter: blur(24px);
   }
   .focus-ring {
-    @apply focus:outline-none focus:ring-2 focus:ring-accent-dark focus:border-transparent;
+    @apply focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent;
   }
 }

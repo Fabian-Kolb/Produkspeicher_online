@@ -1,11 +1,26 @@
 import React, { useState, useEffect } from 'react';
-import { X, Check, Trash2, Square, Layers, Sun, Moon, Zap } from 'lucide-react';
+import { X, Check, Trash2, Layers } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useUIStore } from '../../store/useUIStore';
 import { useAppStore } from '../../store/useAppStore';
-import { applyGlobalTheme, applyBaseMode } from '../../utils/themeHelpers';
+import { applyGlobalTheme, applyBaseMode, THEME_PRESETS, rgbaToHexAndAlpha, hexToRgba } from '../../utils/themeHelpers';
 import { cn } from '../../utils/cn';
 import type { CustomTheme } from '../../types';
+
+const COLOR_LABELS: Record<string, string> = {
+  bg: 'App-Hintergrund',
+  card: 'Karten & Paneele',
+  border: 'Rahmen & Linien',
+  textDark: 'Haupttext',
+  textGrey: 'Nebentext',
+  accent: 'Akzent (Aktiv)',
+  accentHover: 'Akzent Hover',
+  inactiveBtnBg: 'Inaktiver Button-Hintergrund',
+  inactiveBtnText: 'Inaktiver Button-Text',
+  heart: 'Herz-Farbe (Favoriten)',
+  glassBg: 'Glas-Hintergrund',
+  glassBorder: 'Glas-Rahmen',
+};
 
 export const ThemeCreatorModal: React.FC = () => {
   const { isThemeManagerOpen, toggleThemeManager } = useUIStore();
@@ -18,36 +33,63 @@ export const ThemeCreatorModal: React.FC = () => {
   const [draftTheme, setDraftTheme] = useState<Partial<CustomTheme>>({
     name: 'Mein Theme',
     colors: {
-      bg: '#1a1a1a', card: '#2a2a2a', textDark: '#ffffff', textGrey: '#a0a0a0',
-      border: '#404040', heart: '#FF3366', glassBg: 'rgba(42, 42, 42, 0.7)', glassBorder: 'rgba(255, 255, 255, 0.1)'
+      bg: '#1a1a1a',
+      card: '#252525',
+      border: '#333333',
+      textDark: '#ffffff',
+      textGrey: '#a0a0a0',
+      accent: '#3b82f6',
+      accentHover: '#2563eb',
+      inactiveBtnBg: '#333333',
+      inactiveBtnText: '#888888',
+      heart: '#ef4444',
+      glassBg: 'rgba(37, 37, 37, 0.7)',
+      glassBorder: 'rgba(255, 255, 255, 0.08)'
     }
   });
 
   // Apply draft colors live when editing
   useEffect(() => {
     if (activeTab === 'custom' && draftTheme.colors) {
-      applyGlobalTheme(draftTheme.colors);
+      applyGlobalTheme(draftTheme.colors, settings.theme === 'dark');
     } else {
       // Revert to saved settings
-      applyBaseMode(settings.theme);
-      if (settings.activeThemeId !== 'default') {
-        const t = settings.customThemes.find(t => t.id === settings.activeThemeId);
-        if (t) applyGlobalTheme(t.colors);
+      const preset = THEME_PRESETS.find(p => p.id === settings.activeThemeId);
+      if (preset) {
+        applyGlobalTheme(preset.colors, preset.isDark);
+      } else {
+        const custom = settings.customThemes.find(t => t.id === settings.activeThemeId);
+        if (custom) {
+          applyGlobalTheme(custom.colors, settings.theme === 'dark');
+        } else {
+          applyBaseMode(settings.theme);
+        }
       }
     }
   }, [activeTab, draftTheme.colors, settings.theme, settings.activeThemeId, settings.customThemes]);
 
   if (!isThemeManagerOpen) return null;
 
-  const handleApplyPreset = (mode: 'light' | 'dark') => {
-    updateSettings({ theme: mode, activeThemeId: 'default' });
+  const handleApplyPreset = (presetId: string) => {
+    const preset = THEME_PRESETS.find(p => p.id === presetId);
+    if (preset) {
+      updateSettings({ 
+        theme: preset.isDark ? 'dark' : 'light',
+        activeThemeId: presetId 
+      });
+    }
   };
 
   const handleApplyCustom = (themeId: string) => {
-    updateSettings({ activeThemeId: themeId });
+    const custom = settings.customThemes.find(t => t.id === themeId);
+    if (custom) {
+      updateSettings({ activeThemeId: themeId });
+    }
   };
 
   const handleSaveDraft = () => {
+    if (!draftTheme.name || !draftTheme.colors) return;
+    
     if (editingThemeId) {
       updateCustomTheme(editingThemeId, draftTheme);
     } else {
@@ -56,9 +98,6 @@ export const ThemeCreatorModal: React.FC = () => {
     setEditingThemeId(null);
     setActiveTab('presets');
   };
-
-  const isModalDark = settings.modalTheme === 'dark' || (settings.modalTheme === 'auto' && settings.theme === 'dark');
-  const isModalGlass = settings.modalStyle === 'glass';
 
   return (
     <div className={cn(
@@ -69,13 +108,7 @@ export const ThemeCreatorModal: React.FC = () => {
         initial={{ opacity: 0, scale: 0.95, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 20 }}
-        className={cn(
-          "w-full max-w-4xl max-h-[90vh] rounded-[2.5rem] overflow-hidden flex flex-col shadow-2xl transition-all duration-500",
-          isModalDark 
-            ? (isModalGlass ? "bg-[#1a1a1a]/80 backdrop-blur-2xl border border-white/10" : "bg-[#2a2a2a] border border-border-primary/50 text-white")
-            : (isModalGlass ? "bg-white/70 backdrop-blur-2xl border border-white/40" : "bg-white border border-black/5 text-[#111827]"),
-          isModalDark ? "shadow-black/40" : "shadow-black/10"
-        )}
+        className="w-full max-w-4xl max-h-[90vh] rounded-[2.5rem] overflow-hidden flex flex-col shadow-2xl transition-all duration-500 glass-panel text-text-primary bg-bg-card border border-border-primary"
         onClick={(e) => e.stopPropagation()}
       >
         
@@ -92,147 +125,103 @@ export const ThemeCreatorModal: React.FC = () => {
           <div className="w-full md:w-1/3 border-b md:border-b-0 md:border-r border-border-primary p-4 md:p-6 flex flex-col gap-4 overflow-y-auto hidden-scrollbar">
             {/* Presets */}
             <div>
-              <h3 className="text-sm font-bold text-text-secondary uppercase tracking-wider mb-4">Standard</h3>
-              <div className="flex flex-col gap-3">
-                <button 
-                  onClick={() => handleApplyPreset('light')}
-                  className={cn(
-                    "p-4 rounded-xl border flex items-center justify-between transition-all",
-                    settings.theme === 'light' && settings.activeThemeId === 'default' ? "border-text-primary bg-text-primary/5" : "border-border-primary hover:border-text-secondary"
-                  )}
-                >
-                  <span className="font-medium">Light Mode</span>
-                  {settings.theme === 'light' && settings.activeThemeId === 'default' && <Check size={16} />}
-                </button>
-                <button 
-                  onClick={() => handleApplyPreset('dark')}
-                  className={cn(
-                    "p-4 rounded-xl border flex items-center justify-between transition-all",
-                    settings.theme === 'dark' && settings.activeThemeId === 'default' ? "border-text-primary bg-text-primary/5" : "border-border-primary hover:border-text-secondary"
-                  )}
-                >
-                  <span className="font-medium">Dark Mode</span>
-                  {settings.theme === 'dark' && settings.activeThemeId === 'default' && <Check size={16} />}
-                </button>
+              <h3 className="text-xs font-black text-text-secondary uppercase tracking-[0.2em] mb-4">Standard Presets</h3>
+              <div className="flex flex-col gap-2">
+                {THEME_PRESETS.map((preset) => (
+                  <button 
+                    key={preset.id}
+                    onClick={() => handleApplyPreset(preset.id)}
+                    className={cn(
+                      "p-3 rounded-xl border flex items-center justify-between transition-all text-left",
+                      settings.activeThemeId === preset.id ? "border-text-primary bg-text-primary/5 font-bold" : "border-border-primary hover:border-text-secondary"
+                    )}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-4 h-4 rounded-full border border-border-primary" style={{ backgroundColor: preset.colors.accent }}></div>
+                      <span className="text-sm font-medium">{preset.name}</span>
+                    </div>
+                    {settings.activeThemeId === preset.id && <Check size={16} />}
+                  </button>
+                ))}
               </div>
             </div>
 
             {/* Custom List */}
-            <div className="mt-6">
+            <div className="mt-4">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-sm font-bold text-text-secondary uppercase tracking-wider">Eigene Themes</h3>
-                <button onClick={() => { setActiveTab('custom'); setEditingThemeId(null); setDraftTheme({name: 'Neues Theme', colors: {...draftTheme.colors!}}); }} className="text-xs font-bold text-text-primary hover:underline">
+                <h3 className="text-xs font-black text-text-secondary uppercase tracking-[0.2em]">Eigene Themes</h3>
+                <button 
+                  onClick={() => { 
+                    setActiveTab('custom'); 
+                    setEditingThemeId(null); 
+                    setDraftTheme({
+                      name: 'Mein Theme',
+                      colors: {
+                        bg: '#1a1a1a',
+                        card: '#252525',
+                        border: '#333333',
+                        textDark: '#ffffff',
+                        textGrey: '#a0a0a0',
+                        accent: '#3b82f6',
+                        accentHover: '#2563eb',
+                        inactiveBtnBg: '#333333',
+                        inactiveBtnText: '#888888',
+                        heart: '#ef4444',
+                        glassBg: 'rgba(37, 37, 37, 0.7)',
+                        glassBorder: 'rgba(255, 255, 255, 0.08)'
+                      }
+                    }); 
+                  }} 
+                  className="text-xs font-bold text-accent hover:underline"
+                >
                   + Neu
                 </button>
               </div>
-              <div className="flex flex-col gap-3">
-                {settings.customThemes.map(t => (
+              <div className="flex flex-col gap-2">
+                {settings.customThemes.filter(t => !THEME_PRESETS.some(p => p.id === t.id)).map(t => (
                   <div key={t.id} className="flex gap-2">
                     <button 
                       onClick={() => handleApplyCustom(t.id)}
                       className={cn(
-                        "flex-1 p-4 rounded-xl border flex items-center justify-between transition-all text-left",
-                        settings.activeThemeId === t.id ? "border-text-primary bg-text-primary/5" : "border-border-primary hover:border-text-secondary"
+                        "flex-1 p-3 rounded-xl border flex items-center justify-between transition-all text-left",
+                        settings.activeThemeId === t.id ? "border-text-primary bg-text-primary/5 font-bold" : "border-border-primary hover:border-text-secondary"
                       )}
                     >
-                      <span className="font-medium">{t.name}</span>
+                      <span className="text-sm font-medium">{t.name}</span>
                       {settings.activeThemeId === t.id && <Check size={16} />}
                     </button>
                     <button 
                       onClick={() => { setActiveTab('custom'); setEditingThemeId(t.id); setDraftTheme(t); }}
-                      className="w-10 flex items-center justify-center rounded-xl border border-border-primary hover:bg-black/5"
+                      className="w-10 h-10 flex items-center justify-center rounded-xl border border-border-primary hover:bg-black/5"
                       title="Bearbeiten"
                     >
                       ✏️
                     </button>
-                    {t.id !== 'default' && (
-                      <button 
-                        onClick={() => deleteCustomTheme(t.id)}
-                        className="w-10 flex items-center justify-center rounded-xl border border-border-primary hover:bg-heart/10 text-heart"
-                        title="Löschen"
-                      >
-                        <Trash2 size={16} />
-                      </button>
-                    )}
+                    <button 
+                      onClick={() => deleteCustomTheme(t.id)}
+                      className="w-10 h-10 flex items-center justify-center rounded-xl border border-border-primary hover:bg-heart/10 text-heart"
+                      title="Löschen"
+                    >
+                      <Trash2 size={16} />
+                    </button>
                   </div>
                 ))}
               </div>
             </div>
             
-            {/* Modal Styles */}
-            <div className="mt-6 pt-6 border-t border-border-primary">
-              <h3 className="text-[10px] font-black text-text-secondary uppercase tracking-[0.2em] mb-4">Modal Style</h3>
-              <div className="grid grid-cols-2 gap-2">
-                <button 
-                  onClick={() => updateSettings({ modalStyle: 'solid' })}
-                  className={cn(
-                    "flex flex-col items-center gap-2 p-3 rounded-2xl border transition-all",
-                    settings.modalStyle === 'solid' ? "border-text-primary bg-text-primary/5" : "border-border-primary/50 hover:border-text-secondary"
-                  )}
-                >
-                  <Square size={20} className={settings.modalStyle === 'solid' ? "text-text-primary" : "text-text-secondary"} />
-                  <span className="text-[10px] font-bold uppercase tracking-wider">Solid</span>
-                </button>
-                <button 
-                  onClick={() => updateSettings({ modalStyle: 'glass' })}
-                  className={cn(
-                    "flex flex-col items-center gap-2 p-3 rounded-2xl border transition-all",
-                    settings.modalStyle === 'glass' ? "border-text-primary bg-text-primary/5" : "border-border-primary/50 hover:border-text-secondary"
-                  )}
-                >
-                  <Layers size={20} className={settings.modalStyle === 'glass' ? "text-text-primary" : "text-text-secondary"} />
-                  <span className="text-[10px] font-bold uppercase tracking-wider">Glass</span>
-                </button>
-              </div>
-            </div>
-
-            {/* Modal Theme */}
-            <div className="mt-4">
-              <h3 className="text-[10px] font-black text-text-secondary uppercase tracking-[0.2em] mb-4">Modal Theme</h3>
-              <div className="grid grid-cols-3 gap-2">
-                <button 
-                  onClick={() => updateSettings({ modalTheme: 'light' })}
-                  className={cn(
-                    "flex flex-col items-center gap-2 p-2 rounded-2xl border transition-all",
-                    settings.modalTheme === 'light' ? "border-text-primary bg-text-primary/5" : "border-border-primary/50 hover:border-text-secondary"
-                  )}
-                >
-                  <Sun size={18} className={settings.modalTheme === 'light' ? "text-text-primary" : "text-text-secondary"} />
-                  <span className="text-[9px] font-bold uppercase tracking-tight">Light</span>
-                </button>
-                <button 
-                  onClick={() => updateSettings({ modalTheme: 'dark' })}
-                  className={cn(
-                    "flex flex-col items-center gap-2 p-2 rounded-2xl border transition-all",
-                    settings.modalTheme === 'dark' ? "border-text-primary bg-text-primary/5" : "border-border-primary/50 hover:border-text-secondary"
-                  )}
-                >
-                  <Moon size={18} className={settings.modalTheme === 'dark' ? "text-text-primary" : "text-text-secondary"} />
-                  <span className="text-[9px] font-bold uppercase tracking-tight">Dark</span>
-                </button>
-                <button 
-                  onClick={() => updateSettings({ modalTheme: 'auto' })}
-                  className={cn(
-                    "flex flex-col items-center gap-2 p-2 rounded-2xl border transition-all",
-                    settings.modalTheme === 'auto' ? "border-text-primary bg-text-primary/5" : "border-border-primary/50 hover:border-text-secondary"
-                  )}
-                >
-                  <Zap size={18} className={settings.modalTheme === 'auto' ? "text-text-primary" : "text-text-secondary"} />
-                  <span className="text-[9px] font-bold uppercase tracking-tight">Auto</span>
-                </button>
-              </div>
-            </div>
-
             {/* Global Settings */}
             <div className="mt-auto pt-6 border-t border-border-primary">
-              <h3 className="text-[10px] font-black text-text-secondary uppercase tracking-[0.2em] mb-4">Global</h3>
-              <label className="flex items-center justify-between cursor-pointer p-2 rounded-xl hover:bg-black/5 transition-colors">
-                <span className="text-sm font-medium">Glassmorphism</span>
+              <h3 className="text-xs font-black text-text-secondary uppercase tracking-[0.2em] mb-4">Optionen</h3>
+              <label className="flex items-center justify-between cursor-pointer p-3 rounded-xl hover:bg-text-primary/5 transition-colors border border-border-primary/50">
+                <span className="text-sm font-medium flex items-center gap-2">
+                  <Layers size={16} />
+                  Glassmorphismus
+                </span>
                 <input 
                   type="checkbox" 
                   checked={settings.isGlassEnabled}
                   onChange={(e) => updateSettings({ isGlassEnabled: e.target.checked })}
-                  className="w-5 h-5 accent-text-primary rounded cursor-pointer"
+                  className="w-5 h-5 accent-accent rounded cursor-pointer"
                 />
               </label>
             </div>
@@ -241,63 +230,159 @@ export const ThemeCreatorModal: React.FC = () => {
           {/* Right Content Area */}
           <div className="w-full md:w-2/3 p-4 md:p-8 overflow-y-auto bg-black/5">
             {activeTab === 'presets' ? (
-              <div className="h-full flex flex-col items-center justify-center text-center text-text-secondary">
+              <div className="h-full flex flex-col items-center justify-center text-center text-text-secondary p-6">
                 <div className="text-6xl mb-4">🎨</div>
                 <h3 className="text-xl font-bold font-playfair mb-2 text-text-primary">Theme & Design Manager</h3>
-                <p className="max-w-md">Wähle ein Standard-Theme, aktiviere Glass-Effekte oder erstelle auf der linken Seite dein komplett eigenes Farbschema.</p>
+                <p className="max-w-md text-sm">Wähle ein vordefiniertes Preset, schalte Glassmorphismus an/aus, oder erstelle dein ganz persönliches Theme über den "+ Neu" Button.</p>
               </div>
             ) : (
-              <div className="animate-in fade-in slide-in-from-right-8 duration-300">
-                <div className="flex justify-between items-center mb-6">
+              <div className="animate-in fade-in slide-in-from-right-8 duration-300 flex flex-col gap-6">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-border-primary pb-4">
                   <input 
                     type="text" 
                     value={draftTheme.name}
                     onChange={e => setDraftTheme({...draftTheme, name: e.target.value})}
-                    className="text-2xl font-playfair font-bold bg-transparent border-b border-border-primary outline-none focus:border-text-primary px-2 py-1"
+                    className="text-2xl font-playfair font-bold bg-transparent border-b border-border-primary outline-none focus:border-text-primary px-2 py-1 w-full sm:w-auto"
+                    placeholder="Theme Name"
                   />
-                  <div className="flex gap-3">
+                  <div className="flex gap-3 w-full sm:w-auto justify-end shrink-0">
                     <button onClick={() => setActiveTab('presets')} className="px-4 py-2 rounded-xl text-sm font-medium border border-border-primary hover:bg-black/5">Abbrechen</button>
-                    <button onClick={handleSaveDraft} className="px-4 py-2 rounded-xl text-sm font-medium bg-text-primary text-bg-primary hover:opacity-90 shadow-md">Speichern</button>
+                    <button onClick={handleSaveDraft} className="px-5 py-2 rounded-xl text-sm font-medium bg-accent text-bg-primary hover:opacity-90 shadow-md">Speichern</button>
                   </div>
                 </div>
 
                 {/* Color Pickers Generator */}
-                <div className="grid grid-cols-2 gap-6">
-                  {draftTheme.colors && Object.entries(draftTheme.colors).map(([key, val]) => (
-                    <div key={key} className="flex flex-col gap-2">
-                      <label className="text-xs font-semibold uppercase tracking-wider text-text-secondary">{key.replace(/([A-Z])/g, ' $1').trim()}</label>
-                      <div className="flex gap-3 items-center">
-                        <div className="relative w-10 h-10 rounded-lg overflow-hidden border border-border-primary shadow-inner shrink-0 cursor-pointer">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {draftTheme.colors && Object.entries(draftTheme.colors).map(([key, val]) => {
+                    const isGlassColor = key === 'glassBg' || key === 'glassBorder';
+                    const { hex, alpha } = rgbaToHexAndAlpha(val);
+
+                    return (
+                      <div key={key} className="flex flex-col gap-2 p-4 rounded-2xl border border-border-primary/50 bg-bg-card/50">
+                        <label className="text-[10px] font-black uppercase tracking-wider text-text-secondary">
+                          {COLOR_LABELS[key] || key}
+                        </label>
+                        
+                        <div className="flex gap-3 items-center">
+                          <div className="relative w-10 h-10 rounded-lg overflow-hidden border border-border-primary shadow-inner shrink-0 cursor-pointer">
+                            <input 
+                              type="color" 
+                              value={isGlassColor ? hex : val} 
+                              onChange={e => {
+                                const newHex = e.target.value;
+                                const newVal = isGlassColor ? hexToRgba(newHex, alpha) : newHex;
+                                setDraftTheme({
+                                  ...draftTheme,
+                                  colors: { ...draftTheme.colors!, [key]: newVal }
+                                });
+                              }}
+                              className="absolute -inset-2 w-14 h-14 cursor-pointer"
+                            />
+                          </div>
                           <input 
-                            type="color" 
-                            value={val.length === 7 ? val : '#ffffff'} 
-                            onChange={e => setDraftTheme({...draftTheme, colors: {...draftTheme.colors!, [key]: e.target.value}})}
-                            className="absolute -inset-2 w-14 h-14 cursor-pointer"
-                            // Color picker inputs struggle with rgba, so a real app might need a custom hex/rgba component
+                            type="text" 
+                            value={val}
+                            onChange={e => {
+                              setDraftTheme({
+                                ...draftTheme,
+                                colors: { ...draftTheme.colors!, [key]: e.target.value }
+                              });
+                            }}
+                            className="flex-1 bg-bg-card border border-border-primary rounded-lg px-3 py-2 text-xs font-mono outline-none focus:border-text-secondary"
                           />
                         </div>
-                        <input 
-                          type="text" 
-                          value={val}
-                          onChange={e => setDraftTheme({...draftTheme, colors: {...draftTheme.colors!, [key]: e.target.value}})}
-                          className="flex-1 bg-bg-card border border-border-primary rounded-lg px-3 py-2 text-sm font-mono outline-none focus:border-text-secondary"
-                        />
+
+                        {isGlassColor && (
+                          <div className="flex flex-col gap-1 mt-2">
+                            <div className="flex justify-between text-[10px] text-text-secondary font-bold">
+                              <span>Deckkraft (Opacity)</span>
+                              <span>{Math.round(alpha * 100)}%</span>
+                            </div>
+                            <input 
+                              type="range"
+                              min="0"
+                              max="100"
+                              value={Math.round(alpha * 100)}
+                              onChange={e => {
+                                const newAlpha = parseInt(e.target.value) / 100;
+                                const newVal = hexToRgba(hex, newAlpha);
+                                setDraftTheme({
+                                  ...draftTheme,
+                                  colors: { ...draftTheme.colors!, [key]: newVal }
+                                });
+                              }}
+                              className="w-full accent-accent h-1.5 bg-border-primary rounded-lg appearance-none cursor-pointer"
+                            />
+                          </div>
+                        )}
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
-                
+
                 {/* Live Preview Minimap */}
-                <div className="mt-10 p-6 rounded-2xl border border-border-primary glass-panel" style={{ background: draftTheme.colors?.bg }}>
-                  <h4 className="font-playfair font-bold mb-4" style={{ color: draftTheme.colors?.textDark }}>Live Vorschau</h4>
-                  <div className="flex gap-4">
-                    <div className="flex-1 p-4 rounded-xl border" style={{ background: draftTheme.colors?.card, borderColor: draftTheme.colors?.border }}>
-                      <div className="h-4 w-1/2 rounded mb-2" style={{ background: draftTheme.colors?.textDark }}></div>
-                      <div className="h-3 w-full rounded mb-4" style={{ background: draftTheme.colors?.textGrey }}></div>
-                      <button className="px-4 py-2 rounded-lg text-xs font-bold w-full" style={{ background: draftTheme.colors?.textDark, color: draftTheme.colors?.bg }}>Aktion</button>
+                <div className="mt-4 p-6 rounded-3xl border border-border-primary relative overflow-hidden" style={{ background: draftTheme.colors?.bg }}>
+                  {/* Glowing Blobs for preview if glassmorphism is checked */}
+                  {settings.isGlassEnabled && (
+                    <div className="absolute inset-0 pointer-events-none overflow-hidden opacity-30 z-0">
+                      <div className="absolute top-[-25%] left-[-10%] w-[60%] h-[60%] bg-violet-600/40 rounded-full blur-[80px]" />
+                      <div className="absolute bottom-[-25%] right-[-10%] w-[60%] h-[60%] bg-pink-500/30 rounded-full blur-[80px]" />
                     </div>
-                    <div className="flex-1 p-4 rounded-xl border flex items-center justify-center" style={{ background: draftTheme.colors?.glassBg, borderColor: draftTheme.colors?.glassBorder }}>
-                      <span className="font-bold" style={{ color: draftTheme.colors?.heart }}>❤</span>
+                  )}
+
+                  <div className="relative z-10">
+                    <h4 className="text-[10px] font-black uppercase tracking-[0.2em] mb-4" style={{ color: draftTheme.colors?.textDark }}>Live Vorschau</h4>
+                    
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      {/* Left Minimap Card */}
+                      <div 
+                        className={cn(
+                          "p-5 rounded-2xl border transition-all duration-300",
+                          settings.isGlassEnabled ? "backdrop-blur-xl" : ""
+                        )}
+                        style={{ 
+                          backgroundColor: settings.isGlassEnabled ? draftTheme.colors?.glassBg : draftTheme.colors?.card, 
+                          borderColor: settings.isGlassEnabled ? draftTheme.colors?.glassBorder : draftTheme.colors?.border 
+                        }}
+                      >
+                        <div className="h-3 w-2/3 rounded mb-2" style={{ background: draftTheme.colors?.textDark }}></div>
+                        <div className="h-2 w-full rounded mb-4" style={{ background: draftTheme.colors?.textGrey }}></div>
+                        
+                        <div className="flex gap-2">
+                          <button 
+                            className="flex-1 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-wider text-center"
+                            style={{ backgroundColor: draftTheme.colors?.accent, color: draftTheme.colors?.bg }}
+                            onClick={() => {}}
+                          >
+                            Aktiv
+                          </button>
+                          <button 
+                            className="flex-1 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-wider text-center"
+                            style={{ backgroundColor: draftTheme.colors?.inactiveBtnBg, color: draftTheme.colors?.inactiveBtnText }}
+                            onClick={() => {}}
+                          >
+                            Inaktiv
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Right Minimap Card */}
+                      <div 
+                        className={cn(
+                          "p-5 rounded-2xl border transition-all duration-300 flex flex-col justify-between",
+                          settings.isGlassEnabled ? "backdrop-blur-xl" : ""
+                        )}
+                        style={{ 
+                          backgroundColor: settings.isGlassEnabled ? draftTheme.colors?.glassBg : draftTheme.colors?.card, 
+                          borderColor: settings.isGlassEnabled ? draftTheme.colors?.glassBorder : draftTheme.colors?.border 
+                        }}
+                      >
+                        <div className="flex justify-between items-center mb-6">
+                          <span className="text-[9px] font-bold" style={{ color: draftTheme.colors?.textGrey }}>Shop Name</span>
+                          <span style={{ color: draftTheme.colors?.heart }}>❤</span>
+                        </div>
+                        <div className="h-3.5 w-1/2 rounded" style={{ background: draftTheme.colors?.textDark }}></div>
+                      </div>
                     </div>
                   </div>
                 </div>

@@ -64,15 +64,25 @@ const defaultSettings: AppSettings = {
   modalTheme: 'auto',
   customThemes: [
     {
-      id: 'default',
+      id: 'default-dark',
       name: 'Default Dark',
       colors: {
-        bg: '#1a1a1a', card: '#2a2a2a', textDark: '#ffffff', textGrey: '#a0a0a0', 
-        border: '#404040', heart: '#FF3366', glassBg: 'rgba(42, 42, 42, 0.7)', glassBorder: 'rgba(255, 255, 255, 0.1)'
+        bg: '#1a1a1a',
+        card: '#252525',
+        border: '#333333',
+        textDark: '#ffffff',
+        textGrey: '#a0a0a0',
+        accent: '#3b82f6',
+        accentHover: '#2563eb',
+        inactiveBtnBg: '#333333',
+        inactiveBtnText: '#888888',
+        heart: '#ef4444',
+        glassBg: 'rgba(37, 37, 37, 0.7)',
+        glassBorder: 'rgba(255, 255, 255, 0.08)'
       }
     }
   ],
-  activeThemeId: 'default',
+  activeThemeId: 'default-dark',
   mobileGrid: 'multi',
 };
 

@@ -2,6 +2,7 @@ import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { LayoutDashboard, BookOpen, Heart, Layers, Wallet, Tag } from 'lucide-react';
 import { cn } from '../../utils/cn';
+import { useAppStore } from '../../store/useAppStore';
 
 const navItems = [
   { to: '/',          label: 'Start',     Icon: LayoutDashboard },
@@ -13,12 +14,16 @@ const navItems = [
 ];
 
 export const BottomNav: React.FC = () => {
+  const { settings } = useAppStore();
+  const isGlassEnabled = settings.isGlassEnabled;
+
   return (
     <nav
       className={cn(
-        'fixed bottom-0 left-0 right-0 z-40 md:hidden',
-        'bg-[var(--theme-glass-bg)] backdrop-blur-xl border-t border-[var(--theme-glass-border)]',
-        'flex items-stretch'
+        'fixed bottom-0 left-0 right-0 z-40 md:hidden flex items-stretch border-t transition-all duration-300',
+        isGlassEnabled
+          ? 'bg-[var(--theme-glass-bg)] backdrop-blur-xl border-[var(--theme-glass-border)]'
+          : 'bg-bg-card border-border-primary'
       )}
       style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
     >

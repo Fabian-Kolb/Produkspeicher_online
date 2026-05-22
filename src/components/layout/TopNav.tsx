@@ -11,22 +11,24 @@ import logoWhite from '../../assets/logo/logo_white.png';
 export const TopNav: React.FC = () => {
   const toggleMainMenu = useUIStore((s) => s.toggleMainMenu);
   const { settings, updateSettings } = useAppStore();
-  const isGlassEnabled = settings.isGlassEnabled;
-  const activeClass = isGlassEnabled
-    ? "bg-text-primary text-bg-primary shadow-md"
-    : "bg-blue-600 dark:bg-blue-500 text-white shadow-md";
+  const activeClass = "bg-accent text-bg-primary shadow-md";
 
   const navItems = [
     { to: '/', label: 'Dashboard' },
     { to: '/katalog', label: 'Katalog' },
     { to: '/favoriten', label: 'Favoriten' },
-    { to: '/bundles', label: 'Bundles' },
-    { to: '/budget', label: 'Budget' },
-    { to: '/deals', label: 'Deals' },
+    { to: '/bundles',   label: 'Bundles' },
+    { to: '/budget',    label: 'Budget' },
+    { to: '/deals',     label: 'Deals' },
   ];
 
   return (
-    <header className="fixed top-0 w-full z-50 px-4 md:px-6 py-2 md:py-3 flex items-center justify-between backdrop-blur-xl bg-[var(--theme-glass-bg)] border-b border-[var(--theme-glass-border)] transition-colors duration-300">
+    <header className={cn(
+      "fixed top-0 w-full z-50 px-4 md:px-6 py-2 md:py-3 flex items-center justify-between border-b transition-all duration-300",
+      settings.isGlassEnabled
+        ? "backdrop-blur-xl bg-[var(--theme-glass-bg)] border-[var(--theme-glass-border)]"
+        : "bg-bg-card border-border-primary"
+    )}>
       {/* Logo */}
       <div className="flex items-center gap-2 md:gap-3">
         <img

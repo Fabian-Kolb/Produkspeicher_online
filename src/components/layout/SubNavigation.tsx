@@ -1,8 +1,9 @@
- import { Settings } from 'lucide-react';
- import { useUIStore } from '../../store/useUIStore';
- import { useAppStore } from '../../store/useAppStore';
- import { CategoryMenu } from '../features/CategoryMenu';
- import React, { useRef } from 'react';
+import { Settings } from 'lucide-react';
+import { useUIStore } from '../../store/useUIStore';
+import { useAppStore } from '../../store/useAppStore';
+import { CategoryMenu } from '../features/CategoryMenu';
+import React, { useRef } from 'react';
+import { cn } from '../../utils/cn';
 
  export const SubNavigation: React.FC<{
    categories: string[];
@@ -10,14 +11,14 @@
    const { mainCat, setMainCat, toggleCategoryMenu, isCategoryMenuOpen } = useUIStore();
    const isGlassEnabled = useAppStore(state => state.settings.isGlassEnabled);
    const settingsBtnRef = useRef<HTMLButtonElement>(null);
- 
-   const activeClass = isGlassEnabled
-     ? "bg-text-primary text-bg-primary shadow-lg scale-110"
-     : "bg-blue-600 dark:bg-blue-500 text-white shadow-lg scale-110";
+   const activeClass = "bg-accent text-bg-primary shadow-lg scale-110";
 
   return (
     <div className="w-full mt-2 mb-6 md:mb-12 flex justify-center px-0">
-      <div className="bg-[var(--theme-glass-bg)] border border-[var(--theme-glass-border)] backdrop-blur-md px-4 py-1 md:px-1.5 md:py-1.5 flex items-center gap-1 md:gap-2 rounded-full overflow-x-auto no-scrollbar shadow-sm w-full md:w-auto pb-1.5 md:pb-1">
+      <div className={cn(
+        "px-4 py-1 md:px-1.5 md:py-1.5 flex items-center gap-1 md:gap-2 rounded-full overflow-x-auto no-scrollbar shadow-sm w-full md:w-auto pb-1.5 md:pb-1 border transition-all duration-300",
+        isGlassEnabled ? "bg-[var(--theme-glass-bg)] border-[var(--theme-glass-border)] backdrop-blur-md" : "bg-bg-card border-border-primary"
+      )}>
         <NavPill
           active={mainCat === 'Alle'}
           onClick={() => setMainCat('Alle')}
@@ -66,10 +67,7 @@ interface NavPillProps {
 }
 
 const NavPill: React.FC<NavPillProps> = ({ active, onClick, children, className = '' }) => {
-  const isGlassEnabled = useAppStore(state => state.settings.isGlassEnabled);
-  const activeClass = isGlassEnabled
-    ? 'bg-text-primary text-bg-primary shadow-md font-bold'
-    : 'bg-blue-600 dark:bg-blue-500 text-white shadow-md font-bold';
+  const activeClass = 'bg-accent text-bg-primary shadow-md font-bold';
 
   return (
     <button

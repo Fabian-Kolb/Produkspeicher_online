@@ -45,8 +45,10 @@ export const MainMenuSidebar: React.FC = () => {
       />
       <div 
         className={cn(
-          'fixed top-0 right-0 h-full w-[320px] border-l border-border-primary z-[101] shadow-2xl transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]',
-          settings.isGlassEnabled ? 'bg-bg-card/80 backdrop-blur-xl' : 'bg-bg-card',
+          'fixed top-0 right-0 h-full w-[320px] border-l z-[101] shadow-2xl transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]',
+          settings.isGlassEnabled
+            ? 'bg-[var(--theme-glass-bg)] backdrop-blur-xl border-[var(--theme-glass-border)]'
+            : 'bg-bg-card border-border-primary',
           isMainMenuOpen ? 'translate-x-0' : 'translate-x-full'
         )}
       >
@@ -105,7 +107,7 @@ const MenuButton: React.FC<MenuButtonProps> = ({ icon, children, onClick, isDest
         isDestructive 
           ? 'text-heart hover:bg-heart/10' 
           : isActive 
-            ? 'bg-blue-500/10 text-blue-500 ring-1 ring-blue-500/30'
+            ? 'bg-accent/10 text-accent ring-1 ring-accent/30'
             : 'text-text-primary hover:bg-border-primary'
       )}
     >
@@ -114,7 +116,7 @@ const MenuButton: React.FC<MenuButtonProps> = ({ icon, children, onClick, isDest
         isDestructive 
           ? 'text-heart' 
           : isActive 
-            ? 'text-blue-500' 
+            ? 'text-accent' 
             : 'text-text-secondary group-hover:text-text-primary'
       )}>
         {icon}

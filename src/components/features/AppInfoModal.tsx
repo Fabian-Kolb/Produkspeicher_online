@@ -17,6 +17,20 @@ interface LogEntry {
 
 const CHANGELOG: LogEntry[] = [
   {
+    version: '0.7.0',
+    date: '22. Mai 2026',
+    changes: {
+      added: [
+        'Semantisches Design-Token-System mit 12 zentralen CSS-Variablen eingeführt',
+        'Komplett überarbeiteter Theme-Creator mit RGBA-Farbreglern und Live-Vorschau',
+        'Globale Vereinheitlichung des Glassmorphismus-Designs (Modals, Sidebar, Navigation)'
+      ],
+      improved: [
+        'Design-Einstellungen vereinfacht durch Vereinheitlichung von Theme und Glassmorphismus'
+      ]
+    }
+  },
+  {
     version: '0.6.1',
     date: '22. Mai 2026',
     changes: {
@@ -196,8 +210,6 @@ const CHANGELOG: LogEntry[] = [
 export const AppInfoModal: React.FC = () => {
   const { isAppInfoModalOpen, toggleAppInfoModal } = useUIStore();
   const settings = useAppStore(state => state.settings);
-  const isModalDark = settings.modalTheme === 'dark' || (settings.modalTheme === 'auto' && settings.theme === 'dark');
-  const isModalGlass = settings.modalStyle === 'glass';
   
   const [expandedVersions, setExpandedVersions] = useState<string[]>([CHANGELOG[0].version]);
 
@@ -234,45 +246,23 @@ export const AppInfoModal: React.FC = () => {
         initial={{ opacity: 0, scale: 0.95, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 20 }}
-        className={cn(
-          "relative z-10 w-full max-w-2xl max-h-[85vh] rounded-[2.5rem] overflow-hidden flex flex-col shadow-2xl transition-all duration-500",
-          isModalDark 
-            ? (isModalGlass ? "bg-[#1a1a1a]/80 backdrop-blur-2xl border border-white/10 text-white" : "bg-[#2a2a2a] border border-border-primary/50 text-white")
-            : (isModalGlass ? "bg-white/70 backdrop-blur-2xl border border-white/40 text-[#111827]" : "bg-white border border-black/5 text-[#111827]"),
-          isModalDark ? "shadow-black/40" : "shadow-black/10"
-        )}
+        className="relative z-10 w-full max-w-2xl max-h-[85vh] rounded-[2.5rem] overflow-hidden flex flex-col shadow-2xl transition-all duration-500 glass-panel text-text-primary"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className={cn(
-          "p-8 border-b flex items-center justify-between transition-colors",
-          isModalDark ? "border-white/10 bg-white/[0.02]" : "border-black/5 bg-black/[0.01]"
-        )}>
+        <div className="p-8 border-b flex items-center justify-between transition-colors border-border-primary/50">
           <div className="flex items-center gap-4">
-            <div className={cn(
-              "w-12 h-12 rounded-2xl flex items-center justify-center border transition-all",
-              isModalDark 
-                ? "bg-blue-500/10 text-blue-400 border-blue-500/20" 
-                : "bg-blue-500/5 text-blue-600 border-blue-500/10"
-            )}>
+            <div className="w-12 h-12 rounded-2xl flex items-center justify-center border border-accent/20 bg-accent/10 text-accent transition-all">
               <Info size={24} />
             </div>
             <div>
               <h2 className="text-2xl font-bold tracking-tight">App Info & Version</h2>
-              <p className={cn(
-                "text-[10px] font-black tracking-[0.2em] uppercase opacity-40",
-                isModalDark ? "text-white" : "text-black"
-              )}>Ventory Ecosystem</p>
+              <p className="text-[10px] font-black tracking-[0.2em] uppercase opacity-45 text-text-secondary">Ventory Ecosystem</p>
             </div>
           </div>
           <button 
             onClick={toggleAppInfoModal}
-            className={cn(
-              "w-10 h-10 flex items-center justify-center rounded-xl transition-all",
-              isModalDark 
-                ? "bg-white/5 hover:bg-white/10 text-white/60 hover:text-white" 
-                : "bg-black/5 hover:bg-black/10 text-black/40 hover:text-black"
-            )}
+            className="w-10 h-10 flex items-center justify-center rounded-xl transition-all bg-black/5 dark:bg-white/5 text-text-secondary hover:text-text-primary"
           >
             <X size={20} />
           </button>
@@ -282,33 +272,17 @@ export const AppInfoModal: React.FC = () => {
         <div className="flex-grow overflow-y-auto p-8 hidden-scrollbar space-y-10">
           
           {/* Current Version Card */}
-          <div className={cn(
-            "p-6 rounded-3xl border relative overflow-hidden group transition-all duration-500",
-            isModalDark 
-              ? "bg-gradient-to-br from-blue-500/10 to-violet-500/10 border-blue-500/20" 
-              : "bg-gradient-to-br from-blue-500/5 to-violet-500/5 border-blue-500/10 shadow-sm"
-          )}>
-            <div className={cn(
-              "absolute top-[-20%] right-[-10%] w-40 h-40 rounded-full blur-3xl pointer-events-none transition-colors",
-              isModalDark ? "bg-blue-500/20 group-hover:bg-blue-500/30" : "bg-blue-500/10 group-hover:bg-blue-500/20"
-            )} />
+          <div className="p-6 rounded-3xl border relative overflow-hidden group transition-all duration-500 bg-accent/10 border-accent/20 shadow-sm">
+            <div className="absolute top-[-20%] right-[-10%] w-40 h-40 rounded-full blur-3xl pointer-events-none transition-colors bg-accent/20 group-hover:bg-accent/30" />
             
             <div className="relative z-10 flex items-center justify-between">
               <div>
-                <span className={cn(
-                  "text-[10px] font-black uppercase tracking-[0.3em] mb-1 block",
-                  isModalDark ? "text-blue-400" : "text-blue-600"
-                )}>Current Release</span>
+                <span className="text-[10px] font-black uppercase tracking-[0.3em] mb-1 block text-accent">Current Release</span>
                 <h3 className="text-4xl font-black tracking-tighter">v{CHANGELOG[0].version}</h3>
               </div>
               <div className="flex flex-col items-end">
                 <span className="text-[10px] font-bold opacity-40 uppercase mb-1">Status</span>
-                <span className={cn(
-                  "px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border transition-colors",
-                  isModalDark 
-                    ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" 
-                    : "bg-emerald-500/5 text-emerald-600 border-emerald-500/10"
-                )}>Development Build</span>
+                <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border transition-colors bg-emerald-500/10 text-emerald-400 border-emerald-500/20">Development Build</span>
               </div>
             </div>
           </div>
@@ -329,8 +303,8 @@ export const AppInfoModal: React.FC = () => {
                     className={cn(
                       "rounded-[2rem] border transition-all duration-500 overflow-hidden",
                       isExpanded 
-                        ? (isModalDark ? "bg-white/[0.03] border-white/10 shadow-sm" : "bg-black/[0.02] border-black/5 shadow-sm") 
-                        : (isModalDark ? "bg-transparent border-white/5 hover:border-white/20" : "bg-transparent border-black/5 hover:border-black/10")
+                        ? "bg-black/5 dark:bg-white/5 border-border-primary/50 shadow-sm" 
+                        : "bg-transparent border-border-primary/20 hover:border-border-primary/45"
                     )}
                   >
                     {/* Version Header (Clickable) */}
@@ -342,8 +316,8 @@ export const AppInfoModal: React.FC = () => {
                         <span className={cn(
                           "text-xs font-black px-3 py-1 rounded-xl border transition-all",
                           isExpanded 
-                            ? "bg-blue-500/10 text-blue-500 border-blue-500/20" 
-                            : "bg-text-secondary/5 text-text-secondary border-border-primary/10 group-hover:border-border-primary/30"
+                            ? "bg-accent/10 text-accent border-accent/20" 
+                            : "bg-inactive-btn-bg text-inactive-btn-text border-border-primary/10 group-hover:border-border-primary/30"
                         )}>
                           v{log.version}
                         </span>
@@ -365,19 +339,13 @@ export const AppInfoModal: React.FC = () => {
                         >
                           <div className="px-6 pb-8 space-y-5">
                             {log.changes.added && (
-                              <div className={cn(
-                                "p-5 rounded-2xl border space-y-3 transition-colors",
-                                isModalDark ? "bg-emerald-500/5 border-emerald-500/10" : "bg-emerald-500/[0.03] border-emerald-500/10"
-                              )}>
+                              <div className="p-5 rounded-2xl border space-y-3 transition-colors bg-emerald-500/5 border-emerald-500/10">
                                 <div className="flex items-center gap-2 text-[10px] font-black text-emerald-500 uppercase tracking-widest">
                                   <Zap size={14} /> Neu hinzugefügt
                                 </div>
                                 <ul className="space-y-2">
                                   {log.changes.added.map((item, i) => (
-                                    <li key={i} className={cn(
-                                      "text-[13px] flex gap-3 leading-relaxed font-medium",
-                                      isModalDark ? "text-white/70" : "text-black/70"
-                                    )}>
+                                    <li key={i} className="text-[13px] flex gap-3 leading-relaxed font-medium text-text-primary">
                                       <span className="text-emerald-500/40 mt-1.5 shrink-0 w-1 h-1 rounded-full bg-current" />
                                       {item}
                                     </li>
@@ -387,20 +355,14 @@ export const AppInfoModal: React.FC = () => {
                             )}
                             
                             {log.changes.improved && (
-                              <div className={cn(
-                                "p-5 rounded-2xl border space-y-3 transition-colors",
-                                isModalDark ? "bg-blue-500/5 border-blue-500/10" : "bg-blue-500/[0.03] border-blue-500/10"
-                              )}>
-                                <div className="flex items-center gap-2 text-[10px] font-black text-blue-500 uppercase tracking-widest">
+                              <div className="p-5 rounded-2xl border space-y-3 transition-colors bg-accent/5 border-accent/10">
+                                <div className="flex items-center gap-2 text-[10px] font-black text-accent uppercase tracking-widest">
                                   <Sparkles size={14} /> Verbesserungen
                                 </div>
                                 <ul className="space-y-2">
                                   {log.changes.improved.map((item, i) => (
-                                    <li key={i} className={cn(
-                                      "text-[13px] flex gap-3 leading-relaxed font-medium",
-                                      isModalDark ? "text-white/70" : "text-black/70"
-                                    )}>
-                                      <span className="text-blue-500/40 mt-1.5 shrink-0 w-1 h-1 rounded-full bg-current" />
+                                    <li key={i} className="text-[13px] flex gap-3 leading-relaxed font-medium text-text-primary">
+                                      <span className="text-accent/40 mt-1.5 shrink-0 w-1 h-1 rounded-full bg-current" />
                                       {item}
                                     </li>
                                   ))}
@@ -409,19 +371,13 @@ export const AppInfoModal: React.FC = () => {
                             )}
 
                             {log.changes.fixed && (
-                              <div className={cn(
-                                "p-5 rounded-2xl border space-y-3 transition-colors",
-                                isModalDark ? "bg-heart/5 border-heart/10" : "bg-heart/[0.03] border-heart/10"
-                              )}>
+                              <div className="p-5 rounded-2xl border space-y-3 transition-colors bg-heart/5 border-heart/10">
                                 <div className="flex items-center gap-2 text-[10px] font-black text-heart uppercase tracking-widest">
                                   <ShieldCheck size={14} /> Behoben
                                 </div>
                                 <ul className="space-y-2">
                                   {log.changes.fixed.map((item, i) => (
-                                    <li key={i} className={cn(
-                                      "text-[13px] flex gap-3 leading-relaxed font-medium",
-                                      isModalDark ? "text-white/70" : "text-black/70"
-                                    )}>
+                                    <li key={i} className="text-[13px] flex gap-3 leading-relaxed font-medium text-text-primary">
                                       <span className="text-heart/40 mt-1.5 shrink-0 w-1 h-1 rounded-full bg-current" />
                                       {item}
                                     </li>
@@ -441,10 +397,7 @@ export const AppInfoModal: React.FC = () => {
         </div>
 
         {/* Footer */}
-        <div className={cn(
-          "p-6 border-t text-center transition-colors",
-          isModalDark ? "bg-white/[0.01] border-white/5" : "bg-black/[0.01] border-black/5"
-        )}>
+        <div className="p-6 border-t text-center transition-colors border-border-primary/30 bg-black/5 dark:bg-white/5">
           <p className="text-[10px] font-bold opacity-20 uppercase tracking-[0.3em]">
             Built with ❤️ by Vibe-Coding © 2026
           </p>

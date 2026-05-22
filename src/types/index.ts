@@ -41,6 +41,10 @@ export interface CustomTheme {
     textGrey: string;
     border: string;
     heart: string;
+    accent: string;
+    accentHover: string;
+    inactiveBtnBg: string;
+    inactiveBtnText: string;
     glassBg: string;
     glassBorder: string;
   };

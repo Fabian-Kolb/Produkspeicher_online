@@ -113,9 +113,6 @@ export const ProfileSettingsModal: React.FC = () => {
     }
   };
 
-  const isModalDark = settings.modalTheme === 'dark' || (settings.modalTheme === 'auto' && settings.theme === 'dark');
-  const isModalGlass = settings.modalStyle === 'glass';
-
   if (!isProfileModalOpen) return null;
 
   return (
@@ -132,28 +129,17 @@ export const ProfileSettingsModal: React.FC = () => {
         initial={{ opacity: 0, scale: 0.95, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 20 }}
-        className={cn(
-          "relative z-10 w-full max-w-md rounded-[2.5rem] p-8 shadow-2xl overflow-hidden transition-all duration-500",
-          isModalDark 
-            ? (isModalGlass ? "bg-[#1a1a1a]/80 backdrop-blur-2xl border border-white/10 text-white" : "bg-[#2a2a2a] border border-border-primary/50 text-white")
-            : (isModalGlass ? "bg-white/70 backdrop-blur-2xl border border-white/40 text-[#111827]" : "bg-white border border-black/5 text-[#111827]"),
-          isModalDark ? "shadow-black/40" : "shadow-black/10"
-        )}
+        className="relative z-10 w-full max-w-md rounded-[2.5rem] p-8 shadow-2xl overflow-hidden transition-all duration-500 glass-panel text-text-primary shadow-black/40"
       >
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <h2 className="text-2xl font-bold font-playfair flex items-center gap-3">
-            <User className={cn("transition-colors", isModalDark ? "text-white/40" : "text-black/20")} />
+            <User className="transition-colors text-text-secondary" />
             Profil
           </h2>
           <button 
             onClick={toggleProfileModal}
-            className={cn(
-              "w-10 h-10 flex items-center justify-center rounded-xl transition-all",
-              isModalDark 
-                ? "bg-white/5 hover:bg-white/10 text-white/40 hover:text-white" 
-                : "bg-black/5 hover:bg-black/10 text-black/20 hover:text-black"
-            )}
+            className="w-10 h-10 flex items-center justify-center rounded-xl transition-all bg-black/5 dark:bg-white/5 text-text-secondary hover:text-text-primary"
           >
             <X size={18} />
           </button>
@@ -171,21 +157,13 @@ export const ProfileSettingsModal: React.FC = () => {
           <div className="flex flex-col items-center gap-4">
             <div 
               onClick={() => fileInputRef.current?.click()}
-              className={cn(
-                "relative w-28 h-28 rounded-full border-2 flex items-center justify-center cursor-pointer transition-all group overflow-hidden",
-                isModalDark 
-                  ? "bg-white/5 border-white/10 hover:border-white/30 shadow-inner" 
-                  : "bg-black/5 border-black/5 hover:border-black/10 shadow-inner"
-              )}
+              className="relative w-28 h-28 rounded-full border-2 flex items-center justify-center cursor-pointer transition-all group overflow-hidden bg-black/5 dark:bg-white/5 border-border-primary/50 hover:border-accent/40 shadow-inner"
             >
               {avatarUrl ? (
                 <img src={avatarUrl} alt="Profil" className="w-full h-full object-cover" />
               ) : (
                 <div className="flex flex-col items-center gap-2">
-                  <ImagePlus className={cn(
-                    "w-8 h-8 transition-colors",
-                    isModalDark ? "text-white/20 group-hover:text-white/40" : "text-black/10 group-hover:text-black/20"
-                  )} />
+                  <ImagePlus className="w-8 h-8 transition-colors text-text-secondary group-hover:text-accent" />
                 </div>
               )}
               {isUploading && (
@@ -209,21 +187,13 @@ export const ProfileSettingsModal: React.FC = () => {
 
           {/* Name Section */}
           <div>
-            <label className={cn(
-              "block text-[10px] font-black uppercase tracking-[0.2em] mb-3 opacity-40",
-              isModalDark ? "text-white" : "text-black"
-            )}>Display Name</label>
+            <label className="block text-[10px] font-black uppercase tracking-[0.2em] mb-3 opacity-40 text-text-secondary">Display Name</label>
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Dein Vorname"
-              className={cn(
-                "w-full rounded-2xl px-5 py-4 text-sm font-medium focus:outline-none transition-all",
-                isModalDark 
-                  ? "bg-white/5 border border-white/5 focus:bg-white/10 focus:border-white/10 text-white placeholder:text-white/20" 
-                  : "bg-black/5 border border-black/5 focus:bg-black/[0.08] focus:border-black/5 text-black placeholder:text-black/20"
-              )}
+              className="w-full rounded-2xl px-5 py-4 text-sm font-medium focus:outline-none transition-all bg-black/5 dark:bg-white/5 border border-border-primary/30 focus:border-accent/50 focus:bg-black/10 dark:focus:bg-white/10 text-text-primary placeholder:text-text-secondary/45"
             />
           </div>
 
@@ -232,12 +202,7 @@ export const ProfileSettingsModal: React.FC = () => {
             <button
               onClick={handleSave}
               disabled={isSubmitting || isUploading || !name.trim()}
-              className={cn(
-                "w-full py-4 rounded-2xl font-black text-xs uppercase tracking-[0.2em] flex items-center justify-center gap-3 transition-all disabled:opacity-50 shadow-lg",
-                isModalDark 
-                  ? "bg-white text-[#1a1a1a] hover:bg-white/90 shadow-white/5" 
-                  : "bg-black text-white hover:bg-black/90 shadow-black/10"
-              )}
+              className="w-full py-4 rounded-2xl font-black text-xs uppercase tracking-[0.2em] flex items-center justify-center gap-3 transition-all disabled:opacity-50 shadow-lg bg-accent text-bg-primary hover:bg-accent-hover hover:scale-[1.02] active:scale-[0.98]"
             >
               {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
               Speichern
@@ -246,12 +211,7 @@ export const ProfileSettingsModal: React.FC = () => {
             <button
               onClick={handleClearName}
               disabled={isSubmitting}
-              className={cn(
-                "w-full py-4 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] flex items-center justify-center gap-2 transition-all",
-                isModalDark 
-                  ? "text-heart/60 hover:text-heart hover:bg-heart/10" 
-                  : "text-heart/80 hover:text-heart hover:bg-heart/5"
-              )}
+              className="w-full py-4 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] flex items-center justify-center gap-2 transition-all text-heart hover:bg-heart/10 hover:scale-[1.02] active:scale-[0.98]"
             >
               <Trash2 className="w-4 h-4" />
               Reset & Onboarding

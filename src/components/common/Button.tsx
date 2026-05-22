@@ -1,8 +1,6 @@
 import React from 'react';
 import { cn } from '../../utils/cn';
 
-import { useAppStore } from '../../store/useAppStore';
-
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'secondary' | 'danger' | 'ghost' | 'glass';
   size?: 'sm' | 'md' | 'lg' | 'icon';
@@ -10,16 +8,12 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant = 'primary', size = 'md', children, ...props }, ref) => {
-    const isGlassEnabled = useAppStore(state => state.settings.isGlassEnabled);
-    
     const variants = {
-      primary: isGlassEnabled
-        ? 'bg-text-primary text-bg-primary hover:bg-opacity-90 font-bold shadow-md shadow-black/10 dark:shadow-white/5'
-        : 'bg-blue-600 dark:bg-blue-500 text-white hover:bg-blue-700 dark:hover:bg-blue-600 font-bold shadow-md shadow-blue-500/20',
-      secondary: 'bg-border-primary text-text-primary hover:bg-opacity-80',
-      danger: 'bg-heart text-white hover:bg-opacity-90',
-      ghost: 'bg-transparent text-text-secondary hover:text-text-primary',
-      glass: 'glass-panel text-text-primary hover:bg-opacity-80'
+      primary: 'bg-accent hover:bg-accent-hover text-bg-primary font-bold shadow-md transition-colors',
+      secondary: 'bg-inactive-btn-bg text-inactive-btn-text hover:opacity-90 transition-colors',
+      danger: 'bg-heart text-white hover:bg-opacity-90 transition-colors',
+      ghost: 'bg-transparent text-text-secondary hover:text-text-primary transition-colors',
+      glass: 'glass-panel text-text-primary hover:bg-opacity-80 transition-colors'
     };
 
     const sizes = {

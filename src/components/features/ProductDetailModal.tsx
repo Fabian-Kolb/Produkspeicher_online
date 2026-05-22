@@ -58,7 +58,7 @@ export const ProductDetailModal: React.FC = () => {
       onClick={closeProductDetailModal}
     >
       <div 
-        className="w-full max-w-6xl max-h-[90vh] glass-panel bg-bg-card border border-border-primary/50 rounded-[3rem] overflow-hidden flex flex-col md:flex-row shadow-2xl animate-in zoom-in-95 duration-500"
+        className="w-full max-w-6xl max-h-[90vh] glass-panel rounded-[3rem] overflow-hidden flex flex-col md:flex-row shadow-2xl animate-in zoom-in-95 duration-500"
         onClick={(e) => e.stopPropagation()}
       >
         
@@ -91,7 +91,7 @@ export const ProductDetailModal: React.FC = () => {
         </div>
 
         {/* Right Side: Details */}
-        <div className="w-full md:w-1/2 p-8 md:p-14 flex flex-col overflow-y-auto hidden-scrollbar bg-bg-card relative">
+        <div className="w-full md:w-1/2 p-8 md:p-14 flex flex-col overflow-y-auto hidden-scrollbar bg-transparent relative">
           
           {/* Mobile Close Button – always visible on small screens */}
           <button 

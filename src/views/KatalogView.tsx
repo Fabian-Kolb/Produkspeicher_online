@@ -9,7 +9,7 @@ import { cn } from '../utils/cn';
 
 
 export const KatalogView: React.FC = () => {
-  const { products, categories, subCats } = useAppStore();
+  const { products, categories, subCats, settings } = useAppStore();
   const {
     mainCat, selectedSubCats, sortMode, searchQuery, statusFilter,
     setSearchQuery, setSortMode, setStatusFilter
@@ -80,7 +80,12 @@ export const KatalogView: React.FC = () => {
           <select
             value={sortMode}
             onChange={(e) => setSortMode(e.target.value as any)}
-            className="bg-[var(--theme-glass-bg)] border border-[var(--theme-glass-border)] backdrop-blur-md rounded-full px-4 py-2 text-sm outline-none focus:border-text-secondary shadow-sm appearance-none pr-8 relative cursor-pointer"
+            className={cn(
+              "rounded-full px-4 py-2 text-sm outline-none focus:border-text-secondary shadow-sm appearance-none pr-8 relative cursor-pointer border transition-all duration-300",
+              settings.isGlassEnabled
+                ? "bg-[var(--theme-glass-bg)] border-[var(--theme-glass-border)] backdrop-blur-md"
+                : "bg-bg-card border-border-primary"
+            )}
           >
             <option value="default">Sort: Favoriten</option>
             <option value="priceAsc">Preis aufsteigend</option>
@@ -94,8 +99,8 @@ export const KatalogView: React.FC = () => {
             className={cn(
               "px-5 py-2 rounded-full text-sm font-medium transition-all duration-300 shadow-sm border",
               statusFilter === 'bought' 
-                ? "bg-blue-600 dark:bg-blue-500 text-white border-transparent"
-                : 'bg-slate-50/40 dark:bg-slate-800/20 border-slate-50 dark:border-slate-700/10 text-text-secondary hover:text-text-primary hover:scale-105 hover:shadow-md'
+                ? "bg-accent text-bg-primary border-transparent"
+                : "bg-inactive-btn-bg text-inactive-btn-text border-border-primary hover:text-text-primary hover:scale-105 hover:shadow-md"
             )}
           >
             Gekauft
@@ -105,8 +110,8 @@ export const KatalogView: React.FC = () => {
             className={cn(
               "px-5 py-2 rounded-full text-sm font-medium transition-all duration-300 shadow-sm border",
               statusFilter === 'reduced' 
-                ? "bg-blue-600 dark:bg-blue-500 text-white border-transparent"
-                : 'bg-slate-50/40 dark:bg-slate-800/20 border-slate-50 dark:border-slate-700/10 text-text-secondary hover:text-text-primary hover:scale-105 hover:shadow-md'
+                ? "bg-accent text-bg-primary border-transparent"
+                : "bg-inactive-btn-bg text-inactive-btn-text border-border-primary hover:text-text-primary hover:scale-105 hover:shadow-md"
             )}
           >
             Reduziert
@@ -129,8 +134,8 @@ export const KatalogView: React.FC = () => {
               className={cn(
                 "px-5 py-2 rounded-full text-sm font-medium transition-colors border shadow-sm",
                 selectedSubCats.includes(sub)
-                  ? "bg-blue-600 dark:bg-blue-500 text-white border-transparent"
-                  : 'bg-slate-50/40 dark:bg-slate-800/20 border-slate-50 dark:border-slate-700/10 text-text-secondary hover:text-text-primary'
+                  ? "bg-accent text-bg-primary border-transparent"
+                  : "bg-inactive-btn-bg text-inactive-btn-text border-border-primary hover:text-text-primary"
               )}
             >
               {sub}

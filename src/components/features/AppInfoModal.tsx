@@ -17,6 +17,23 @@ interface LogEntry {
 
 const CHANGELOG: LogEntry[] = [
   {
+    version: '0.6.0',
+    date: '22. Mai 2026',
+    changes: {
+      added: [
+        'Echtzeit-Gestensteuerung (Wisch-Navigation) für Mobilgeräte integriert'
+      ],
+      improved: [
+        'Seitenübergänge mit performanten CSS-Transforms und Ease-Out-Expo-Kurven',
+        'Einzeln scrollbare Ansichten zur Isolation der Scroll-Positionen zwischen Tabs',
+        'Rubber-Band-Effekt bei den äußeren Seitenrändern (Dashboard & Deals)'
+      ],
+      fixed: [
+        'Vermeidung von Wisch-Konflikten bei Eingabefeldern und horizontal scrollbaren Listen'
+      ]
+    }
+  },
+  {
     version: '0.5.9',
     date: '21. April 2026',
     changes: {

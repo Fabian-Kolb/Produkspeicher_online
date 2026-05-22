@@ -177,7 +177,7 @@ export const BudgetView: React.FC = () => {
                 timeRange === range 
                   ? (settings.isGlassEnabled 
                       ? "bg-text-primary text-bg-primary shadow-md"
-                      : "bg-blue-600 dark:bg-blue-500 text-white shadow-md")
+                      : "bg-accent text-bg-primary shadow-md")
                   : "text-text-secondary hover:text-text-primary bg-black/5 dark:bg-white/5"
               )}
             >
@@ -222,19 +222,14 @@ export const BudgetView: React.FC = () => {
                 onChange={(e) => setTempBudget(e.target.value)}
                 onBlur={handleBudgetSubmit}
                 onKeyDown={(e) => { if (e.key === 'Enter') handleBudgetSubmit(); }}
-                className="w-24 bg-black/5 dark:bg-white/5 border border-[var(--theme-glass-border)] px-2 py-1 rounded-lg text-xl font-bold outline-none text-text-primary focus:border-text-primary transition-colors"
+                className="w-24 bg-black/5 dark:bg-white/5 border border-border-primary/50 hover:border-text-secondary focus:border-text-secondary px-2 py-1 rounded-lg text-xl font-bold outline-none text-text-primary hover:-translate-y-0.5 focus:-translate-y-0.5 hover:scale-[1.03] focus:scale-[1.03] hover:shadow-md focus:shadow-md transition-all duration-500 ease-out transform-gpu origin-center"
                 autoFocus
               />
               <span className="text-xl font-bold">€</span>
             </div>
           ) : (
             <p 
-              className={cn(
-                "text-2xl font-bold cursor-pointer transition-colors",
-                settings.isGlassEnabled 
-                  ? "hover:text-emerald-500 dark:hover:text-emerald-400"
-                  : "hover:text-blue-500 dark:hover:text-blue-400"
-              )}
+              className="text-2xl font-bold cursor-pointer transition-colors hover:text-accent"
               onClick={() => { setIsEditingBudget(true); setTempBudget(String(settings.monthlyBudget)); }}
             >
               {settings.monthlyBudget.toLocaleString('de-DE')} €
@@ -265,13 +260,13 @@ export const BudgetView: React.FC = () => {
                     offset="0%" 
                     stopColor="currentColor" 
                     stopOpacity="0.8" 
-                    className={settings.isGlassEnabled ? "text-text-primary" : "text-blue-600 dark:text-blue-500"} 
+                    className={settings.isGlassEnabled ? "text-text-primary" : "text-accent"} 
                   />
                   <stop 
                     offset="100%" 
                     stopColor="currentColor" 
                     stopOpacity="0.2" 
-                    className={settings.isGlassEnabled ? "text-text-primary" : "text-blue-600 dark:text-blue-500"} 
+                    className={settings.isGlassEnabled ? "text-text-primary" : "text-accent"} 
                   />
                 </linearGradient>
                 <linearGradient id="barHoverGradient" x1="0" y1="0" x2="0" y2="1">
@@ -279,13 +274,13 @@ export const BudgetView: React.FC = () => {
                     offset="0%" 
                     stopColor="currentColor" 
                     stopOpacity="1" 
-                    className={settings.isGlassEnabled ? "text-text-primary" : "text-blue-500 dark:text-blue-400"} 
+                    className={settings.isGlassEnabled ? "text-text-primary" : "text-accent-hover"} 
                   />
                   <stop 
                     offset="100%" 
                     stopColor="currentColor" 
                     stopOpacity="0.8" 
-                    className={settings.isGlassEnabled ? "text-text-primary" : "text-blue-600 dark:text-blue-500"} 
+                    className={settings.isGlassEnabled ? "text-text-primary" : "text-accent"} 
                   />
                 </linearGradient>
               </defs>
@@ -446,7 +441,7 @@ export const BudgetView: React.FC = () => {
                         <div 
                           className={cn(
                             "h-2.5 rounded-full transition-all duration-1000",
-                            settings.isGlassEnabled ? "bg-text-primary" : "bg-blue-600 dark:bg-blue-500"
+                            settings.isGlassEnabled ? "bg-text-primary" : "bg-accent"
                           )}
                           style={{ width: `${Math.min((cat.amount / maxCategorySpend) * 100, 100)}%` }}
                         ></div>
@@ -493,7 +488,7 @@ export const BudgetView: React.FC = () => {
                           </div>
                         )}
                         <div className="flex flex-col flex-1 min-w-0">
-                          <span className="text-sm font-semibold truncate text-text-primary group-hover/item:text-blue-600 dark:group-hover/item:text-blue-400 transition-colors uppercase tracking-tight">{p.name}</span>
+                          <span className="text-sm font-semibold truncate text-text-primary group-hover/item:text-accent transition-colors uppercase tracking-tight">{p.name}</span>
                           <span className="text-[10px] text-text-secondary truncate">{p.mainCat || 'Ohne Kategorie'}</span>
                         </div>
                         <span className="text-sm font-bold font-mono opacity-90 shrink-0">{(p.finalPrice || 0).toLocaleString('de-DE', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
@@ -523,7 +518,7 @@ export const BudgetView: React.FC = () => {
                       </div>
                       <div className="flex items-baseline gap-1">
                         <span className="text-sm font-bold text-text-secondary">€</span>
-                        <span className="text-3xl font-bold font-mono tracking-tight text-text-primary group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-500">
+                        <span className="text-3xl font-bold font-mono tracking-tight text-text-primary group-hover:text-accent transition-colors duration-500">
                           {hoveredDay.value.toLocaleString('de-DE', {minimumFractionDigits: 2, maximumFractionDigits: 2})}
                         </span>
                       </div>
@@ -573,7 +568,7 @@ export const BudgetView: React.FC = () => {
                           setStatusFilter('bought');
                           setSearchQuery(p.name);
                         }}
-                        className="bg-[var(--theme-glass-bg)] border border-[var(--theme-glass-border)] backdrop-blur-xl p-4 md:p-5 rounded-3xl shadow-sm flex items-center gap-5 cursor-pointer hover:shadow-lg hover:border-blue-500/50 transition-all duration-300 group"
+                        className="bg-[var(--theme-glass-bg)] border border-[var(--theme-glass-border)] backdrop-blur-xl p-4 md:p-5 rounded-3xl shadow-sm flex items-center gap-5 cursor-pointer hover:shadow-lg hover:border-accent/50 transition-all duration-300 group"
                       >
                         {p.imgs && p.imgs.length > 0 ? (
                           <img src={p.imgs[p.mainImgIdx || 0]} alt={p.name} className="w-16 h-16 md:w-20 md:h-20 rounded-2xl object-cover shadow-sm bg-black/10 dark:bg-white/10 shrink-0" />
@@ -587,7 +582,7 @@ export const BudgetView: React.FC = () => {
                             "text-lg md:text-xl font-bold truncate text-text-primary transition-colors",
                             settings.isGlassEnabled 
                               ? "group-hover:text-text-primary" 
-                              : "group-hover:text-blue-600 dark:group-hover:text-blue-400"
+                              : "group-hover:text-accent"
                           )}>
                             {p.name}
                           </span>

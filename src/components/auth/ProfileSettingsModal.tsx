@@ -193,7 +193,7 @@ export const ProfileSettingsModal: React.FC = () => {
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Dein Vorname"
-              className="w-full rounded-2xl px-5 py-4 text-sm font-medium focus:outline-none transition-all bg-black/5 dark:bg-white/5 border border-border-primary/30 focus:border-accent/50 focus:bg-black/10 dark:focus:bg-white/10 text-text-primary placeholder:text-text-secondary/45"
+              className="w-full rounded-2xl px-5 py-4 text-sm font-medium focus:outline-none bg-black/5 dark:bg-white/5 border border-border-primary/30 hover:border-text-secondary focus:border-text-secondary hover:-translate-y-0.5 focus:-translate-y-0.5 hover:scale-[1.015] focus:scale-[1.015] hover:shadow-md focus:shadow-md focus:bg-black/10 dark:focus:bg-white/10 text-text-primary placeholder:text-text-secondary/45 transition-all duration-500 ease-out transform-gpu origin-center"
             />
           </div>
 

@@ -32,11 +32,15 @@ interface AppState {
   addCategory: (cat: string) => Promise<void>;
   renameCategory: (oldName: string, newName: string) => Promise<void>;
   deleteCategory: (cat: string) => Promise<void>;
+  reorderCategories: (newCats: string[]) => Promise<void>;
   addSubCategory: (mainCat: string, subCat: string) => Promise<void>;
   deleteSubCategory: (mainCat: string, subCat: string) => Promise<void>;
 
   addWebsite: (web: Website) => Promise<void>;
   deleteWebsite: (name: string) => Promise<void>;
+  addWebsiteCat: (cat: string) => Promise<void>;
+  deleteWebsiteCat: (cat: string) => Promise<void>;
+  reorderWebsiteCats: (newCats: string[]) => Promise<void>;
   
   updateSettings: (settings: Partial<AppSettings>) => Promise<void>;
   addCustomTheme: (theme: Omit<CustomTheme, 'id'>) => Promise<void>;
@@ -107,7 +111,7 @@ export const useAppStore = create<AppState>()((set, get) => ({
   categories: defaultCategories,
   subCats: defaultSubCats,
   websites: [],
-  websiteCats: ['Allgemein', 'Mode'],
+  websiteCats: ['Allgemein', 'Mode', 'Elektronik', 'Wohnen', 'Sport', 'Musik'],
   bundles: [],
   settings: defaultSettings,
   userId: null,
@@ -158,7 +162,7 @@ export const useAppStore = create<AppState>()((set, get) => ({
       set({
         categories: sData.categories || defaultCategories,
         subCats: sData.subCats || defaultSubCats,
-        websiteCats: sData.websiteCats || ['Allgemein', 'Mode'],
+        websiteCats: sData.websiteCats || ['Allgemein', 'Mode', 'Elektronik', 'Wohnen', 'Sport', 'Musik'],
         settings: sData.settings || defaultSettings
       });
     } else {
@@ -257,6 +261,13 @@ export const useAppStore = create<AppState>()((set, get) => ({
     await supabase.from('products').update({ mainCat: 'Alle' }).eq('user_id', userId).eq('mainCat', cat);
   },
 
+  reorderCategories: async (newCats) => {
+    const { userId } = get();
+    if (!userId) return;
+    set({ categories: newCats });
+    await syncAppState(userId, get());
+  },
+
   addSubCategory: async (mainCat, subCat) => {
     set((state) => {
       const current = state.subCats[mainCat] || [];
@@ -291,7 +302,40 @@ export const useAppStore = create<AppState>()((set, get) => ({
     }));
     if ((site as any).id) {
        await supabase.from('websites').delete().eq('id', (site as any).id);
+     }
+  },
+
+  addWebsiteCat: async (cat) => {
+    const trimmed = cat.trim();
+    if (!trimmed || get().websiteCats.includes(trimmed)) return;
+    set((state) => ({
+      websiteCats: [...state.websiteCats, trimmed]
+    }));
+    await syncAppState(get().userId!, get());
+  },
+
+  deleteWebsiteCat: async (cat) => {
+    const { userId, websites } = get();
+    if (!userId) return;
+
+    const updatedWebsites = websites.map(w => w.c === cat ? { ...w, c: 'Allgemein' } : w);
+
+    set({
+      websiteCats: get().websiteCats.filter(c => c !== cat),
+      websites: updatedWebsites
+    });
+
+    await syncAppState(userId, get());
+    if (!get().isDemoMode) {
+      await supabase.from('websites').update({ c: 'Allgemein' }).eq('user_id', userId).eq('c', cat);
     }
+  },
+
+  reorderWebsiteCats: async (newCats) => {
+    const { userId } = get();
+    if (!userId) return;
+    set({ websiteCats: newCats });
+    await syncAppState(userId, get());
   },
 
   updateSettings: async (newSettings) => {

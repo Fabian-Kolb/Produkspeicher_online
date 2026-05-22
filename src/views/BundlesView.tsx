@@ -39,7 +39,7 @@ const MarqueeOverflow: React.FC<{ children: React.ReactNode; className?: string 
 
 export const BundlesView: React.FC = () => {
   const { bundles, products, categories, subCats, addBundle, updateBundle, deleteBundle, settings } = useAppStore();
-  const { activeBundleId, setActiveBundleId, bundleDraft, setBundleDraft } = useUIStore();
+  const { activeBundleId, setActiveBundleId, bundleDraft, setBundleDraft, openProductDetailModal } = useUIStore();
 
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -184,7 +184,7 @@ export const BundlesView: React.FC = () => {
             "border border-transparent backdrop-blur-md px-3 md:px-5 py-2 md:py-2.5 rounded-full font-medium text-sm transition-all duration-200 shadow-md flex items-center gap-1.5 md:gap-2",
             settings.isGlassEnabled
               ? "bg-text-primary text-bg-primary hover:opacity-90 shadow-black/10 dark:shadow-white/5"
-              : "bg-blue-600 dark:bg-blue-500 text-white hover:bg-blue-700 dark:hover:bg-blue-600 shadow-blue-500/20"
+              : "bg-accent text-bg-primary hover:bg-accent-hover"
           )}
         >
           <Plus size={15} /> <span>Neues Bundle</span>
@@ -207,7 +207,7 @@ export const BundlesView: React.FC = () => {
                   "px-6 py-3 rounded-full text-sm font-semibold transition-all shadow-md",
                   settings.isGlassEnabled
                     ? "bg-text-primary text-bg-primary hover:opacity-90"
-                    : "bg-blue-600 dark:bg-blue-500 text-white hover:bg-blue-700 dark:hover:bg-blue-600 shadow-blue-500/20"
+                    : "bg-accent text-bg-primary hover:bg-accent-hover"
                 )}
               >
                 Jetzt erstellen
@@ -248,8 +248,8 @@ export const BundlesView: React.FC = () => {
                             className={cn(
                               "backdrop-blur-md px-2.5 md:px-4 py-1.5 rounded-full text-xs font-medium transition-all shadow-sm",
                               settings.isGlassEnabled
-                                ? "bg-[var(--theme-glass-bg)] border border-[var(--theme-glass-border)] hover:bg-white/10"
-                                : "bg-blue-600 dark:bg-blue-500 text-white hover:bg-blue-700 dark:hover:bg-blue-600 shadow-blue-500/20"
+                              ? "bg-[var(--theme-glass-bg)] border border-[var(--theme-glass-border)] hover:bg-white/10"
+                              : "bg-accent text-bg-primary hover:bg-accent-hover"
                             )}
                           >
                             Bearbeiten
@@ -259,8 +259,8 @@ export const BundlesView: React.FC = () => {
                             className={cn(
                               "w-7 h-7 md:w-8 md:h-8 rounded-full flex items-center justify-center transition-all shadow-sm group/trash border",
                               settings.isGlassEnabled
-                                ? "bg-[var(--theme-glass-bg)] border-[var(--theme-glass-border)] text-text-secondary hover:text-heart hover:border-heart"
-                                : "bg-blue-600 dark:bg-blue-500 border-transparent text-white hover:bg-heart shadow-blue-500/20 shadow-md"
+                                ? "bg-[var(--theme-glass-bg)] border border-[var(--theme-glass-border)] text-text-secondary hover:text-heart hover:border-heart"
+                                : "bg-accent text-bg-primary border-transparent hover:bg-heart hover:text-white"
                             )}
                           >
                             <Trash2 size={13} />
@@ -276,7 +276,11 @@ export const BundlesView: React.FC = () => {
                           const product = products.find(p => p.id === item.id);
                           if (!product) return null;
                           return (
-                            <div key={item.id} className="flex flex-col w-28 md:w-44 shrink-0 glass-panel rounded-xl md:rounded-2xl p-2 md:p-3 pb-3 md:pb-4">
+                            <div 
+                              key={item.id} 
+                              onClick={() => openProductDetailModal(product.id)}
+                              className="flex flex-col w-28 md:w-44 shrink-0 glass-panel rounded-xl md:rounded-2xl p-2 md:p-3 pb-3 md:pb-4 cursor-pointer transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1.5 hover:scale-[1.02] hover:shadow-xl"
+                            >
                               <div className="w-full aspect-square rounded-lg md:rounded-xl overflow-hidden mb-2 md:mb-3 shadow-sm">
                                 <img
                                   src={product.imgs[0] || 'https://via.placeholder.com/200'}
@@ -299,7 +303,7 @@ export const BundlesView: React.FC = () => {
                         "px-4 md:px-6 py-2 md:py-2.5 rounded-full text-sm font-semibold transition-all shadow-md",
                         settings.isGlassEnabled
                           ? "bg-text-primary text-bg-primary hover:opacity-90"
-                          : "bg-blue-600 dark:bg-blue-500 text-white hover:bg-blue-700 dark:hover:bg-blue-600 shadow-blue-500/20"
+                          : "bg-accent text-bg-primary hover:bg-accent-hover"
                       )}>
                         Kaufen
                       </button>
@@ -355,7 +359,7 @@ export const BundlesView: React.FC = () => {
                     value={searchQuery}
                     onChange={e => setSearchQuery(e.target.value)}
                     placeholder="Suchen..."
-                    className="w-full bg-[var(--theme-glass-bg)] border border-[var(--theme-glass-border)] rounded-full pl-10 pr-4 py-2 text-sm outline-none"
+                    className="w-full bg-[var(--theme-glass-bg)] border border-[var(--theme-glass-border)] rounded-full pl-10 pr-4 py-2 text-sm outline-none hover:border-text-secondary focus:border-text-secondary hover:-translate-y-0.5 focus:-translate-y-0.5 hover:scale-[1.02] focus:scale-[1.02] hover:shadow-md focus:shadow-md transition-all duration-500 ease-out transform-gpu origin-center shadow-sm"
                   />
                 </div>
 
@@ -366,8 +370,8 @@ export const BundlesView: React.FC = () => {
                     className={cn(
                       'px-3 py-1.5 rounded-full text-xs font-medium transition-all shadow-sm border whitespace-nowrap shrink-0',
                       editorMainCat === 'Alle' 
-                        ? "bg-blue-600 dark:bg-blue-500 text-white border-transparent"
-                        : 'bg-slate-50/40 dark:bg-slate-800/20 border-slate-50 dark:border-slate-700/10 text-text-secondary hover:text-text-primary'
+                        ? "bg-accent text-bg-primary border-transparent"
+                        : "bg-inactive-btn-bg text-inactive-btn-text border-border-primary hover:text-text-primary"
                     )}
                   >
                     Alle
@@ -379,8 +383,8 @@ export const BundlesView: React.FC = () => {
                       className={cn(
                         'px-3 py-1.5 rounded-full text-xs font-medium transition-all shadow-sm border whitespace-nowrap shrink-0',
                         editorMainCat === cat 
-                          ? "bg-blue-600 dark:bg-blue-500 text-white border-transparent"
-                          : 'bg-slate-50/40 dark:bg-slate-800/20 border-slate-50 dark:border-slate-700/10 text-text-secondary hover:text-text-primary'
+                          ? "bg-accent text-bg-primary border-transparent"
+                          : "bg-inactive-btn-bg text-inactive-btn-text border-border-primary hover:text-text-primary"
                       )}
                     >
                       {cat}
@@ -395,8 +399,8 @@ export const BundlesView: React.FC = () => {
                     className={cn(
                       'flex-1 py-1.5 rounded-full text-xs font-medium transition-all shadow-sm border',
                       editorStatusFilter === 'bought' 
-                        ? "bg-blue-600 dark:bg-blue-500 text-white border-transparent" 
-                        : 'bg-slate-50/40 dark:bg-slate-800/20 border-slate-50 dark:border-slate-700/10 text-text-secondary hover:text-text-primary'
+                        ? "bg-accent text-bg-primary border-transparent" 
+                        : "bg-inactive-btn-bg text-inactive-btn-text border-border-primary hover:text-text-primary"
                     )}
                   >
                     Gekauft
@@ -406,8 +410,8 @@ export const BundlesView: React.FC = () => {
                     className={cn(
                       'flex-1 py-1.5 rounded-full text-xs font-medium transition-all shadow-sm border',
                       editorStatusFilter === 'reduced' 
-                        ? "bg-blue-600 dark:bg-blue-500 text-white border-transparent" 
-                        : 'bg-slate-50/40 dark:bg-slate-800/20 border-slate-50 dark:border-slate-700/10 text-text-secondary hover:text-text-primary'
+                        ? "bg-accent text-bg-primary border-transparent" 
+                        : "bg-inactive-btn-bg text-inactive-btn-text border-border-primary hover:text-text-primary"
                     )}
                   >
                     Reduziert
@@ -422,8 +426,8 @@ export const BundlesView: React.FC = () => {
                       className={cn(
                         'px-3 py-1.5 rounded-full text-xs font-medium transition-all shadow-sm border',
                         editorSelectedSubCats.length === 0 
-                          ? "bg-blue-600 dark:bg-blue-500 text-white border-transparent" 
-                          : 'bg-slate-50/40 dark:bg-slate-800/20 border-slate-50 dark:border-slate-700/10 text-text-secondary hover:text-text-primary'
+                          ? "bg-accent text-bg-primary border-transparent" 
+                          : "bg-inactive-btn-bg text-inactive-btn-text border-border-primary hover:text-text-primary"
                       )}
                     >
                       Alle
@@ -441,8 +445,8 @@ export const BundlesView: React.FC = () => {
                         className={cn(
                           'px-3 py-1.5 rounded-full text-xs font-medium transition-all shadow-sm border',
                           editorSelectedSubCats.includes(sub) 
-                            ? "bg-blue-600 dark:bg-blue-500 text-white border-transparent" 
-                            : 'bg-slate-50/40 dark:bg-slate-800/20 border-slate-50 dark:border-slate-700/10 text-text-secondary hover:text-text-primary'
+                            ? "bg-accent text-bg-primary border-transparent" 
+                            : "bg-inactive-btn-bg text-inactive-btn-text border-border-primary hover:text-text-primary"
                         )}
                       >
                         {sub}
@@ -460,7 +464,7 @@ export const BundlesView: React.FC = () => {
                       <div
                         key={product.id}
                         onClick={() => { handleAddItem(product.id); setMobileEditorTab('bundle'); }}
-                        className="glass-panel group relative flex flex-col overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-xl rounded-2xl p-2 md:p-3 cursor-pointer"
+                        className="glass-panel group relative flex flex-col overflow-hidden hover:-translate-y-1.5 hover:scale-[1.02] hover:shadow-xl transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] transform-gpu rounded-2xl p-2 md:p-3 cursor-pointer"
                       >
                         <div className="relative w-full aspect-square rounded-xl overflow-hidden bg-black/20 mb-2">
                           <img
@@ -502,7 +506,7 @@ export const BundlesView: React.FC = () => {
                     value={draftName}
                     onChange={e => setDraftName(e.target.value)}
                     placeholder="Name der Zusammenstellung..."
-                    className="bg-transparent border-none outline-none font-bold text-base md:text-lg text-text-primary placeholder:text-text-secondary/70 w-full"
+                    className="bg-transparent border-b border-transparent hover:border-text-secondary/30 focus:border-text-secondary outline-none font-bold text-base md:text-lg text-text-primary placeholder:text-text-secondary/70 w-full py-1 transition-all duration-500 ease-out"
                   />
                   <button onClick={handleCancelBundle} className="text-text-secondary hover:text-text-primary transition-colors cursor-pointer shrink-0 ml-3 font-bold"><X size={18} /></button>
                 </div>
@@ -533,7 +537,7 @@ export const BundlesView: React.FC = () => {
                               "w-7 h-7 md:w-9 md:h-9 rounded-full flex items-center justify-center transition-all text-sm font-bold shadow-sm",
                               settings.isGlassEnabled
                                 ? "bg-[var(--theme-glass-bg)] border border-[var(--theme-glass-border)] text-text-primary hover:bg-white/20"
-                                : "bg-blue-600 dark:bg-blue-500 border-blue-600 dark:border-blue-500 text-white hover:bg-blue-700 dark:hover:bg-blue-600"
+                                : "bg-accent text-bg-primary hover:bg-accent-hover"
                             )}
                           >
                             −
@@ -544,7 +548,7 @@ export const BundlesView: React.FC = () => {
                               "w-7 h-7 md:w-9 md:h-9 rounded-full flex items-center justify-center transition-all text-sm font-bold shadow-sm",
                               settings.isGlassEnabled
                                 ? "bg-[var(--theme-glass-bg)] border border-[var(--theme-glass-border)] text-text-primary hover:bg-white/20"
-                                : "bg-blue-600 dark:bg-blue-500 border-blue-600 dark:border-blue-500 text-white hover:bg-blue-700 dark:hover:bg-blue-600"
+                                : "bg-accent text-bg-primary hover:bg-accent-hover"
                             )}
                           >
                             +
@@ -555,7 +559,7 @@ export const BundlesView: React.FC = () => {
                               "w-7 h-7 md:w-9 md:h-9 rounded-full flex items-center justify-center transition-all text-sm font-bold shadow-sm",
                               settings.isGlassEnabled
                                 ? "bg-[var(--theme-glass-bg)] border border-[var(--theme-glass-border)] text-text-primary hover:text-heart"
-                                : "bg-blue-600 dark:bg-blue-500 border-blue-600 dark:border-blue-500 text-white hover:bg-blue-700 dark:hover:bg-blue-600 hover:text-white"
+                                : "bg-accent text-bg-primary hover:bg-heart hover:text-white"
                             )}
                           >
                             ×
@@ -578,7 +582,7 @@ export const BundlesView: React.FC = () => {
                     "w-full py-2.5 md:py-3 rounded-xl text-sm font-medium transition-all shadow-sm",
                     settings.isGlassEnabled
                       ? "bg-[var(--theme-glass-bg)] border border-[var(--theme-glass-border)] hover:bg-black/5 dark:hover:bg-white/10"
-                      : "bg-blue-600 dark:bg-blue-500 text-white hover:bg-blue-700 dark:hover:bg-blue-600 shadow-blue-500/20"
+                      : "bg-accent text-bg-primary hover:bg-accent-hover"
                   )}
                 >
                   Zusammenstellung speichern

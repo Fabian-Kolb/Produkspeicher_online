@@ -72,7 +72,7 @@ export const FavoritenView: React.FC = () => {
               placeholder="In Favoriten suchen..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full sm:w-64 bg-[var(--theme-glass-bg)] border border-[var(--theme-glass-border)] backdrop-blur-md rounded-full pl-10 pr-4 py-2 text-sm outline-none focus:border-text-secondary transition-all shadow-sm"
+              className="w-full sm:w-64 hover:sm:w-80 focus:sm:w-80 bg-[var(--theme-glass-bg)] border border-[var(--theme-glass-border)] backdrop-blur-md rounded-full pl-10 pr-4 py-2 text-sm outline-none hover:border-text-secondary focus:border-text-secondary hover:-translate-y-0.5 focus:-translate-y-0.5 hover:scale-[1.02] focus:scale-[1.02] hover:shadow-md focus:shadow-md transition-all duration-500 ease-out transform-gpu origin-center shadow-sm"
             />
           </div>
 
@@ -93,8 +93,8 @@ export const FavoritenView: React.FC = () => {
             className={cn(
               "px-5 py-2 rounded-full text-sm font-medium transition-all duration-300 shadow-sm border",
               statusFilter === 'bought'
-                ? "bg-blue-600 dark:bg-blue-500 text-white border-transparent"
-                : 'bg-slate-50/40 dark:bg-slate-800/20 border-slate-50 dark:border-slate-700/10 text-text-secondary hover:text-text-primary hover:scale-105 hover:shadow-md'
+                ? "bg-accent text-bg-primary border-transparent"
+                : "bg-inactive-btn-bg text-inactive-btn-text border-border-primary hover:text-text-primary hover:scale-105 hover:shadow-md"
             )}
           >
             Gekauft
@@ -104,8 +104,8 @@ export const FavoritenView: React.FC = () => {
             className={cn(
               "px-5 py-2 rounded-full text-sm font-medium transition-all duration-300 shadow-sm border",
               statusFilter === 'reduced'
-                ? "bg-blue-600 dark:bg-blue-500 text-white border-transparent"
-                : 'bg-slate-50/40 dark:bg-slate-800/20 border-slate-50 dark:border-slate-700/10 text-text-secondary hover:text-text-primary hover:scale-105 hover:shadow-md'
+                ? "bg-accent text-bg-primary border-transparent"
+                : "bg-inactive-btn-bg text-inactive-btn-text border-border-primary hover:text-text-primary hover:scale-105 hover:shadow-md"
             )}
           >
             Reduziert
@@ -128,8 +128,8 @@ export const FavoritenView: React.FC = () => {
               className={cn(
                 "px-5 py-2 rounded-full text-sm font-medium transition-colors border shadow-sm",
                 selectedSubCats.includes(sub)
-                  ? "bg-blue-600 dark:bg-blue-500 text-white border-transparent"
-                  : 'bg-slate-50/40 dark:bg-slate-800/20 border-slate-50 dark:border-slate-700/10 text-text-secondary hover:text-text-primary'
+                  ? "bg-accent text-bg-primary border-transparent"
+                  : "bg-inactive-btn-bg text-inactive-btn-text border-border-primary hover:text-text-primary"
               )}
             >
               {sub}

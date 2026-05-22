@@ -79,7 +79,7 @@ function App() {
   }, [fetchAllData]);
 
   if (loading) {
-    return <div className="h-screen w-screen flex items-center justify-center bg-bg-secondary"><div className="animate-spin h-8 w-8 border-4 border-blue-500 rounded-full border-t-transparent"></div></div>;
+    return <div className="h-screen w-screen flex items-center justify-center bg-bg-primary"><div className="animate-spin h-8 w-8 border-4 border-accent rounded-full border-t-transparent"></div></div>;
   }
 
   return (

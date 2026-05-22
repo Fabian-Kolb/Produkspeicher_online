@@ -211,7 +211,7 @@ export const ProductDetailModal: React.FC = () => {
               <div className="flex gap-3">
                 <button 
                   onClick={handleEdit}
-                  className="w-12 h-12 flex items-center justify-center rounded-xl bg-bg-card text-text-secondary hover:text-blue-500 hover:bg-blue-500/5 transition-all border border-border-primary/20 hover:border-blue-500/30"
+                  className="w-12 h-12 flex items-center justify-center rounded-xl bg-bg-card text-text-secondary hover:text-accent hover:bg-accent/5 transition-all border border-border-primary/20 hover:border-accent/30"
                   title="Bearbeiten"
                 >
                   <Edit3 size={20} />

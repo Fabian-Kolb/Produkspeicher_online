@@ -66,7 +66,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ onComplete }) 
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Wie soll ich dich nennen?"
-                className="w-full bg-black/20 border border-white/10 rounded-2xl px-6 py-4 text-white placeholder:text-white/30 focus:outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/50 transition-all text-center text-xl font-medium"
+                className="w-full bg-black/20 border border-white/10 rounded-2xl px-6 py-4 text-white placeholder:text-white/30 focus:outline-none hover:border-white/40 focus:border-white/40 hover:-translate-y-0.5 focus:-translate-y-0.5 hover:scale-[1.02] focus:scale-[1.02] hover:shadow-md focus:shadow-md text-center text-xl font-medium transition-all duration-500 ease-out transform-gpu origin-center"
                 autoFocus
               />
             </div>

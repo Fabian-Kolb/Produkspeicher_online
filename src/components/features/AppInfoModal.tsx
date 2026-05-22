@@ -17,6 +17,102 @@ interface LogEntry {
 
 const CHANGELOG: LogEntry[] = [
   {
+    version: '0.7.8',
+    date: '22. Mai 2026',
+    changes: {
+      added: [
+        'Drag-and-Drop-Filtersteuerung: Kategoriefilter im Dashboard (Deine Shops) und Katalog (Produkte) können jetzt interaktiv per Drag and Drop umsortiert werden. Die Sortierreihenfolge bleibt nach dem Neuladen erhalten.',
+        'Neues Katalog-Kategorie-Editiermenü: Die Verwaltung der Produktkategorien wurde von einem seitlichen Dropdown in ein elegantes, zentriertes Slide-Down-Menü überführt, das sich geschmeidig per Framer Motion direkt unter der Pill-Navigation öffnet.'
+      ],
+      improved: [
+        'Zentrale Persistenz für Shop-Kategorien: Shop-Filterkategorien werden nun im globalen App-Zustand gespeichert und automatisch mit Supabase synchronisiert. Bei Löschung einer Shop-Kategorie werden verknüpfte Shops automatisch zu "Allgemein" umgeordnet.',
+        'Einheitliche Editier-UX: Der Bearbeitungsmodus für Filter-Chips (gestrichelte Ränder, Lösch-Badges auf Hover, wackelnde Animationen) sieht jetzt auf dem Dashboard und im Katalog vollkommen identisch aus.'
+      ]
+    }
+  },
+  {
+    version: '0.7.7',
+    date: '22. Mai 2026',
+    changes: {
+      fixed: [
+        'Abruptes Springen der Kärtchen/Boxen und Eingabefelder behoben: Standardwerte für `translate` (0 0) und `scale` (1) wurden für `.glass-panel` und globale Eingabefelder festgelegt und explizit in die Transition-Eigenschaften aufgenommen. Dadurch gleiten alle Boxen nun sanft und absolut flüssig über 500ms in Größe und Position, statt sofort zu springen.'
+      ]
+    }
+  },
+  {
+    version: '0.7.6',
+    date: '22. Mai 2026',
+    changes: {
+      added: [
+        'Premium-Hover- und Fokus-Animationen verfeinert: Alle interaktiven Kärtchen, Widgets, Shop-Karten und Eingabefelder nutzen nun eine einheitliche, neutrale Transformation ohne blaue Akzente, blaue Ränder oder leuchtende Schatten-Glows auf Hover/Fokus.',
+        'Verzögerungsfreie Transformationen behoben: Durch die Zuweisung expliziter Tailwind-Übergangsklassen animieren alle Kärtchen und Boxen nun ihre Größe (Scale) und Position (Translation) flüssig über 500ms mit einer organischen Timing-Kurve.'
+      ],
+      improved: [
+        'Farbneutralität hergestellt: Unerwünschte blaue Standardhintergründe und -ränder bei Hover und Fokus wurden systemweit entfernt und durch feine neutrale Rahmenübergänge (hover:border-text-secondary) ersetzt.',
+        'Budget-Eingabe & Theme-Name-Eingabe angepasst: Das Budget-Eingabefeld und die Theme-Manager-Eingabefelder nutzen jetzt ebenfalls die premium 500ms neutrale Skalierungs- und Hebeanimation.'
+      ]
+    }
+  },
+  {
+    version: '0.7.5',
+    date: '22. Mai 2026',
+    changes: {
+      added: [
+        'Premium-Fokus- und Hover-Animationen für alle Textboxen, Suchfelder und Eingaben hinzugefügt. Fokussierte Eingabefelder heben sich nun taktil hervor durch minimale Skalierung (101.5% bis 102%) und einen leuchtenden Border-Glow in der aktiven Accent-Farbe.'
+      ],
+      improved: [
+        'Eingabefelder-Expansion: Suchfelder im Katalog, in Favoriten und Bundles vergrößern sich bei Fokus flüssig von 256px auf 320px Breite auf größeren Bildschirmen.',
+        'Notizen-Feld-Expansion: Das Details/Notizen-Textfeld in der Produkt-Modalansicht vergrößert bei Fokus organisch seine minimale Höhe von 100px auf 160px.'
+      ]
+    }
+  },
+  {
+    version: '0.7.4',
+    date: '22. Mai 2026',
+    changes: {
+      added: [
+        'Einheitliche, premium Hover-Animationen für alle interaktiven Karten (Produktkarten, Dashboard KPI-Widgets, Shop-Karten und Bundle-Produktkarten) hinzugefügt. Diese nutzen eine elastische Höhen-Verschiebung (-6px), minimale Skalierung (102%), Border-Glow mit der Akzentfarbe und einen weichen Akzent-Schatten.'
+      ],
+      improved: [
+        'Interaktivität im Bundle-Bereich verbessert: Produkt-Kärtchen in der horizontalen Bundle-Vorschau sind nun anklickbar und öffnen direkt die Produktdetail-Modalansicht.'
+      ]
+    }
+  },
+  {
+    version: '0.7.3',
+    date: '22. Mai 2026',
+    changes: {
+      improved: [
+        'Systemweite Bereinigung hardcodierter Farbcodes: Alle verbleibenden Instanzen von blau-basierten Styles (z. B. in BudgetView, BundlesView, DashboardView und Produktdetails) wurden durch dynamische Accent-Token (bg-accent, text-accent) ersetzt, sodass benutzerdefinierte Farbmuster perfekt funktionieren.'
+      ]
+    }
+  },
+  {
+    version: '0.7.2',
+    date: '22. Mai 2026',
+    changes: {
+      improved: [
+        'Filter-Styling vereinheitlicht: Favoriten- und Bundle-Editor-Filter nutzen nun dieselben dynamischen Accent-Farben wie der Katalog'
+      ]
+    }
+  },
+  {
+    version: '0.7.1',
+    date: '22. Mai 2026',
+    changes: {
+      improved: [
+        'Theme-Customizer für Mobilgeräte optimiert (dynamische Modal-Höhe, Ausblenden von Sidebar/Editor zur Platzersparnis)',
+        'Neuer, prominenter Button zur Theme-Erstellung eingeführt',
+        'Farb-Auswahlelemente im Editor auf Mobilgeräten im 2-Spalten-Layout angeordnet',
+        'Framer Motion Übergangsanimationen beim Wechseln zwischen Presets und Editor integriert'
+      ],
+      fixed: [
+        'Unerwünschte Größenänderungen des Desktop-Modals beim Tab-Wechsel behoben',
+        'Überflüssiges Emoji-Icon aus dem Theme-Manager Infofeld entfernt'
+      ]
+    }
+  },
+  {
     version: '0.7.0',
     date: '22. Mai 2026',
     changes: {

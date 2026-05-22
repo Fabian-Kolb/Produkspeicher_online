@@ -193,7 +193,7 @@ export const ProductModal: React.FC = () => {
             <textarea
               value={formData.details}
               onChange={e => setFormData({ ...formData, details: e.target.value })}
-              className="w-full bg-bg-card border border-border-primary rounded-xl px-4 py-3 outline-none focus:border-text-secondary min-h-[100px]"
+              className="w-full bg-bg-card border border-border-primary rounded-xl px-4 py-3 outline-none hover:border-text-secondary focus:border-text-secondary hover:-translate-y-0.5 focus:-translate-y-0.5 hover:scale-[1.01] focus:scale-[1.01] hover:shadow-md focus:shadow-md min-h-[100px] focus:min-h-[160px] transition-all duration-500 ease-out transform-gpu origin-center"
             />
           </div>
 

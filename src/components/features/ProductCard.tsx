@@ -36,7 +36,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   return (
     <div 
       onClick={() => openProductDetailModal(product.id)}
-      className="glass-panel group relative flex flex-col overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl rounded-[1.5rem] p-3 cursor-pointer"
+      className="glass-panel group relative flex flex-col overflow-hidden hover:-translate-y-1.5 hover:scale-[1.02] hover:shadow-xl transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] transform-gpu rounded-[1.5rem] p-3 cursor-pointer"
     >
       
       {/* Image Container */}

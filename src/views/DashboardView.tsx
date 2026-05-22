@@ -48,8 +48,7 @@ function getFavicon(url: string) {
   }
 }
 
-/* ── Default filter categories ─────────────────────────────── */
-const DEFAULT_FILTER_CATS = ['Alle', 'Allgemein', 'Mode', 'Elektronik', 'Wohnen', 'Sport', 'Musik'];
+
 
 /* ═══════════════════════════════════════════════════════════════
    AddShopModal – Inline-Modal zum Hinzufügen neuer Shops
@@ -224,7 +223,10 @@ const AddShopModal: React.FC<AddShopModalProps> = ({ open, onClose, onAdd, categ
    ═══════════════════════════════════════════════════════════════ */
 export const DashboardView: React.FC = () => {
   const navigate = useNavigate();
-  const { products, settings, userName, isDemoMode, websites, addWebsite } = useAppStore();
+  const {
+    products, settings, userName, isDemoMode, websites, addWebsite,
+    websiteCats, addWebsiteCat, deleteWebsiteCat, reorderWebsiteCats
+  } = useAppStore();
 
   const displayName = userName || (isDemoMode ? 'Gast' : 'User');
 
@@ -264,12 +266,13 @@ export const DashboardView: React.FC = () => {
   const todayStr = new Date().toISOString().split('T')[0];
 
   /* ── Shop filter state ─────────────────────────────────── */
-  const [filterCats, setFilterCats] = useState<string[]>(DEFAULT_FILTER_CATS);
+  const displayCats = useMemo(() => ['Alle', ...websiteCats], [websiteCats]);
   const [activeFilter, setActiveFilter] = useState('Alle');
   const [isEditing, setIsEditing] = useState(false);
   const [newCatName, setNewCatName] = useState('');
   const [showAddInput, setShowAddInput] = useState(false);
   const [showAddShopModal, setShowAddShopModal] = useState(false);
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const addInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -280,8 +283,8 @@ export const DashboardView: React.FC = () => {
 
   const handleAddCat = () => {
     const trimmed = newCatName.trim();
-    if (trimmed && !filterCats.includes(trimmed)) {
-      setFilterCats(prev => [...prev, trimmed]);
+    if (trimmed) {
+      addWebsiteCat(trimmed);
     }
     setNewCatName('');
     setShowAddInput(false);
@@ -289,16 +292,36 @@ export const DashboardView: React.FC = () => {
 
   const handleRemoveCat = (cat: string) => {
     if (cat === 'Alle') return;
-    setFilterCats(prev => prev.filter(c => c !== cat));
+    deleteWebsiteCat(cat);
     if (activeFilter === cat) setActiveFilter('Alle');
   };
 
   const handleAddShop = (shop: Website) => {
     addWebsite(shop);
-    // If the shop's category doesn't exist in filterCats, add it
-    if (!filterCats.includes(shop.c)) {
-      setFilterCats(prev => [...prev, shop.c]);
+    // If the shop's category doesn't exist in websiteCats, add it
+    if (!websiteCats.includes(shop.c)) {
+      addWebsiteCat(shop.c);
     }
+  };
+
+  const handleDragStart = (e: React.DragEvent, index: number) => {
+    setDraggedIndex(index);
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
+  const handleDragEnter = (index: number) => {
+    if (draggedIndex === null || draggedIndex === index || index === 0 || draggedIndex === 0) return;
+
+    const newCats = [...displayCats];
+    const [removed] = newCats.splice(draggedIndex, 1);
+    newCats.splice(index, 0, removed);
+
+    setDraggedIndex(index);
+    reorderWebsiteCats(newCats.slice(1));
+  };
+
+  const handleDragEnd = () => {
+    setDraggedIndex(null);
   };
 
   /* ── Merge default + user shops ────────────────────────── */
@@ -333,7 +356,7 @@ export const DashboardView: React.FC = () => {
         {/* Budget Widget */}
         <div
           onClick={() => navigate('/budget')}
-          className="glass-panel p-6 cursor-pointer hover:-translate-y-1 transition-transform duration-300"
+          className="glass-panel p-6 cursor-pointer hover:-translate-y-1.5 hover:scale-[1.02] hover:shadow-xl transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] transform-gpu"
         >
           <div className="flex justify-between items-center mb-6 text-text-secondary">
             <span className="font-semibold uppercase text-xs tracking-wider">Monatsbudget</span>
@@ -358,7 +381,7 @@ export const DashboardView: React.FC = () => {
         {/* Favorites Widget */}
         <div
           onClick={() => navigate('/favoriten')}
-          className="glass-panel p-6 cursor-pointer hover:-translate-y-1 transition-transform duration-300"
+          className="glass-panel p-6 cursor-pointer hover:-translate-y-1.5 hover:scale-[1.02] hover:shadow-xl transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] transform-gpu"
         >
           <div className="flex justify-between items-center mb-6 text-text-secondary">
             <span className="font-semibold uppercase text-xs tracking-wider">Favoriten</span>
@@ -374,7 +397,7 @@ export const DashboardView: React.FC = () => {
         {/* Price Alerts Widget */}
         <div
           onClick={() => navigate('/deals')}
-          className="glass-panel p-6 cursor-pointer hover:-translate-y-1 transition-transform duration-300 relative overflow-hidden"
+          className="glass-panel p-6 cursor-pointer hover:-translate-y-1.5 hover:scale-[1.02] hover:shadow-xl transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] transform-gpu relative overflow-hidden"
         >
           <div className="flex justify-between items-center mb-6 text-text-secondary relative z-10">
             <span className="font-semibold uppercase text-xs tracking-wider">Preisalarme</span>
@@ -408,7 +431,7 @@ export const DashboardView: React.FC = () => {
               "flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium active:scale-95 transition-all duration-200 shadow-md",
               settings.isGlassEnabled
                 ? "bg-text-primary text-bg-primary hover:opacity-90 shadow-black/10 dark:shadow-white/5"
-                : "bg-blue-600 dark:bg-blue-500 text-white hover:bg-blue-700 dark:hover:bg-blue-600 shadow-blue-500/20"
+                : "bg-accent text-bg-primary hover:bg-accent-hover"
             )}
           >
             <Plus size={14} />
@@ -435,36 +458,56 @@ export const DashboardView: React.FC = () => {
           </FilterChip>
 
           {/* Category FilterChips */}
-          {filterCats.map((cat) => (
-            <div key={cat} className="relative animate-in fade-in zoom-in-95 duration-200">
-              <FilterChip
-                active={activeFilter === cat && !isEditing}
-                editable={isEditing && cat !== 'Alle'}
-                shaking={isEditing && cat !== 'Alle'}
-                onClick={() => {
-                  if (!isEditing) setActiveFilter(cat);
-                }}
-              >
-                {cat}
-              </FilterChip>
+          {displayCats.map((cat, idx) => {
+            const isVirtual = cat === 'Alle';
+            const isDragging = draggedIndex === idx;
 
-              {/* Delete Badge in Edit Mode */}
-              {isEditing && cat !== 'Alle' && (
-                <button
-                  onClick={(e) => { e.stopPropagation(); handleRemoveCat(cat); }}
-                  className="absolute -top-1.5 -right-1.5 w-5 h-5 flex items-center justify-center rounded-full bg-heart text-white text-[10px] shadow-md hover:scale-110 active:scale-95 transition-transform duration-150 z-10 animate-in zoom-in duration-200"
+            return (
+              <div
+                key={cat}
+                draggable={isEditing && !isVirtual}
+                onDragStart={(e) => handleDragStart(e, idx)}
+                onDragEnter={() => handleDragEnter(idx)}
+                onDragEnd={handleDragEnd}
+                onDragOver={(e) => e.preventDefault()}
+                className={cn(
+                  "relative animate-in fade-in zoom-in-95 duration-200 transition-all duration-300",
+                  isDragging && "opacity-40 scale-95 border-dashed",
+                  isEditing && !isVirtual && "cursor-move"
+                )}
+              >
+                <FilterChip
+                  active={activeFilter === cat && !isEditing}
+                  editable={isEditing && !isVirtual}
+                  shaking={isEditing && !isVirtual}
+                  onClick={() => {
+                    if (!isEditing) setActiveFilter(cat);
+                  }}
                 >
-                  <X size={10} />
-                </button>
-              )}
-            </div>
-          ))}
+                  {cat}
+                </FilterChip>
+
+                {/* Delete Badge in Edit Mode */}
+                {isEditing && !isVirtual && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleRemoveCat(cat);
+                    }}
+                    className="absolute -top-1.5 -right-1.5 w-5 h-5 flex items-center justify-center rounded-full bg-heart text-white text-[10px] shadow-md hover:scale-110 active:scale-95 transition-transform duration-150 z-10 animate-in zoom-in duration-200 cursor-pointer"
+                  >
+                    <X size={10} />
+                  </button>
+                )}
+              </div>
+            );
+          })}
 
           {/* Add new category chip in edit mode */}
           {isEditing && !showAddInput && (
             <FilterChip
               onClick={() => setShowAddInput(true)}
-              className="!border-dashed !border-emerald-400/50 !text-emerald-400 hover:!bg-emerald-400/10 animate-in fade-in zoom-in-95 duration-200"
+              className="!border-dashed !border-emerald-400/50 !text-emerald-400 hover:!bg-emerald-400/10 animate-in fade-in zoom-in-95 duration-200 cursor-pointer"
             >
               <Plus size={12} className="mr-1" />
               Neu
@@ -521,7 +564,7 @@ export const DashboardView: React.FC = () => {
                 href={shop.u}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group glass-panel p-4 flex flex-col items-center gap-3 cursor-pointer hover:-translate-y-1.5 hover:shadow-xl hover:shadow-black/10 transition-all duration-300 relative animate-in fade-in zoom-in-95 slide-in-from-bottom-2"
+                className="group glass-panel p-4 flex flex-col items-center gap-3 cursor-pointer hover:-translate-y-1.5 hover:scale-[1.02] hover:shadow-xl transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] transform-gpu relative animate-in fade-in zoom-in-95 slide-in-from-bottom-2"
                 style={{ animationDelay: `${delay}ms`, animationFillMode: 'both' }}
               >
                 {/* External link indicator */}
@@ -587,7 +630,7 @@ export const DashboardView: React.FC = () => {
         open={showAddShopModal}
         onClose={() => setShowAddShopModal(false)}
         onAdd={handleAddShop}
-        categories={filterCats}
+        categories={displayCats}
       />
     </div>
   );

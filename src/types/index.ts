@@ -34,6 +34,8 @@ export interface Bundle {
 export interface CustomTheme {
   id: string;
   name: string;
+  isDark?: boolean;
+  isGlassEnabled?: boolean;
   colors: {
     bg: string;
     card: string;

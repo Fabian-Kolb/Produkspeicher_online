@@ -175,9 +175,7 @@ export const BudgetView: React.FC = () => {
               className={cn(
                 "px-4 py-1.5 rounded-full text-xs font-bold transition-all duration-300 whitespace-nowrap",
                 timeRange === range 
-                  ? (settings.isGlassEnabled 
-                      ? "bg-text-primary text-bg-primary shadow-md"
-                      : "bg-accent text-bg-primary shadow-md")
+                  ? "bg-accent text-bg-primary shadow-md"
                   : "text-text-secondary hover:text-text-primary bg-black/5 dark:bg-white/5"
               )}
             >

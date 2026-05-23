@@ -1,8 +1,9 @@
 export const THEME_PRESETS = [
   {
-    id: 'default-dark',
-    name: 'Default Dark',
+    id: 'default-dark-solid',
+    name: 'Default Dark (Solid)',
     isDark: true,
+    isGlass: false,
     colors: {
       bg: '#1a1a1a',
       card: '#252525',
@@ -19,9 +20,30 @@ export const THEME_PRESETS = [
     }
   },
   {
-    id: 'default-light',
-    name: 'Default Light',
+    id: 'default-dark-glass',
+    name: 'Default Dark (Glass)',
+    isDark: true,
+    isGlass: true,
+    colors: {
+      bg: '#1a1a1a',
+      card: '#252525',
+      border: '#333333',
+      textDark: '#ffffff',
+      textGrey: '#a0a0a0',
+      accent: '#3b82f6',
+      accentHover: '#2563eb',
+      inactiveBtnBg: '#333333',
+      inactiveBtnText: '#888888',
+      heart: '#ef4444',
+      glassBg: 'rgba(37, 37, 37, 0.7)',
+      glassBorder: 'rgba(255, 255, 255, 0.08)'
+    }
+  },
+  {
+    id: 'default-light-solid',
+    name: 'Default Light (Solid)',
     isDark: false,
+    isGlass: false,
     colors: {
       bg: '#f4f5f9',
       card: '#ffffff',
@@ -38,41 +60,23 @@ export const THEME_PRESETS = [
     }
   },
   {
-    id: 'nordic-forest',
-    name: 'Nordic Forest',
-    isDark: true,
+    id: 'default-light-glass',
+    name: 'Default Light (Glass)',
+    isDark: false,
+    isGlass: true,
     colors: {
-      bg: '#0a1c15',
-      card: '#112c21',
-      border: '#1b4233',
-      textDark: '#e6f4ea',
-      textGrey: '#8fa89b',
-      accent: '#10b981',
-      accentHover: '#059669',
-      inactiveBtnBg: '#1b4233',
-      inactiveBtnText: '#638575',
-      heart: '#f43f5e',
-      glassBg: 'rgba(17, 44, 33, 0.65)',
-      glassBorder: 'rgba(255, 255, 255, 0.1)'
-    }
-  },
-  {
-    id: 'rose-petal',
-    name: 'Rose Petal',
-    isDark: true,
-    colors: {
-      bg: '#1f1315',
-      card: '#2d1d20',
-      border: '#422b2f',
-      textDark: '#faebee',
-      textGrey: '#bfa1a6',
-      accent: '#ec4899',
-      accentHover: '#db2777',
-      inactiveBtnBg: '#422b2f',
-      inactiveBtnText: '#96757c',
-      heart: '#f43f5e',
-      glassBg: 'rgba(45, 29, 32, 0.7)',
-      glassBorder: 'rgba(255, 255, 255, 0.1)'
+      bg: '#f4f5f9',
+      card: '#ffffff',
+      border: '#e2e8f0',
+      textDark: '#111827',
+      textGrey: '#4b5563',
+      accent: '#3b82f6',
+      accentHover: '#1d4ed8',
+      inactiveBtnBg: '#f1f5f9',
+      inactiveBtnText: '#94a3b8',
+      heart: '#ef4444',
+      glassBg: 'rgba(255, 255, 255, 0.7)',
+      glassBorder: 'rgba(0, 0, 0, 0.06)'
     }
   }
 ];
@@ -156,9 +160,18 @@ export const applyGlobalTheme = (colors: any, isDark: boolean = true) => {
   root.style.setProperty('--inactive-btn-text', inactiveBtnText);
   root.style.setProperty('--scrollbar-glass-thumb', isDark ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.2)');
   root.style.setProperty('--scrollbar-glass-hover', isDark ? 'rgba(255, 255, 255, 0.4)' : 'rgba(0, 0, 0, 0.4)');
+
+  // Toggle dark class
+  if (isDark) {
+    root.classList.add('dark');
+    if (document.body) document.body.classList.add('dark');
+  } else {
+    root.classList.remove('dark');
+    if (document.body) document.body.classList.remove('dark');
+  }
 };
 
 export const applyBaseMode = (theme: string) => {
-  const preset = THEME_PRESETS.find(p => p.id === `default-${theme}`) || THEME_PRESETS[0];
+  const preset = THEME_PRESETS.find(p => p.id === `default-${theme}-solid` || p.id === `default-${theme}-glass` || p.id === `default-${theme}`) || THEME_PRESETS[0];
   applyGlobalTheme(preset.colors, preset.isDark);
 };

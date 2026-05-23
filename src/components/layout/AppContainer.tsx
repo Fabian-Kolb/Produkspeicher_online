@@ -10,7 +10,7 @@ import { AppInfoModal } from '../features/AppInfoModal';
 import { ProfileSettingsModal } from '../auth/ProfileSettingsModal';
 import { useAppStore } from '../../store/useAppStore';
 import { useUIStore } from '../../store/useUIStore';
-import { applyGlobalTheme, applyBaseMode } from '../../utils/themeHelpers';
+import { applyGlobalTheme, applyBaseMode, THEME_PRESETS } from '../../utils/themeHelpers';
 
 // View Imports
 import { DashboardView } from '../../views/DashboardView';
@@ -30,12 +30,23 @@ export const AppContainer: React.FC = () => {
 
   // Apply theme on load and when settings change
   useEffect(() => {
-    applyBaseMode(settings.theme);
+    let applied = false;
     if (settings.activeThemeId && settings.activeThemeId !== 'default') {
       const customTheme = settings.customThemes.find(t => t.id === settings.activeThemeId);
       if (customTheme) {
-        applyGlobalTheme(customTheme.colors);
+        applyGlobalTheme(customTheme.colors, customTheme.isDark);
+        applied = true;
+      } else {
+        const preset = THEME_PRESETS.find(p => p.id === settings.activeThemeId);
+        if (preset) {
+          applyGlobalTheme(preset.colors, preset.isDark);
+          applied = true;
+        }
       }
+    }
+    
+    if (!applied) {
+      applyBaseMode(settings.theme);
     }
     
     // Toggle glass effects

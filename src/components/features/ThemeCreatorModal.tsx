@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Check, Trash2, Layers, Plus } from 'lucide-react';
+import { X, Check, Trash2, Plus } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useUIStore } from '../../store/useUIStore';
 import { useAppStore } from '../../store/useAppStore';
@@ -33,6 +33,8 @@ export const ThemeCreatorModal: React.FC = () => {
   const [editingThemeId, setEditingThemeId] = useState<string | null>(null);
   const [draftTheme, setDraftTheme] = useState<Partial<CustomTheme>>({
     name: 'Mein Theme',
+    isDark: true,
+    isGlassEnabled: true,
     colors: {
       bg: '#1a1a1a',
       card: '#252525',
@@ -73,7 +75,16 @@ export const ThemeCreatorModal: React.FC = () => {
   // Apply draft colors live when editing
   useEffect(() => {
     if (activeTab === 'custom' && draftTheme.colors) {
-      applyGlobalTheme(draftTheme.colors, settings.theme === 'dark');
+      applyGlobalTheme(draftTheme.colors, draftTheme.isDark);
+      
+      // Temporarily toggle glass class on document for live preview of the whole app
+      if (draftTheme.isGlassEnabled) {
+        document.body.classList.add('glass-enabled');
+        document.documentElement.classList.add('glass-enabled');
+      } else {
+        document.body.classList.remove('glass-enabled');
+        document.documentElement.classList.remove('glass-enabled');
+      }
     } else {
       // Revert to saved settings
       const preset = THEME_PRESETS.find(p => p.id === settings.activeThemeId);
@@ -82,13 +93,22 @@ export const ThemeCreatorModal: React.FC = () => {
       } else {
         const custom = settings.customThemes.find(t => t.id === settings.activeThemeId);
         if (custom) {
-          applyGlobalTheme(custom.colors, settings.theme === 'dark');
+          applyGlobalTheme(custom.colors, custom.isDark);
         } else {
           applyBaseMode(settings.theme);
         }
       }
+      
+      // Restore global glass effect settings
+      if (settings.isGlassEnabled) {
+        document.body.classList.add('glass-enabled');
+        document.documentElement.classList.add('glass-enabled');
+      } else {
+        document.body.classList.remove('glass-enabled');
+        document.documentElement.classList.remove('glass-enabled');
+      }
     }
-  }, [activeTab, draftTheme.colors, settings.theme, settings.activeThemeId, settings.customThemes]);
+  }, [activeTab, draftTheme.colors, draftTheme.isGlassEnabled, draftTheme.isDark, settings.theme, settings.activeThemeId, settings.customThemes, settings.isGlassEnabled]);
 
   if (!isThemeManagerOpen) return null;
 
@@ -97,7 +117,8 @@ export const ThemeCreatorModal: React.FC = () => {
     if (preset) {
       updateSettings({ 
         theme: preset.isDark ? 'dark' : 'light',
-        activeThemeId: presetId 
+        activeThemeId: presetId,
+        isGlassEnabled: preset.isGlass
       });
     }
   };
@@ -105,7 +126,11 @@ export const ThemeCreatorModal: React.FC = () => {
   const handleApplyCustom = (themeId: string) => {
     const custom = settings.customThemes.find(t => t.id === themeId);
     if (custom) {
-      updateSettings({ activeThemeId: themeId });
+      updateSettings({ 
+        activeThemeId: themeId,
+        theme: custom.isDark ? 'dark' : 'light',
+        isGlassEnabled: !!custom.isGlassEnabled
+      });
     }
   };
 
@@ -207,6 +232,8 @@ export const ThemeCreatorModal: React.FC = () => {
                       setEditingThemeId(null); 
                       setDraftTheme({
                         name: 'Mein Theme',
+                        isDark: true,
+                        isGlassEnabled: true,
                         colors: {
                           bg: '#1a1a1a',
                           card: '#252525',
@@ -261,22 +288,7 @@ export const ThemeCreatorModal: React.FC = () => {
                   </div>
                 </div>
                 
-                {/* Global Settings */}
-                <div className="mt-auto pt-6 border-t border-border-primary">
-                  <h3 className="text-xs font-black text-text-secondary uppercase tracking-[0.2em] mb-4">Optionen</h3>
-                  <label className="flex items-center justify-between cursor-pointer p-3 rounded-xl hover:bg-text-primary/5 transition-colors border border-border-primary/50">
-                    <span className="text-sm font-medium flex items-center gap-2">
-                      <Layers size={16} />
-                      Glassmorphismus
-                    </span>
-                    <input 
-                      type="checkbox" 
-                      checked={settings.isGlassEnabled}
-                      onChange={(e) => updateSettings({ isGlassEnabled: e.target.checked })}
-                      className="w-5 h-5 accent-accent rounded cursor-pointer"
-                    />
-                  </label>
-                </div>
+                {/* Global Settings section removed */}
               </motion.div>
             )}
 
@@ -312,80 +324,151 @@ export const ThemeCreatorModal: React.FC = () => {
                       </div>
                     </div>
 
+                    {/* Theme Customizer Options (Glass Mode) */}
+                    <div className="flex flex-col gap-4">
+                      <div className="flex items-center justify-between p-4 rounded-2xl border border-border-primary/50 bg-bg-card/50">
+                        <div className="flex flex-col select-none">
+                          <span className="text-sm font-bold">Glassmorphismus</span>
+                          <span className="text-xs text-text-secondary">Aktiviert moderne, semi-transparente Glaseffekte</span>
+                        </div>
+                        <label className="relative inline-flex items-center cursor-pointer">
+                          <input 
+                            type="checkbox" 
+                            checked={!!draftTheme.isGlassEnabled}
+                            onChange={e => setDraftTheme({ ...draftTheme, isGlassEnabled: e.target.checked })}
+                            className="sr-only peer"
+                          />
+                          <div className="w-11 h-6 bg-inactive-btn-bg peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-accent"></div>
+                        </label>
+                      </div>
+
+                      <AnimatePresence initial={false}>
+                        {draftTheme.isGlassEnabled && (
+                          <motion.div
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: "auto", opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                            className="overflow-hidden"
+                          >
+                            <div className="p-4 rounded-2xl border border-dashed border-accent/20 bg-accent/5 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                              <div className="col-span-1 sm:col-span-2">
+                                <h4 className="text-[10px] font-black uppercase tracking-wider text-accent">Glas-Morphismus Farbeinstellungen</h4>
+                                <p className="text-[11px] text-text-secondary mt-0.5">Diese Einstellungen bestimmen das Aussehen der Glas-Kärtchen im aktivierten Glassmorphismus-Modus.</p>
+                              </div>
+                              
+                              {['glassBg', 'glassBorder'].map((key) => {
+                                const val = draftTheme.colors?.[key as keyof typeof draftTheme.colors] || '';
+                                const { hex, alpha } = rgbaToHexAndAlpha(val);
+                                return (
+                                  <div key={key} className="flex flex-col gap-1.5 p-3 rounded-xl border border-border-primary/50 bg-bg-card">
+                                    <label className="text-[10px] font-black uppercase tracking-wider text-text-secondary truncate">
+                                      {COLOR_LABELS[key] || key}
+                                    </label>
+                                    <div className="flex gap-2 items-center">
+                                      <div className="relative w-9 h-9 rounded-lg overflow-hidden border border-border-primary shadow-inner shrink-0 cursor-pointer">
+                                        <input 
+                                          type="color" 
+                                          value={hex} 
+                                          onChange={e => {
+                                            const newHex = e.target.value;
+                                            const newVal = hexToRgba(newHex, alpha);
+                                            setDraftTheme({
+                                              ...draftTheme,
+                                              colors: { ...draftTheme.colors!, [key]: newVal }
+                                            });
+                                          }}
+                                          className="absolute -inset-2 w-14 h-14 cursor-pointer"
+                                        />
+                                      </div>
+                                      <input 
+                                        type="text" 
+                                        value={val}
+                                        onChange={e => {
+                                          setDraftTheme({
+                                            ...draftTheme,
+                                            colors: { ...draftTheme.colors!, [key]: e.target.value }
+                                          });
+                                        }}
+                                        className="w-full bg-bg-card border border-border-primary hover:border-text-secondary focus:border-text-secondary rounded-lg px-2 py-1 text-xs font-mono outline-none hover:-translate-y-0.5 focus:-translate-y-0.5 hover:scale-[1.015] focus:scale-[1.015] transition-all duration-500 ease-out transform-gpu shadow-sm min-w-0"
+                                      />
+                                    </div>
+                                    <div className="flex flex-col gap-1 mt-1">
+                                      <div className="flex justify-between text-[10px] text-text-secondary font-bold">
+                                        <span>Deckkraft</span>
+                                        <span>{Math.round(alpha * 100)}%</span>
+                                      </div>
+                                      <input 
+                                        type="range"
+                                        min="0"
+                                        max="100"
+                                        value={Math.round(alpha * 100)}
+                                        onChange={e => {
+                                          const newAlpha = parseInt(e.target.value) / 100;
+                                          const newVal = hexToRgba(hex, newAlpha);
+                                          setDraftTheme({
+                                            ...draftTheme,
+                                            colors: { ...draftTheme.colors!, [key]: newVal }
+                                          });
+                                        }}
+                                        className="w-full accent-accent h-1 bg-border-primary rounded-lg appearance-none cursor-pointer"
+                                      />
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+
                     {/* Color Pickers Generator - Two Columns on Mobile */}
                     <div className="grid grid-cols-2 gap-2 sm:gap-4">
-                      {draftTheme.colors && Object.entries(draftTheme.colors).map(([key, val]) => {
-                        const isGlassColor = key === 'glassBg' || key === 'glassBorder';
-                        const { hex, alpha } = rgbaToHexAndAlpha(val);
-
-                        return (
-                          <div key={key} className="flex flex-col gap-1.5 p-2 sm:p-4 rounded-xl sm:rounded-2xl border border-border-primary/50 bg-bg-card/50">
-                            <label className="text-[9px] sm:text-[10px] font-black uppercase tracking-wider text-text-secondary truncate">
-                              {COLOR_LABELS[key] || key}
-                            </label>
-                            
-                            <div className="flex gap-2 sm:gap-3 items-center">
-                              {/* Color Preview Block - enlarged for tap feedback */}
-                              <div className="relative w-10 h-10 sm:w-11 sm:h-11 rounded-lg overflow-hidden border border-border-primary shadow-inner shrink-0 cursor-pointer">
-                                <input 
-                                  type="color" 
-                                  value={isGlassColor ? hex : val} 
-                                  onChange={e => {
-                                    const newHex = e.target.value;
-                                    const newVal = isGlassColor ? hexToRgba(newHex, alpha) : newHex;
-                                    setDraftTheme({
-                                      ...draftTheme,
-                                      colors: { ...draftTheme.colors!, [key]: newVal }
-                                    });
-                                  }}
-                                  className="absolute -inset-2 w-14 h-14 cursor-pointer"
-                                />
-                              </div>
-                              <input 
-                                type="text" 
-                                value={val}
-                                onChange={e => {
-                                  setDraftTheme({
-                                    ...draftTheme,
-                                    colors: { ...draftTheme.colors!, [key]: e.target.value }
-                                  });
-                                }}
-                                className="w-full bg-bg-card border border-border-primary hover:border-text-secondary focus:border-text-secondary rounded-lg px-2 py-1.5 sm:px-3 sm:py-2 text-[10px] sm:text-xs font-mono outline-none hover:-translate-y-0.5 focus:-translate-y-0.5 hover:scale-[1.015] focus:scale-[1.015] transition-all duration-500 ease-out transform-gpu origin-center shadow-sm min-w-0"
-                              />
-                            </div>
-
-                            {isGlassColor && (
-                              <div className="flex flex-col gap-1 mt-1">
-                                <div className="flex justify-between text-[8px] sm:text-[10px] text-text-secondary font-bold">
-                                  <span>Deckkraft</span>
-                                  <span>{Math.round(alpha * 100)}%</span>
+                      {draftTheme.colors && Object.entries(draftTheme.colors)
+                        .filter(([key]) => key !== 'glassBg' && key !== 'glassBorder')
+                        .map(([key, val]) => {
+                          return (
+                            <div key={key} className="flex flex-col gap-1.5 p-2 sm:p-4 rounded-xl sm:rounded-2xl border border-border-primary/50 bg-bg-card/50">
+                              <label className="text-[9px] sm:text-[10px] font-black uppercase tracking-wider text-text-secondary truncate">
+                                {COLOR_LABELS[key] || key}
+                              </label>
+                              
+                              <div className="flex gap-2 sm:gap-3 items-center">
+                                <div className="relative w-10 h-10 sm:w-11 sm:h-11 rounded-lg overflow-hidden border border-border-primary shadow-inner shrink-0 cursor-pointer">
+                                  <input 
+                                    type="color" 
+                                    value={val} 
+                                    onChange={e => {
+                                      setDraftTheme({
+                                        ...draftTheme,
+                                        colors: { ...draftTheme.colors!, [key]: e.target.value }
+                                      });
+                                    }}
+                                    className="absolute -inset-2 w-14 h-14 cursor-pointer"
+                                  />
                                 </div>
                                 <input 
-                                  type="range"
-                                  min="0"
-                                  max="100"
-                                  value={Math.round(alpha * 100)}
+                                  type="text" 
+                                  value={val}
                                   onChange={e => {
-                                    const newAlpha = parseInt(e.target.value) / 100;
-                                    const newVal = hexToRgba(hex, newAlpha);
                                     setDraftTheme({
                                       ...draftTheme,
-                                      colors: { ...draftTheme.colors!, [key]: newVal }
+                                      colors: { ...draftTheme.colors!, [key]: e.target.value }
                                     });
                                   }}
-                                  className="w-full accent-accent h-1 bg-border-primary rounded-lg appearance-none cursor-pointer"
+                                  className="w-full bg-bg-card border border-border-primary hover:border-text-secondary focus:border-text-secondary rounded-lg px-2 py-1.5 sm:px-3 sm:py-2 text-[10px] sm:text-xs font-mono outline-none hover:-translate-y-0.5 focus:-translate-y-0.5 hover:scale-[1.015] focus:scale-[1.015] transition-all duration-500 ease-out transform-gpu origin-center shadow-sm min-w-0"
                                 />
                               </div>
-                            )}
-                          </div>
-                        );
-                      })}
+                            </div>
+                          );
+                        })}
                     </div>
 
                     {/* Live Preview Minimap */}
                     <div className="mt-4 p-4 sm:p-6 rounded-3xl border border-border-primary relative overflow-hidden" style={{ background: draftTheme.colors?.bg }}>
                       {/* Glowing Blobs for preview if glassmorphism is checked */}
-                      {settings.isGlassEnabled && (
+                      {draftTheme.isGlassEnabled && (
                         <div className="absolute inset-0 pointer-events-none overflow-hidden opacity-30 z-0">
                           <div className="absolute top-[-25%] left-[-10%] w-[60%] h-[60%] bg-violet-600/40 rounded-full blur-[80px]" />
                           <div className="absolute bottom-[-25%] right-[-10%] w-[60%] h-[60%] bg-pink-500/30 rounded-full blur-[80px]" />
@@ -400,11 +483,11 @@ export const ThemeCreatorModal: React.FC = () => {
                           <div 
                             className={cn(
                               "p-3 sm:p-5 rounded-2xl border transition-all duration-300",
-                              settings.isGlassEnabled ? "backdrop-blur-xl" : ""
+                              draftTheme.isGlassEnabled ? "backdrop-blur-xl" : ""
                             )}
                             style={{ 
-                              backgroundColor: settings.isGlassEnabled ? draftTheme.colors?.glassBg : draftTheme.colors?.card, 
-                              borderColor: settings.isGlassEnabled ? draftTheme.colors?.glassBorder : draftTheme.colors?.border 
+                              backgroundColor: draftTheme.isGlassEnabled ? draftTheme.colors?.glassBg : draftTheme.colors?.card, 
+                              borderColor: draftTheme.isGlassEnabled ? draftTheme.colors?.glassBorder : draftTheme.colors?.border 
                             }}
                           >
                             <div className="h-3 w-2/3 rounded mb-2" style={{ background: draftTheme.colors?.textDark }}></div>
@@ -432,11 +515,11 @@ export const ThemeCreatorModal: React.FC = () => {
                           <div 
                             className={cn(
                               "p-3 sm:p-5 rounded-2xl border transition-all duration-300 flex flex-col justify-between",
-                              settings.isGlassEnabled ? "backdrop-blur-xl" : ""
+                              draftTheme.isGlassEnabled ? "backdrop-blur-xl" : ""
                             )}
                             style={{ 
-                              backgroundColor: settings.isGlassEnabled ? draftTheme.colors?.glassBg : draftTheme.colors?.card, 
-                              borderColor: settings.isGlassEnabled ? draftTheme.colors?.glassBorder : draftTheme.colors?.border 
+                              backgroundColor: draftTheme.isGlassEnabled ? draftTheme.colors?.glassBg : draftTheme.colors?.card, 
+                              borderColor: draftTheme.isGlassEnabled ? draftTheme.colors?.glassBorder : draftTheme.colors?.border 
                             }}
                           >
                             <div className="flex justify-between items-center mb-6">

@@ -42,7 +42,7 @@ export const TopNav: React.FC = () => {
       </div>
 
       {/* Desktop Nav Pills – hidden on mobile (BottomNav takes over) */}
-      <nav className="hidden md:flex items-center gap-1 bg-black/5 dark:bg-white/10 p-1 rounded-full">
+      <nav className="hidden md:flex items-center gap-1 bg-black/[0.07] dark:bg-white/10 border border-black/5 dark:border-white/5 p-1 rounded-full shadow-inner">
         {navItems.map((item) => (
           <NavLink
             key={item.to}
@@ -53,7 +53,7 @@ export const TopNav: React.FC = () => {
                 "px-5 py-2 rounded-full text-sm font-medium transition-all duration-300",
                 isActive
                   ? activeClass
-                  : 'text-text-secondary hover:text-text-primary hover:bg-black/5 dark:hover:bg-white/5'
+                  : 'text-text-secondary hover:text-text-primary hover:bg-black/10 dark:hover:bg-white/5'
               )
             }
           >
@@ -66,8 +66,17 @@ export const TopNav: React.FC = () => {
       <div className="flex items-center gap-2 md:gap-4">
         {/* Theme Toggle Switch */}
         <button
-          onClick={() => updateSettings({ theme: settings.theme === 'light' ? 'dark' : 'light' })}
+          onClick={() => {
+            const targetTheme = settings.theme === 'light' ? 'dark' : 'light';
+            const isGlass = settings.isGlassEnabled;
+            const nextThemeId = `default-${targetTheme}-${isGlass ? 'glass' : 'solid'}`;
+            updateSettings({
+              theme: targetTheme,
+              activeThemeId: nextThemeId
+            });
+          }}
           className="relative w-12 md:w-14 h-7 md:h-8 rounded-full bg-black/10 dark:bg-white/10 flex items-center px-1 transition-colors"
+          title={settings.theme === 'light' ? 'Dunkles Design aktivieren' : 'Helles Design aktivieren'}
         >
           <div className={`w-5 md:w-6 h-5 md:h-6 rounded-full bg-bg-primary shadow-md flex items-center justify-center transition-transform duration-300 ${settings.theme === 'dark' ? 'translate-x-5 md:translate-x-6' : 'translate-x-0'}`}>
             {settings.theme === 'dark' ? <Moon size={12} className="text-text-primary" /> : <Sun size={12} className="text-text-primary" />}

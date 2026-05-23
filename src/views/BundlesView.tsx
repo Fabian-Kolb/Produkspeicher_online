@@ -180,12 +180,7 @@ export const BundlesView: React.FC = () => {
         </h1>
         <button
           onClick={() => setActiveBundleId('new')}
-          className={cn(
-            "border border-transparent backdrop-blur-md px-3 md:px-5 py-2 md:py-2.5 rounded-full font-medium text-sm transition-all duration-200 shadow-md flex items-center gap-1.5 md:gap-2",
-            settings.isGlassEnabled
-              ? "bg-text-primary text-bg-primary hover:opacity-90 shadow-black/10 dark:shadow-white/5"
-              : "bg-accent text-bg-primary hover:bg-accent-hover"
-          )}
+          className="border border-transparent backdrop-blur-md px-3 md:px-5 py-2 md:py-2.5 rounded-full font-medium text-sm transition-all duration-200 shadow-md flex items-center gap-1.5 md:gap-2 bg-accent text-bg-primary hover:bg-accent-hover"
         >
           <Plus size={15} /> <span>Neues Bundle</span>
         </button>
@@ -203,12 +198,7 @@ export const BundlesView: React.FC = () => {
               <p className="text-text-secondary text-sm mb-8">Erstelle dein erstes Bundle um Produkte zu gruppieren.</p>
               <button
                 onClick={() => setActiveBundleId('new')}
-                className={cn(
-                  "px-6 py-3 rounded-full text-sm font-semibold transition-all shadow-md",
-                  settings.isGlassEnabled
-                    ? "bg-text-primary text-bg-primary hover:opacity-90"
-                    : "bg-accent text-bg-primary hover:bg-accent-hover"
-                )}
+                className="px-6 py-3 rounded-full text-sm font-semibold transition-all shadow-md bg-accent text-bg-primary hover:bg-accent-hover"
               >
                 Jetzt erstellen
               </button>
@@ -245,23 +235,13 @@ export const BundlesView: React.FC = () => {
                         <div className="flex items-center gap-1.5 md:gap-2">
                           <button
                             onClick={() => setActiveBundleId(bundle.id)}
-                            className={cn(
-                              "backdrop-blur-md px-2.5 md:px-4 py-1.5 rounded-full text-xs font-medium transition-all shadow-sm",
-                              settings.isGlassEnabled
-                              ? "bg-[var(--theme-glass-bg)] border border-[var(--theme-glass-border)] hover:bg-white/10"
-                              : "bg-accent text-bg-primary hover:bg-accent-hover"
-                            )}
+                            className="backdrop-blur-md px-2.5 md:px-4 py-1.5 rounded-full text-xs font-medium transition-all shadow-sm bg-accent text-bg-primary hover:bg-accent-hover"
                           >
                             Bearbeiten
                           </button>
                           <button
                             onClick={() => deleteBundle(bundle.id)}
-                            className={cn(
-                              "w-7 h-7 md:w-8 md:h-8 rounded-full flex items-center justify-center transition-all shadow-sm group/trash border",
-                              settings.isGlassEnabled
-                                ? "bg-[var(--theme-glass-bg)] border border-[var(--theme-glass-border)] text-text-secondary hover:text-heart hover:border-heart"
-                                : "bg-accent text-bg-primary border-transparent hover:bg-heart hover:text-white"
-                            )}
+                            className="w-7 h-7 md:w-8 md:h-8 rounded-full flex items-center justify-center transition-all shadow-sm group/trash border bg-accent text-bg-primary border-transparent hover:bg-heart hover:text-white"
                           >
                             <Trash2 size={13} />
                           </button>
@@ -299,12 +279,7 @@ export const BundlesView: React.FC = () => {
 
                     {/* Bottom right: Kaufen button */}
                     <div className="flex justify-end">
-                      <button className={cn(
-                        "px-4 md:px-6 py-2 md:py-2.5 rounded-full text-sm font-semibold transition-all shadow-md",
-                        settings.isGlassEnabled
-                          ? "bg-text-primary text-bg-primary hover:opacity-90"
-                          : "bg-accent text-bg-primary hover:bg-accent-hover"
-                      )}>
+                      <button className="px-4 md:px-6 py-2 md:py-2.5 rounded-full text-sm font-semibold transition-all shadow-md bg-accent text-bg-primary hover:bg-accent-hover">
                         Kaufen
                       </button>
                     </div>
@@ -533,34 +508,19 @@ export const BundlesView: React.FC = () => {
                         <div className="flex items-center gap-1.5 shrink-0 ml-2">
                           <button
                             onClick={() => handleDecreaseItem(item.id)}
-                            className={cn(
-                              "w-7 h-7 md:w-9 md:h-9 rounded-full flex items-center justify-center transition-all text-sm font-bold shadow-sm",
-                              settings.isGlassEnabled
-                                ? "bg-[var(--theme-glass-bg)] border border-[var(--theme-glass-border)] text-text-primary hover:bg-white/20"
-                                : "bg-accent text-bg-primary hover:bg-accent-hover"
-                            )}
+                            className="w-7 h-7 md:w-9 md:h-9 rounded-full flex items-center justify-center transition-all text-sm font-bold shadow-sm bg-accent text-bg-primary hover:bg-accent-hover"
                           >
                             −
                           </button>
                           <button
                             onClick={() => handleAddItem(item.id)}
-                            className={cn(
-                              "w-7 h-7 md:w-9 md:h-9 rounded-full flex items-center justify-center transition-all text-sm font-bold shadow-sm",
-                              settings.isGlassEnabled
-                                ? "bg-[var(--theme-glass-bg)] border border-[var(--theme-glass-border)] text-text-primary hover:bg-white/20"
-                                : "bg-accent text-bg-primary hover:bg-accent-hover"
-                            )}
+                            className="w-7 h-7 md:w-9 md:h-9 rounded-full flex items-center justify-center transition-all text-sm font-bold shadow-sm bg-accent text-bg-primary hover:bg-accent-hover"
                           >
                             +
                           </button>
                           <button
                             onClick={() => handleRemoveItem(item.id)}
-                            className={cn(
-                              "w-7 h-7 md:w-9 md:h-9 rounded-full flex items-center justify-center transition-all text-sm font-bold shadow-sm",
-                              settings.isGlassEnabled
-                                ? "bg-[var(--theme-glass-bg)] border border-[var(--theme-glass-border)] text-text-primary hover:text-heart"
-                                : "bg-accent text-bg-primary hover:bg-heart hover:text-white"
-                            )}
+                            className="w-7 h-7 md:w-9 md:h-9 rounded-full flex items-center justify-center transition-all text-sm font-bold shadow-sm bg-accent text-bg-primary hover:bg-heart hover:text-white"
                           >
                             ×
                           </button>
@@ -578,12 +538,7 @@ export const BundlesView: React.FC = () => {
                 </div>
                 <button
                   onClick={handleCreateOrUpdate}
-                  className={cn(
-                    "w-full py-2.5 md:py-3 rounded-xl text-sm font-medium transition-all shadow-sm",
-                    settings.isGlassEnabled
-                      ? "bg-[var(--theme-glass-bg)] border border-[var(--theme-glass-border)] hover:bg-black/5 dark:hover:bg-white/10"
-                      : "bg-accent text-bg-primary hover:bg-accent-hover"
-                  )}
+                  className="w-full py-2.5 md:py-3 rounded-xl text-sm font-medium transition-all shadow-sm bg-accent text-bg-primary hover:bg-accent-hover"
                 >
                   Zusammenstellung speichern
                 </button>

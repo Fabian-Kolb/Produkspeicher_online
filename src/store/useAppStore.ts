@@ -66,27 +66,8 @@ const defaultSettings: AppSettings = {
   isGlassEnabled: true,
   modalStyle: 'glass',
   modalTheme: 'auto',
-  customThemes: [
-    {
-      id: 'default-dark',
-      name: 'Default Dark',
-      colors: {
-        bg: '#1a1a1a',
-        card: '#252525',
-        border: '#333333',
-        textDark: '#ffffff',
-        textGrey: '#a0a0a0',
-        accent: '#3b82f6',
-        accentHover: '#2563eb',
-        inactiveBtnBg: '#333333',
-        inactiveBtnText: '#888888',
-        heart: '#ef4444',
-        glassBg: 'rgba(37, 37, 37, 0.7)',
-        glassBorder: 'rgba(255, 255, 255, 0.08)'
-      }
-    }
-  ],
-  activeThemeId: 'default-dark',
+  customThemes: [],
+  activeThemeId: 'default-dark-glass',
   mobileGrid: 'multi',
 };
 
@@ -346,22 +327,34 @@ export const useAppStore = create<AppState>()((set, get) => ({
   },
 
   addCustomTheme: async (theme) => {
+    const id = crypto.randomUUID();
+    const newTheme = { ...theme, id } as CustomTheme;
     set((state) => ({
       settings: {
         ...state.settings,
-        customThemes: [...state.settings.customThemes, { ...theme, id: crypto.randomUUID() } as CustomTheme]
+        customThemes: [...state.settings.customThemes, newTheme],
+        activeThemeId: id,
+        isGlassEnabled: !!newTheme.isGlassEnabled
       }
     }));
     await syncAppState(get().userId!, get());
   },
 
   updateCustomTheme: async (id, updatedTheme) => {
-    set((state) => ({
-      settings: {
-        ...state.settings,
-        customThemes: state.settings.customThemes.map(t => t.id === id ? { ...t, ...updatedTheme } : t)
-      }
-    }));
+    set((state) => {
+      const isEditingActive = state.settings.activeThemeId === id;
+      const updatedThemes = state.settings.customThemes.map(t => t.id === id ? { ...t, ...updatedTheme } : t);
+      const activeTheme = updatedThemes.find(t => t.id === id);
+      return {
+        settings: {
+          ...state.settings,
+          customThemes: updatedThemes,
+          ...(isEditingActive && activeTheme ? {
+            isGlassEnabled: activeTheme.isGlassEnabled !== undefined ? activeTheme.isGlassEnabled : state.settings.isGlassEnabled
+          } : {})
+        }
+      };
+    });
     await syncAppState(get().userId!, get());
   },
 
@@ -370,7 +363,8 @@ export const useAppStore = create<AppState>()((set, get) => ({
       settings: {
         ...state.settings,
         customThemes: state.settings.customThemes.filter(t => t.id !== id),
-        activeThemeId: state.settings.activeThemeId === id ? 'default' : state.settings.activeThemeId
+        activeThemeId: state.settings.activeThemeId === id ? 'default-dark-glass' : state.settings.activeThemeId,
+        isGlassEnabled: state.settings.activeThemeId === id ? true : state.settings.isGlassEnabled
       }
     }));
     await syncAppState(get().userId!, get());

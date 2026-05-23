@@ -208,7 +208,7 @@ const AddShopModal: React.FC<AddShopModalProps> = ({ open, onClose, onAdd, categ
           <button
             type="submit"
             disabled={!name.trim() || !url.trim()}
-            className="mt-2 w-full py-3 rounded-2xl bg-text-primary text-bg-primary font-semibold text-sm transition-all duration-300 hover:opacity-90 hover:shadow-lg active:scale-[0.98] disabled:opacity-30 disabled:cursor-not-allowed"
+            className="mt-2 w-full py-3 rounded-2xl bg-accent text-bg-primary font-semibold text-sm transition-all duration-300 hover:bg-accent-hover hover:shadow-lg active:scale-[0.98] disabled:opacity-30 disabled:cursor-not-allowed"
           >
             Shop hinzufügen
           </button>
@@ -427,12 +427,7 @@ export const DashboardView: React.FC = () => {
           <h2 className="text-xl md:text-2xl font-playfair font-bold">Deine Shops</h2>
           <button
             onClick={() => setShowAddShopModal(true)}
-            className={cn(
-              "flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium active:scale-95 transition-all duration-200 shadow-md",
-              settings.isGlassEnabled
-                ? "bg-text-primary text-bg-primary hover:opacity-90 shadow-black/10 dark:shadow-white/5"
-                : "bg-accent text-bg-primary hover:bg-accent-hover"
-            )}
+            className="flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium active:scale-95 transition-all duration-200 shadow-md bg-accent text-bg-primary hover:bg-accent-hover"
           >
             <Plus size={14} />
             Shop hinzufügen

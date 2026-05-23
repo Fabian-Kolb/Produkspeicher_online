@@ -17,6 +17,45 @@ interface LogEntry {
 
 const CHANGELOG: LogEntry[] = [
   {
+    version: '0.8.1',
+    date: '23. Mai 2026',
+    changes: {
+      improved: [
+        'Einheitliche Button-Farben im Glasmodus: Alle interaktiven Haupt- und Aktionsbuttons (wie „Shop hinzufügen“, „Neues Bundle“, Zeitraum-Umschalter im Budget, Card-Buttons und Editor-Buttons) nutzen nun auch im Glasmodus konsistent die blaue Akzentfarbe zur klaren Kennzeichnung ihrer Interaktivität.'
+      ],
+      fixed: [
+        'Navigationspille im Helles Design sichtbar: Durch die Aktivierung klassenbasierter Dark-Mode-Selektoren in Tailwind v4 und dynamische Synchronisierung der CSS-Klasse .dark ist die Desktop-Navigationsleiste nun auch auf hellen und verglasten Hintergründen perfekt erkennbar.'
+      ]
+    }
+  },
+  {
+    version: '0.8.0',
+    date: '23. Mai 2026',
+    changes: {
+      fixed: [
+        'Header-Pillen-Kontrast im Helles Design: Das Kontrastverhältnis der Kategorie-Navigationsleiste (Solid und Glass) im Light Mode wurde durch Anpassung der Standard-Rahmenfarben und Hinzufügen eines weichen Schattens deutlich erhöht, um die Erkennbarkeit zu verbessern.',
+        'Light/Dark-Modus-Umschalter repariert: Der Theme-Wechsel über das Mond-/Sonnensymbol in der oberen rechten Ecke behält nun den aktiven Glassmorphismus-Status (Solid oder Glass) korrekt bei und wählt das entsprechende Standardpreset aus.'
+      ],
+      improved: [
+        'Skill-Dokumentation aktualisiert: Die zentralen Interaktionsrichtlinien des Designsystems in den Skill-Dateien wurden um die neuen Preset-Strukturen und Theme-Schnittstellen erweitert.'
+      ]
+    }
+  },
+  {
+    version: '0.7.9',
+    date: '23. Mai 2026',
+    changes: {
+      added: [
+        'Separation von Preset-Modi: Default Dark und Default Light stehen nun jeweils als eigenständige Solid- und Glass-Presets (z. B. "Default Dark (Solid)" und "Default Dark (Glass)") in der Auswahlliste bereit, um das Design mit einem Klick exakt einzustellen.',
+        'Bedingter Glassmorphismus-Schalter: Die globale Glassmorphismus-Option wurde aus den Preset-Sidebar-Einstellungen entfernt und stattdessen direkt in den Theme-Ersteller integriert. Das Häkchen wird nun nur noch während der Custom-Theme-Konfiguration angezeigt.'
+      ],
+      improved: [
+        'Echtzeit-Glas-Vorschau: Die Live-Vorschau und die App-Oberfläche passen sich beim Konfigurieren des Custom-Themes augenblicklich dem aktiven Entwurfs-Morphismus-Status an.',
+        'Reorganisation von Presets: Veraltete Presets (Nordic Forest, Rose Petal) wurden entfernt, um Platz für die getrennten Standard-Presets zu schaffen.'
+      ]
+    }
+  },
+  {
     version: '0.7.8',
     date: '22. Mai 2026',
     changes: {

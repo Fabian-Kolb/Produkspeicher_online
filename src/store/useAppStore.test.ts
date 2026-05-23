@@ -79,4 +79,62 @@ describe('useAppStore', () => {
     const updatedStore = useAppStore.getState();
     expect(updatedStore.websiteCats).toEqual(['Mode', 'Allgemein']);
   });
+
+  it('sollte customTheme hinzufügen, aktualisieren und löschen', async () => {
+    const store = useAppStore.getState();
+    
+    // Add a custom theme
+    await store.addCustomTheme({
+      name: 'Custom Pink',
+      isDark: true,
+      isGlassEnabled: true,
+      colors: {
+        bg: '#2f1f25',
+        card: '#3d252c',
+        border: '#4d333b',
+        textDark: '#faebf0',
+        textGrey: '#cfa1ad',
+        accent: '#f472b6',
+        accentHover: '#db2777',
+        inactiveBtnBg: '#4d333b',
+        inactiveBtnText: '#9b7681',
+        heart: '#f43f5e',
+        glassBg: 'rgba(61, 37, 44, 0.7)',
+        glassBorder: 'rgba(255, 255, 255, 0.1)'
+      }
+    });
+
+    let updatedStore = useAppStore.getState();
+    expect(updatedStore.settings.customThemes.length).toBe(1);
+    expect(updatedStore.settings.customThemes[0].name).toBe('Custom Pink');
+    expect(updatedStore.settings.customThemes[0].isDark).toBe(true);
+    expect(updatedStore.settings.customThemes[0].isGlassEnabled).toBe(true);
+    
+    // The newly created theme should be set as active and glass enabled
+    const createdThemeId = updatedStore.settings.customThemes[0].id;
+    expect(updatedStore.settings.activeThemeId).toBe(createdThemeId);
+    expect(updatedStore.settings.isGlassEnabled).toBe(true);
+
+    // Update the custom theme name and options
+    await store.updateCustomTheme(createdThemeId, {
+      name: 'Custom Pink updated',
+      isGlassEnabled: false
+    });
+
+    updatedStore = useAppStore.getState();
+    expect(updatedStore.settings.customThemes[0].name).toBe('Custom Pink updated');
+    expect(updatedStore.settings.customThemes[0].isGlassEnabled).toBe(false);
+    
+    // The active theme settings should update in sync
+    expect(updatedStore.settings.isGlassEnabled).toBe(false);
+
+    // Delete the custom theme
+    await store.deleteCustomTheme(createdThemeId);
+    updatedStore = useAppStore.getState();
+    expect(updatedStore.settings.customThemes.length).toBe(0);
+    
+    // Should fallback to default-dark-glass and enable glass
+    expect(updatedStore.settings.activeThemeId).toBe('default-dark-glass');
+    expect(updatedStore.settings.isGlassEnabled).toBe(true);
+  });
 });

@@ -17,6 +17,29 @@ interface LogEntry {
 
 const CHANGELOG: LogEntry[] = [
   {
+    version: '0.8.3',
+    date: '28. Mai 2026',
+    changes: {
+      added: [
+        'Premium Slide-Down Kategoriesteuerung im Dashboard: Das Hinzufügen, Löschen und Umsortieren von Shop-Kategorien wurde von der Inline-Ansicht in ein elegantes zentriertes Slide-Down-Editiermenü (identisch zum Katalog) überführt.',
+        'Custom Inline-Löschbestätigung für Filter: Statt des störenden, blockierenden System-Popups (confirm) heben sich zu löschende Filter-Chips nun direkt in der Leiste mit einer weichen Animation rot hervor und bieten eine direkte Bestätigung/Abbrechen-Schaltfläche.'
+      ],
+      improved: [
+        'Wiederverwendbare CategoryEditMenu Komponente: Das Editiermenü wurde vollständig modularisiert und nimmt nun Daten sowie Store-Callbacks (Katalog/Dashboard) flexibel über Props entgegen.',
+        'Hervorragende Eingabefelder-Aktivierung: Neue Shop- und Produktkategorie-Eingabefelder unterstützen die einheitliche, tactile 102%-Skalierungs- und Hebeanimation ohne unästhetische blaue Fokus-Ringe.'
+      ]
+    }
+  },
+  {
+    version: '0.8.2',
+    date: '28. Mai 2026',
+    changes: {
+      improved: [
+        'Premium Navigations-Hover und Klick-Animationen (Header & Subnavigation): Umstellung auf das robuste Parent-Tracked Bounding Indicator Design. Eine einzelne, permanente Hintergrund-Kapsel im Navigations-Track slides und morpht dynamisch über Offset-Messungen (offsetLeft/clientWidth) zur aktiven Schaltfläche. Dies eliminiert alle Z-Index-Browserbugs und Framer Motion LayoutId-Konflikte zu 100%.'
+      ]
+    }
+  },
+  {
     version: '0.8.1',
     date: '23. Mai 2026',
     changes: {

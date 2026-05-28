@@ -3,8 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { useAppStore } from '../store/useAppStore';
 import { FilterChip } from '../components/common/FilterChip';
 import { Bell, Euro, Heart, Settings, Plus, X, ExternalLink, Globe, Tag, Link2, Store } from 'lucide-react';
-import { cn } from '../utils/cn';
 import type { Product, Website } from '../types';
+import { CategoryEditMenu } from '../components/features/CategoryEditMenu';
+import { motion, AnimatePresence } from 'framer-motion';
 
 /* ── Default/Standard Shops ────────────────────────────────── */
 const DEFAULT_SHOPS: Website[] = [
@@ -239,7 +240,13 @@ export const DashboardView: React.FC = () => {
       `Moin ${displayName}, bereit für neue Deals?`,
       `Hi ${displayName}, dein Überblick ist bereit.`
     ];
-    return messages[Math.floor(Math.random() * messages.length)];
+    // Use a simple deterministic hash of the display name to avoid impure Math.random() in render
+    let hash = 0;
+    for (let i = 0; i < displayName.length; i++) {
+      hash = displayName.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    const idx = Math.abs(hash) % messages.length;
+    return messages[idx];
   }, [displayName]);
 
   /* ── KPI helpers ───────────────────────────────────────── */
@@ -269,26 +276,7 @@ export const DashboardView: React.FC = () => {
   const displayCats = useMemo(() => ['Alle', ...websiteCats], [websiteCats]);
   const [activeFilter, setActiveFilter] = useState('Alle');
   const [isEditing, setIsEditing] = useState(false);
-  const [newCatName, setNewCatName] = useState('');
-  const [showAddInput, setShowAddInput] = useState(false);
   const [showAddShopModal, setShowAddShopModal] = useState(false);
-  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
-  const addInputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    if (showAddInput && addInputRef.current) {
-      addInputRef.current.focus();
-    }
-  }, [showAddInput]);
-
-  const handleAddCat = () => {
-    const trimmed = newCatName.trim();
-    if (trimmed) {
-      addWebsiteCat(trimmed);
-    }
-    setNewCatName('');
-    setShowAddInput(false);
-  };
 
   const handleRemoveCat = (cat: string) => {
     if (cat === 'Alle') return;
@@ -302,26 +290,6 @@ export const DashboardView: React.FC = () => {
     if (!websiteCats.includes(shop.c)) {
       addWebsiteCat(shop.c);
     }
-  };
-
-  const handleDragStart = (e: React.DragEvent, index: number) => {
-    setDraggedIndex(index);
-    e.dataTransfer.effectAllowed = 'move';
-  };
-
-  const handleDragEnter = (index: number) => {
-    if (draggedIndex === null || draggedIndex === index || index === 0 || draggedIndex === 0) return;
-
-    const newCats = [...displayCats];
-    const [removed] = newCats.splice(draggedIndex, 1);
-    newCats.splice(index, 0, removed);
-
-    setDraggedIndex(index);
-    reorderWebsiteCats(newCats.slice(1));
-  };
-
-  const handleDragEnd = () => {
-    setDraggedIndex(null);
   };
 
   /* ── Merge default + user shops ────────────────────────── */
@@ -439,11 +407,7 @@ export const DashboardView: React.FC = () => {
           {/* Gear FilterChip */}
           <FilterChip
             active={isEditing}
-            onClick={() => {
-              setIsEditing(!isEditing);
-              setShowAddInput(false);
-              setNewCatName('');
-            }}
+            onClick={() => setIsEditing(!isEditing)}
             className="!px-3"
           >
             <Settings
@@ -453,97 +417,49 @@ export const DashboardView: React.FC = () => {
           </FilterChip>
 
           {/* Category FilterChips */}
-          {displayCats.map((cat, idx) => {
-            const isVirtual = cat === 'Alle';
-            const isDragging = draggedIndex === idx;
-
-            return (
-              <div
-                key={cat}
-                draggable={isEditing && !isVirtual}
-                onDragStart={(e) => handleDragStart(e, idx)}
-                onDragEnter={() => handleDragEnter(idx)}
-                onDragEnd={handleDragEnd}
-                onDragOver={(e) => e.preventDefault()}
-                className={cn(
-                  "relative animate-in fade-in zoom-in-95 duration-200 transition-all duration-300",
-                  isDragging && "opacity-40 scale-95 border-dashed",
-                  isEditing && !isVirtual && "cursor-move"
-                )}
-              >
-                <FilterChip
-                  active={activeFilter === cat && !isEditing}
-                  editable={isEditing && !isVirtual}
-                  shaking={isEditing && !isVirtual}
-                  onClick={() => {
-                    if (!isEditing) setActiveFilter(cat);
-                  }}
-                >
-                  {cat}
-                </FilterChip>
-
-                {/* Delete Badge in Edit Mode */}
-                {isEditing && !isVirtual && (
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleRemoveCat(cat);
-                    }}
-                    className="absolute -top-1.5 -right-1.5 w-5 h-5 flex items-center justify-center rounded-full bg-heart text-white text-[10px] shadow-md hover:scale-110 active:scale-95 transition-transform duration-150 z-10 animate-in zoom-in duration-200 cursor-pointer"
-                  >
-                    <X size={10} />
-                  </button>
-                )}
-              </div>
-            );
-          })}
-
-          {/* Add new category chip in edit mode */}
-          {isEditing && !showAddInput && (
+          {displayCats.map((cat) => (
             <FilterChip
-              onClick={() => setShowAddInput(true)}
-              className="!border-dashed !border-emerald-400/50 !text-emerald-400 hover:!bg-emerald-400/10 animate-in fade-in zoom-in-95 duration-200 cursor-pointer"
+              key={cat}
+              active={activeFilter === cat && !isEditing}
+              onClick={() => {
+                if (!isEditing) setActiveFilter(cat);
+              }}
             >
-              <Plus size={12} className="mr-1" />
-              Neu
+              {cat}
             </FilterChip>
-          )}
-
-          {/* Inline add input */}
-          {isEditing && showAddInput && (
-            <div className="flex items-center gap-1.5 animate-in fade-in slide-in-from-left-4 duration-200">
-              <input
-                ref={addInputRef}
-                type="text"
-                value={newCatName}
-                onChange={(e) => setNewCatName(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') handleAddCat();
-                  if (e.key === 'Escape') { setShowAddInput(false); setNewCatName(''); }
-                }}
-                placeholder="Kategorie…"
-                className="w-28 bg-[var(--theme-glass-bg)] border border-emerald-400/40 rounded-full text-sm text-text-primary outline-none px-3 py-1.5 placeholder:text-text-secondary/50 focus:border-emerald-400 transition-colors"
-              />
-              <button
-                onClick={handleAddCat}
-                className="p-1.5 rounded-full text-emerald-400 hover:bg-emerald-400/10 transition-colors"
-              >
-                <Plus size={14} />
-              </button>
-              <button
-                onClick={() => { setShowAddInput(false); setNewCatName(''); }}
-                className="p-1.5 rounded-full text-text-secondary hover:text-text-primary hover:bg-white/5 transition-colors"
-              >
-                <X size={14} />
-              </button>
-            </div>
-          )}
+          ))}
 
           {/* Shop count */}
           <span className="ml-auto text-xs text-text-secondary tabular-nums">
             {filteredShops.length} {filteredShops.length === 1 ? 'Shop' : 'Shops'}
           </span>
         </div>
+
+        {/* Slide-down Category Edit Menu */}
+        <AnimatePresence>
+          {isEditing && (
+            <motion.div
+              initial={{ height: 0, opacity: 0, marginBottom: 0 }}
+              animate={{ height: 'auto', opacity: 1, marginBottom: 24 }}
+              exit={{ height: 0, opacity: 0, marginBottom: 0 }}
+              transition={{ duration: 0.3, ease: 'easeInOut' }}
+              className="overflow-hidden w-full flex justify-center z-10"
+            >
+              <div className="w-full">
+                <CategoryEditMenu
+                  title="Shop-Kategorien"
+                  subtitle="Ändere die Reihenfolge per Drag & Drop oder klicke auf das X zum Löschen."
+                  categories={websiteCats}
+                  onAdd={addWebsiteCat}
+                  onDelete={handleRemoveCat}
+                  onReorder={reorderWebsiteCats}
+                  onClose={() => setIsEditing(false)}
+                  placeholder="Shop-Kategorie…"
+                />
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* ── Shop Grid ───────────────────────────────────── */}
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">

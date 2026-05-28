@@ -1,17 +1,33 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
-import { Plus, X } from 'lucide-react';
-import { useAppStore } from '../../store/useAppStore';
-import { useUIStore } from '../../store/useUIStore';
+import { Plus, X, Check } from 'lucide-react';
 import { FilterChip } from '../common/FilterChip';
 import { cn } from '../../utils/cn';
 
-export const CategoryEditMenu: React.FC = () => {
-  const { categories, addCategory, deleteCategory, reorderCategories } = useAppStore();
-  const { closeCategoryMenu } = useUIStore();
+interface CategoryEditMenuProps {
+  title: string;
+  subtitle: string;
+  categories: string[];
+  onAdd: (cat: string) => void | Promise<void>;
+  onDelete: (cat: string) => void | Promise<void>;
+  onReorder: (newCats: string[]) => void | Promise<void>;
+  onClose: () => void;
+  placeholder?: string;
+}
 
+export const CategoryEditMenu: React.FC<CategoryEditMenuProps> = ({
+  title,
+  subtitle,
+  categories,
+  onAdd,
+  onDelete,
+  onReorder,
+  onClose,
+  placeholder = 'Kategorie…',
+}) => {
   const [newCatName, setNewCatName] = useState('');
   const [showAddInput, setShowAddInput] = useState(false);
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+  const [pendingDelete, setPendingDelete] = useState<string | null>(null);
   const addInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -25,17 +41,10 @@ export const CategoryEditMenu: React.FC = () => {
   const handleAddCat = () => {
     const trimmed = newCatName.trim();
     if (trimmed) {
-      addCategory(trimmed);
+      onAdd(trimmed);
     }
     setNewCatName('');
     setShowAddInput(false);
-  };
-
-  const handleRemoveCat = (cat: string) => {
-    if (cat === 'Alle') return;
-    if (confirm(`Möchtest du die Kategorie "${cat}" wirklich löschen? Alle Produkte in dieser Kategorie werden auf "Alle" zurückgesetzt.`)) {
-      deleteCategory(cat);
-    }
   };
 
   const handleDragStart = (e: React.DragEvent, index: number) => {
@@ -51,7 +60,7 @@ export const CategoryEditMenu: React.FC = () => {
     newCats.splice(index, 0, removed);
 
     setDraggedIndex(index);
-    reorderCategories(newCats.slice(1));
+    onReorder(newCats.slice(1));
   };
 
   const handleDragEnd = () => {
@@ -59,26 +68,60 @@ export const CategoryEditMenu: React.FC = () => {
   };
 
   return (
-    <div className="w-full glass-panel p-6 flex flex-col gap-4 animate-in fade-in slide-in-from-top-4 duration-300 relative">
+    <div className="w-full glass-panel p-6 flex flex-col gap-4 animate-in fade-in slide-in-from-top-4 duration-300 relative shadow-xl">
       {/* Title */}
-      <div className="flex items-center justify-between pb-2 border-b border-white/5">
+      <div className="flex items-center justify-between pb-3 border-b border-border-primary/20">
         <div>
-          <h3 className="text-sm font-bold text-text-primary">Kategorien verwalten</h3>
-          <p className="text-xs text-text-secondary">Drag & Drop zum Sortieren, zum Löschen auf das X klicken</p>
+          <h3 className="text-sm font-bold text-text-primary tracking-wide">{title}</h3>
+          <p className="text-xs text-text-secondary mt-0.5">{subtitle}</p>
         </div>
         <button
-          onClick={closeCategoryMenu}
-          className="p-1.5 rounded-full text-text-secondary hover:text-text-primary hover:bg-white/5 transition-all cursor-pointer"
+          onClick={onClose}
+          className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/5 text-text-secondary hover:text-text-primary hover:bg-black/10 dark:hover:bg-white/10 flex items-center justify-center transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer"
+          title="Schließen"
         >
-          <X size={16} />
+          <X size={15} />
         </button>
       </div>
 
       {/* Filter Chips List */}
-      <div className="flex flex-wrap items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2 pt-1">
         {displayCats.map((cat, idx) => {
           const isVirtual = cat === 'Alle';
           const isDragging = draggedIndex === idx;
+          const isPendingDelete = pendingDelete === cat;
+
+          if (isPendingDelete && !isVirtual) {
+            return (
+              <div
+                key={`confirm-${cat}`}
+                className="flex items-center gap-1.5 bg-heart/10 border border-heart/40 rounded-full px-3 py-1.5 text-xs font-semibold text-heart animate-in zoom-in-95 duration-200 select-none shadow-sm"
+              >
+                <span>Löschen?</span>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onDelete(cat);
+                    setPendingDelete(null);
+                  }}
+                  className="p-0.5 rounded-full hover:bg-heart/20 text-heart cursor-pointer transition-colors"
+                  title="Bestätigen"
+                >
+                  <Check size={12} />
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setPendingDelete(null);
+                  }}
+                  className="p-0.5 rounded-full hover:bg-heart/20 text-heart cursor-pointer transition-colors"
+                  title="Abbrechen"
+                >
+                  <X size={12} />
+                </button>
+              </div>
+            );
+          }
 
           return (
             <div
@@ -90,14 +133,18 @@ export const CategoryEditMenu: React.FC = () => {
               onDragOver={(e) => e.preventDefault()}
               className={cn(
                 "relative transition-all duration-300",
-                isDragging && "opacity-40 scale-95 border-dashed",
-                !isVirtual && "cursor-move"
+                isDragging && "opacity-40 scale-95 border-dashed border-text-secondary",
+                !isVirtual && "cursor-move group"
               )}
             >
               <FilterChip
                 active={false}
                 editable={!isVirtual}
-                shaking={!isVirtual}
+                shaking={false}
+                className={cn(
+                  isVirtual ? "!border-solid" : "group-hover:border-heart group-hover:text-heart group-hover:bg-heart/5 transition-all duration-200",
+                  "pointer-events-none select-none"
+                )}
               >
                 {cat}
               </FilterChip>
@@ -107,9 +154,9 @@ export const CategoryEditMenu: React.FC = () => {
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
-                    handleRemoveCat(cat);
+                    setPendingDelete(cat);
                   }}
-                  className="absolute -top-1.5 -right-1.5 w-5 h-5 flex items-center justify-center rounded-full bg-heart text-white text-[10px] shadow-md hover:scale-110 active:scale-95 transition-transform duration-150 z-10 cursor-pointer"
+                  className="absolute -top-1.5 -right-1.5 w-5 h-5 flex items-center justify-center rounded-full bg-heart text-white text-[10px] shadow-md scale-0 group-hover:scale-100 active:scale-95 transition-all duration-200 z-10 cursor-pointer pointer-events-auto"
                 >
                   <X size={10} />
                 </button>
@@ -122,7 +169,7 @@ export const CategoryEditMenu: React.FC = () => {
         {!showAddInput && (
           <FilterChip
             onClick={() => setShowAddInput(true)}
-            className="!border-dashed !border-emerald-400/50 !text-emerald-400 hover:!bg-emerald-400/10 cursor-pointer"
+            className="!border-dashed !border-emerald-400/50 !text-emerald-400 hover:!bg-emerald-400/10 cursor-pointer flex items-center justify-center"
           >
             <Plus size={12} className="mr-1" />
             Neu
@@ -144,12 +191,13 @@ export const CategoryEditMenu: React.FC = () => {
                   setNewCatName('');
                 }
               }}
-              placeholder="Kategorie…"
-              className="w-28 bg-[var(--theme-glass-bg)] border border-emerald-400/40 rounded-full text-sm text-text-primary outline-none px-3 py-1.5 placeholder:text-text-secondary/50 focus:border-emerald-400 transition-colors"
+              placeholder={placeholder}
+              className="w-32 sm:w-40 bg-black/5 dark:bg-white/5 border border-border-primary/30 rounded-full text-sm text-text-primary outline-none px-4 py-1.5 placeholder:text-text-secondary/45 hover:border-text-secondary focus:border-text-secondary hover:scale-[1.02] focus:scale-[1.02] transition-all duration-300 transform-gpu origin-center"
             />
             <button
               onClick={handleAddCat}
               className="p-1.5 rounded-full text-emerald-400 hover:bg-emerald-400/10 transition-colors cursor-pointer"
+              title="Hinzufügen"
             >
               <Plus size={14} />
             </button>
@@ -159,6 +207,7 @@ export const CategoryEditMenu: React.FC = () => {
                 setNewCatName('');
               }}
               className="p-1.5 rounded-full text-text-secondary hover:text-text-primary hover:bg-white/5 transition-colors cursor-pointer"
+              title="Abbrechen"
             >
               <X size={14} />
             </button>

@@ -2,56 +2,122 @@ import { Settings } from 'lucide-react';
 import { useUIStore } from '../../store/useUIStore';
 import { useAppStore } from '../../store/useAppStore';
 import { CategoryEditMenu } from '../features/CategoryEditMenu';
-import React, { useRef } from 'react';
+import React, { useRef, useState, useLayoutEffect, useEffect } from 'react';
 import { cn } from '../../utils/cn';
 import { motion, AnimatePresence } from 'framer-motion';
 
- export const SubNavigation: React.FC<{
-   categories: string[];
- }> = ({ categories }) => {
-   const { mainCat, setMainCat, toggleCategoryMenu, isCategoryMenuOpen } = useUIStore();
-   const isGlassEnabled = useAppStore(state => state.settings.isGlassEnabled);
-   const settingsBtnRef = useRef<HTMLButtonElement>(null);
-   const activeClass = "bg-accent text-bg-primary shadow-lg scale-110";
+export const SubNavigation: React.FC<{
+  categories: string[];
+}> = ({ categories }) => {
+  const { mainCat, setMainCat, toggleCategoryMenu, isCategoryMenuOpen, closeCategoryMenu } = useUIStore();
+  const { addCategory, deleteCategory, reorderCategories, settings } = useAppStore();
+  const isGlassEnabled = settings.isGlassEnabled;
+  
+  const tabsRef = useRef<{ [key: string]: HTMLButtonElement | null }>({});
+  const [indicatorStyle, setIndicatorStyle] = useState<{ left: number; width: number; height: number; top: number }>({ left: 0, width: 0, height: 0, top: 0 });
+
+  useLayoutEffect(() => {
+    const activeKey = isCategoryMenuOpen ? 'settings' : mainCat;
+    const activeEl = tabsRef.current[activeKey];
+    if (activeEl) {
+      setIndicatorStyle({
+        left: activeEl.offsetLeft,
+        width: activeEl.clientWidth,
+        height: activeEl.clientHeight,
+        top: activeEl.offsetTop
+      });
+    }
+  }, [mainCat, isCategoryMenuOpen, categories]);
+
+  useEffect(() => {
+    const handleResize = () => {
+      const activeKey = isCategoryMenuOpen ? 'settings' : mainCat;
+      const activeEl = tabsRef.current[activeKey];
+      if (activeEl) {
+        setIndicatorStyle({
+          left: activeEl.offsetLeft,
+          width: activeEl.clientWidth,
+          height: activeEl.clientHeight,
+          top: activeEl.offsetTop
+        });
+      }
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [mainCat, isCategoryMenuOpen]);
 
   return (
     <div className="w-full mt-2 mb-6 md:mb-12 flex flex-col items-center justify-center px-0">
-      <div className={cn(
-        "px-4 py-1 md:px-1.5 md:py-1.5 flex items-center gap-1 md:gap-2 rounded-full overflow-x-auto no-scrollbar shadow-sm w-full md:w-auto pb-1.5 md:pb-1 border transition-all duration-300",
-        isGlassEnabled ? "bg-[var(--theme-glass-bg)] border-[var(--theme-glass-border)] backdrop-blur-md" : "bg-bg-card border-border-primary"
-      )}>
-        <NavPill
-          active={mainCat === 'Alle'}
+      <div 
+        className={cn(
+          "relative px-4 py-1 md:px-1.5 md:py-1.5 flex items-center gap-1 md:gap-2 rounded-full overflow-x-auto no-scrollbar shadow-sm w-full md:w-auto pb-1.5 md:pb-1 border transition-all duration-300",
+          isGlassEnabled ? "bg-[var(--theme-glass-bg)] border-[var(--theme-glass-border)] backdrop-blur-md" : "bg-bg-card border-border-primary"
+        )}
+      >
+        {/* Sliding background indicator */}
+        {indicatorStyle.width > 0 && (
+          <motion.div
+            className="absolute top-0 left-0 bg-accent rounded-full shadow-md shadow-accent/15 pointer-events-none"
+            animate={{
+              x: indicatorStyle.left,
+              y: indicatorStyle.top,
+              width: indicatorStyle.width,
+              height: indicatorStyle.height
+            }}
+            transition={{ type: "spring", stiffness: 380, damping: 30 }}
+          />
+        )}
+
+        <button
+          ref={el => { tabsRef.current['Alle'] = el; }}
           onClick={() => setMainCat('Alle')}
+          className={cn(
+            "px-3.5 py-2 md:px-5 md:py-2.5 rounded-full text-xs md:text-sm font-medium transition-colors duration-300 whitespace-nowrap outline-none flex items-center justify-center shrink-0 cursor-pointer select-none z-10 bg-transparent",
+            mainCat === 'Alle' && !isCategoryMenuOpen
+              ? "text-bg-primary font-medium"
+              : "text-text-secondary hover:text-text-primary hover:bg-black/5 dark:hover:bg-white/5"
+          )}
         >
           Alle
-        </NavPill>
+        </button>
+
         {categories.map((cat) => (
-          <NavPill
+          <button
             key={cat}
-            active={mainCat === cat}
+            ref={el => { tabsRef.current[cat] = el; }}
             onClick={() => setMainCat(cat)}
+            className={cn(
+              "px-3.5 py-2 md:px-5 md:py-2.5 rounded-full text-xs md:text-sm font-medium transition-colors duration-300 whitespace-nowrap outline-none flex items-center justify-center shrink-0 cursor-pointer select-none z-10 bg-transparent",
+              mainCat === cat && !isCategoryMenuOpen
+                ? "text-bg-primary font-medium"
+                : "text-text-secondary hover:text-text-primary hover:bg-black/5 dark:hover:bg-white/5"
+            )}
           >
             {cat}
-          </NavPill>
+          </button>
         ))}
 
-         <div className="w-[1px] h-6 md:h-7 bg-border-primary/50 mx-0.5 md:mx-1 shrink-0"></div>
- 
-         <div className="relative shrink-0">
-           <button 
-             ref={settingsBtnRef}
-             onClick={toggleCategoryMenu}
-              className={`w-9 h-9 md:w-10 md:h-10 flex items-center justify-center rounded-full transition-all mr-1 cursor-pointer ${
-                isCategoryMenuOpen 
-                  ? activeClass 
-                  : 'text-text-secondary hover:text-text-primary hover:bg-black/5 dark:hover:bg-white/5'
-              }`}
-           >
-             <Settings size={17} className={`md:w-[18px] md:h-[18px] transition-transform duration-500 ${isCategoryMenuOpen ? 'rotate-180' : 'rotate-0'}`} />
-           </button>
-         </div>
-       </div>
+        <div className="w-[1px] h-6 md:h-7 bg-border-primary/50 mx-0.5 md:mx-1 shrink-0 z-10"></div>
+
+        <button 
+          ref={el => { tabsRef.current['settings'] = el; }}
+          onClick={toggleCategoryMenu}
+          className={cn(
+            "w-9 h-9 md:w-10 md:h-10 flex items-center justify-center rounded-full transition-colors duration-300 mr-1 cursor-pointer select-none bg-transparent shrink-0 z-10",
+            isCategoryMenuOpen 
+              ? "text-bg-primary" 
+              : "text-text-secondary hover:text-text-primary hover:bg-black/5 dark:hover:bg-white/5"
+          )}
+        >
+          <Settings 
+            size={17} 
+            className={cn(
+              "md:w-[18px] md:h-[18px] transition-transform duration-500",
+              isCategoryMenuOpen ? 'rotate-180' : 'rotate-0'
+            )} 
+          />
+        </button>
+      </div>
 
       <AnimatePresence>
         {isCategoryMenuOpen && (
@@ -63,35 +129,20 @@ import { motion, AnimatePresence } from 'framer-motion';
             className="overflow-hidden w-full flex justify-center z-10"
           >
             <div className="w-full max-w-2xl px-4 md:px-0">
-              <CategoryEditMenu />
+              <CategoryEditMenu
+                title="Katalog-Kategorien"
+                subtitle="Ändere die Reihenfolge per Drag & Drop oder klicke auf das X zum Löschen."
+                categories={categories}
+                onAdd={addCategory}
+                onDelete={deleteCategory}
+                onReorder={reorderCategories}
+                onClose={closeCategoryMenu}
+                placeholder="Kategorie…"
+              />
             </div>
           </motion.div>
         )}
       </AnimatePresence>
     </div>
-  );
-};
-
-interface NavPillProps {
-  active: boolean;
-  onClick: () => void;
-  children: React.ReactNode;
-  className?: string;
-}
-
-const NavPill: React.FC<NavPillProps> = ({ active, onClick, children, className = '' }) => {
-  const activeClass = 'bg-accent text-bg-primary shadow-md font-bold';
-
-  return (
-    <button
-      onClick={onClick}
-      className={`px-3.5 py-2 md:px-5 md:py-2.5 rounded-full text-xs md:text-sm font-medium transition-all duration-300 whitespace-nowrap outline-none flex items-center justify-center shrink-0 ${
-        active 
-          ? activeClass 
-          : 'bg-transparent text-text-secondary hover:text-text-primary hover:bg-black/5 dark:hover:bg-white/5 hover:scale-105'
-      } ${className}`}
-    >
-      {children}
-    </button>
   );
 };

@@ -1,5 +1,5 @@
-import React from 'react';
-import { NavLink } from 'react-router-dom';
+import React, { useRef, useState, useLayoutEffect, useEffect } from 'react';
+import { NavLink, useLocation } from 'react-router-dom';
 import { Menu, Moon, Sun, LogOut } from 'lucide-react';
 import { useUIStore } from '../../store/useUIStore';
 import { useAppStore } from '../../store/useAppStore';
@@ -7,11 +7,15 @@ import { supabase } from '../../lib/supabase';
 import { cn } from '../../utils/cn';
 import logoDark from '../../assets/logo/logo_dark.png';
 import logoWhite from '../../assets/logo/logo_white.png';
+import { motion } from 'framer-motion';
 
 export const TopNav: React.FC = () => {
   const toggleMainMenu = useUIStore((s) => s.toggleMainMenu);
   const { settings, updateSettings } = useAppStore();
-  const activeClass = "bg-accent text-bg-primary shadow-md";
+  const location = useLocation();
+
+  const tabsRef = useRef<{ [key: string]: HTMLAnchorElement | null }>({});
+  const [indicatorStyle, setIndicatorStyle] = useState<{ left: number; width: number; height: number; top: number }>({ left: 0, width: 0, height: 0, top: 0 });
 
   const navItems = [
     { to: '/', label: 'Dashboard' },
@@ -21,6 +25,42 @@ export const TopNav: React.FC = () => {
     { to: '/budget',    label: 'Budget' },
     { to: '/deals',     label: 'Deals' },
   ];
+
+  // Find active item based on current path
+  const activeItem = navItems.find(item => {
+    if (item.to === '/') {
+      return location.pathname === '/';
+    }
+    return location.pathname.startsWith(item.to);
+  }) || navItems[0];
+
+  useLayoutEffect(() => {
+    const activeEl = tabsRef.current[activeItem.to];
+    if (activeEl) {
+      setIndicatorStyle({
+        left: activeEl.offsetLeft,
+        width: activeEl.clientWidth,
+        height: activeEl.clientHeight,
+        top: activeEl.offsetTop
+      });
+    }
+  }, [activeItem.to]);
+
+  useEffect(() => {
+    const handleResize = () => {
+      const activeEl = tabsRef.current[activeItem.to];
+      if (activeEl) {
+        setIndicatorStyle({
+          left: activeEl.offsetLeft,
+          width: activeEl.clientWidth,
+          height: activeEl.clientHeight,
+          top: activeEl.offsetTop
+        });
+      }
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [activeItem.to]);
 
   return (
     <header className={cn(
@@ -42,17 +82,34 @@ export const TopNav: React.FC = () => {
       </div>
 
       {/* Desktop Nav Pills – hidden on mobile (BottomNav takes over) */}
-      <nav className="hidden md:flex items-center gap-1 bg-black/[0.07] dark:bg-white/10 border border-black/5 dark:border-white/5 p-1 rounded-full shadow-inner">
+      <nav 
+        className="relative hidden md:flex items-center gap-1 bg-black/[0.07] dark:bg-white/10 border border-black/5 dark:border-white/5 p-1 rounded-full shadow-inner"
+      >
+        {/* Sliding background indicator */}
+        {indicatorStyle.width > 0 && (
+          <motion.div
+            className="absolute top-0 left-0 bg-accent rounded-full shadow-md shadow-accent/15 pointer-events-none"
+            animate={{
+              x: indicatorStyle.left,
+              y: indicatorStyle.top,
+              width: indicatorStyle.width,
+              height: indicatorStyle.height
+            }}
+            transition={{ type: "spring", stiffness: 380, damping: 30 }}
+          />
+        )}
+
         {navItems.map((item) => (
           <NavLink
             key={item.to}
             to={item.to}
             end={item.to === '/'}
+            ref={el => { tabsRef.current[item.to] = el; }}
             className={({ isActive }) =>
               cn(
-                "px-5 py-2 rounded-full text-sm font-medium transition-all duration-300",
+                "px-5 py-2 rounded-full text-sm font-medium transition-colors duration-300 select-none outline-none cursor-pointer z-10 bg-transparent",
                 isActive
-                  ? activeClass
+                  ? "text-bg-primary"
                   : 'text-text-secondary hover:text-text-primary hover:bg-black/10 dark:hover:bg-white/5'
               )
             }

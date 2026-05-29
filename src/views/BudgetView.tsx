@@ -7,8 +7,10 @@ import { cn } from '../utils/cn';
 export const BudgetView: React.FC = () => {
   const { products, settings, updateSettings } = useAppStore();
   const { setView, setStatusFilter, setSearchQuery } = useUIStore();
-  const [timeRange, setTimeRange] = useState<'7d' | 'month' | 'total'>('7d');
-  const [hoveredDay, setHoveredDay] = useState<{ label: string, value: number, products: Product[] } | null>(null);
+  const [timeRange, setTimeRange] = useState<'7d' | 'month' | 'total'>('month');
+  const [chartMode, setChartMode] = useState<'daily' | 'cumulative'>('cumulative');
+  const [sortBy, setSortBy] = useState<'date' | 'price'>('date');
+  const [hoveredDay, setHoveredDay] = useState<{ label: string, dailyValue: number, cumulativeValue: number, products: Product[] } | null>(null);
   
   const [isEditingBudget, setIsEditingBudget] = useState(false);
   const [tempBudget, setTempBudget] = useState(String(settings.monthlyBudget));
@@ -38,27 +40,80 @@ export const BudgetView: React.FC = () => {
       .reduce((sum: number, p: Product) => sum + (p.finalPrice || 0), 0);
   }, [boughtProducts, currentMonth, currentYear]);
 
+  // Helper to format Date in local YYYY-MM-DD
+  const getLocalDateKey = (d: Date) => {
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
+  // Helper to calculate target value for any date key safely
+  const getTargetVal = (dateKey: string) => {
+    if (dateKey.endsWith('-00')) return 0;
+    const parts = dateKey.split('-');
+    const year = Number(parts[0]);
+    const month = Number(parts[1]);
+    const day = Number(parts[2]);
+    const dim = new Date(year, month, 0).getDate(); // Get last day of month
+    return (settings.monthlyBudget / dim) * day;
+  };
+
+  // Helper to calculate target value for Soll-Pace line based on index
+  const getSollPaceVal = (i: number) => {
+    if (i === 0) return 0;
+    if (timeRange === '7d') {
+      return (settings.monthlyBudget / 30) * i;
+    }
+    const item = chartData[i];
+    if (!item) return 0;
+    const dateKey = item.dateKey;
+    if (dateKey.endsWith('-00')) return 0;
+    const parts = dateKey.split('-');
+    const year = Number(parts[0]);
+    const month = Number(parts[1]);
+    const day = Number(parts[2]);
+    const dim = new Date(year, month, 0).getDate(); // Get last day of month
+    return (settings.monthlyBudget / dim) * day;
+  };
+
   // Chart data calculation based on timeRange
   const chartData = useMemo(() => {
     const today = new Date();
     const dateMap: Record<string, { label: string, value: number, products: Product[] }> = {};
     
     if (timeRange === '7d') {
+      // Prepend Day 0 (8 days ago)
+      const d0 = new Date(today);
+      d0.setDate(d0.getDate() - 7);
+      const d0Key = getLocalDateKey(d0);
+      dateMap[d0Key] = { label: '', value: 0, products: [] };
+
       for (let i = 6; i >= 0; i--) {
         const d = new Date(today);
         d.setDate(d.getDate() - i);
-        const dateKey = d.toISOString().split('T')[0];
+        const dateKey = getLocalDateKey(d);
         const label = d.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' });
         dateMap[dateKey] = { label, value: 0, products: [] };
       }
     } else if (timeRange === 'month') {
+      // Prepend Day 0 (0th of the month)
       const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
-      for (let d = new Date(firstDay); d <= today; d.setDate(d.getDate() + 1)) {
-        const dateKey = d.toISOString().split('T')[0];
+      const d0Key = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-00`;
+      dateMap[d0Key] = { label: '', value: 0, products: [] };
+
+      const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0); // End of month
+      for (let d = new Date(firstDay); d <= lastDay; d.setDate(d.getDate() + 1)) {
+        const dateKey = getLocalDateKey(d);
         const label = d.toLocaleDateString('de-DE', { day: '2-digit' });
         dateMap[dateKey] = { label, value: 0, products: [] };
       }
     } else if (timeRange === 'total') {
+      // Prepend Month 0 (7 months ago)
+      const d0 = new Date(today.getFullYear(), today.getMonth() - 6, 1);
+      const d0Key = `${d0.getFullYear()}-${String(d0.getMonth() + 1).padStart(2, '0')}`;
+      dateMap[d0Key] = { label: '', value: 0, products: [] };
+
       // Show last 6 months
       for (let i = 5; i >= 0; i--) {
         const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
@@ -75,7 +130,7 @@ export const BudgetView: React.FC = () => {
       if (timeRange === 'total') {
         pKey = `${pDate.getFullYear()}-${String(pDate.getMonth() + 1).padStart(2, '0')}`;
       } else {
-        pKey = pDate.toISOString().split('T')[0];
+        pKey = getLocalDateKey(pDate);
       }
 
       if (dateMap[pKey]) {
@@ -84,16 +139,25 @@ export const BudgetView: React.FC = () => {
       }
     });
 
-    return Object.values(dateMap).sort((a, b) => {
-      if (timeRange === 'total') {
-        // Simple string sort for "2024-01" keys is fine
-        return Object.keys(dateMap).find(k => dateMap[k] === a)!.localeCompare(
-          Object.keys(dateMap).find(k => dateMap[k] === b)!
-        );
+    const todayStr = getLocalDateKey(today);
+    const sortedKeys = Object.keys(dateMap).sort((a, b) => a.localeCompare(b));
+    let runningSum = 0;
+    return sortedKeys.map(key => {
+      const item = dateMap[key];
+      const isFuture = timeRange === 'month' && key > todayStr;
+      
+      if (!isFuture) {
+        runningSum += item.value;
       }
-      const [dayA, monthA] = a.label.includes('.') ? a.label.split('.') : [a.label, '0'];
-      const [dayB, monthB] = b.label.includes('.') ? b.label.split('.') : [b.label, '0'];
-      return Number(monthA + dayA) - Number(monthB + dayB);
+      
+      return {
+        dateKey: key,
+        label: item.label,
+        dailyValue: item.value,
+        cumulativeValue: isFuture ? null : runningSum,
+        isFuture,
+        products: item.products
+      };
     });
   }, [boughtProducts, timeRange]);
 
@@ -104,23 +168,53 @@ export const BudgetView: React.FC = () => {
   const DRAW_HEIGHT = PAD_BOTTOM - PAD_TOP;
   const DRAW_WIDTH = 600 - MARGIN_LEFT;
 
+  const chartVal = (d: any) => chartMode === 'cumulative' ? d.cumulativeValue : d.dailyValue;
+
+  const actualData = useMemo(() => chartData.filter(d => !d.isFuture), [chartData]);
+  
+  const latestCumulativeSpend = useMemo(() => {
+    if (actualData.length === 0) return 0;
+    return actualData[actualData.length - 1].cumulativeValue || 0;
+  }, [actualData]);
+
+  // Projected spending at the end of the month
+  const projectedEndSpend = useMemo(() => {
+    const activeDaysCount = actualData.filter(d => d.dateKey.split('-')[2] !== '00').length;
+    if (activeDaysCount === 0) return 0;
+    const dailyAverage = latestCumulativeSpend / activeDaysCount;
+    const totalDaysCount = chartData.filter(d => d.dateKey.split('-')[2] !== '00').length;
+    return dailyAverage * totalDaysCount;
+  }, [actualData, chartData, latestCumulativeSpend]);
+
   const roundedMax = useMemo(() => {
-    const rawMax = Math.max(...chartData.map(d => d.value), 10);
+    let limit = 10;
+    if (timeRange === 'total') {
+      limit = settings.monthlyBudget;
+    } else if (chartMode === 'cumulative') {
+      if (chartData.length > 0) {
+        limit = Math.max(
+          getTargetVal(chartData[chartData.length - 1].dateKey),
+          projectedEndSpend
+        );
+      }
+    } else {
+      limit = settings.monthlyBudget / 30;
+    }
+
+    const rawMax = Math.max(...chartData.map(d => chartVal(d) || 0), limit, 10);
     if (rawMax <= 100) return Math.ceil(rawMax / 10) * 10;
-    if (rawMax <= 300) return 300; // Consistent with user's example
+    if (rawMax <= 300) return 300;
     if (rawMax <= 500) return 500;
     if (rawMax <= 1000) return 1000;
     return Math.ceil(rawMax / 250) * 250;
-  }, [chartData]);
+  }, [chartData, chartMode, timeRange, settings.monthlyBudget, projectedEndSpend]);
 
   const getY = (val: number) => PAD_BOTTOM - (val / roundedMax) * DRAW_HEIGHT;
   const BAR_PITCH = DRAW_WIDTH / (chartData.length || 1);
-  const getX = (i: number) => MARGIN_LEFT + (i * BAR_PITCH) + (BAR_PITCH / 2);
-  const BAR_GAP = 2;
-  const barWidth = Math.max(BAR_PITCH - BAR_GAP, 4);
+  const getX = (i: number) => MARGIN_LEFT + (i / Math.max(chartData.length - 1, 1)) * DRAW_WIDTH;
 
   const timeRangeLabel = timeRange === '7d' ? '7 Tage' : timeRange === 'month' ? 'Dieser Monat' : 'Gesamt';
-  const timeRangeSpend = chartData.reduce((sum, d) => sum + d.value, 0);
+  const timeRangeSpend = chartData.reduce((sum, d) => sum + d.dailyValue, 0);
   const timeRangeProductsCount = chartData.reduce((sum, d) => sum + d.products.length, 0);
   const averagePrice = timeRangeProductsCount > 0 ? timeRangeSpend / timeRangeProductsCount : 0;
 
@@ -139,7 +233,60 @@ export const BudgetView: React.FC = () => {
 
   const maxCategorySpend = topCategories.length > 0 ? Math.max(topCategories[0].amount, 1) : 1;
 
+  // Determine if over budget
+  const isOverBudget = useMemo(() => {
+    if (chartData.length === 0) return false;
+    const latestItem = actualData[actualData.length - 1];
+    if (!latestItem) return false;
+    if (timeRange === 'total') {
+      return latestItem.dailyValue > settings.monthlyBudget;
+    }
+    if (chartMode === 'cumulative') {
+      const targetVal = getTargetVal(latestItem.dateKey);
+      return latestItem.cumulativeValue! > targetVal;
+    } else {
+      return spentThisMonth > settings.monthlyBudget;
+    }
+  }, [actualData, chartMode, timeRange, settings.monthlyBudget, spentThisMonth]);
+
+  // Compute curve paths using actualData
+  const linePath = useMemo(() => {
+    if (actualData.length === 0) return '';
+    let path = `M ${getX(0)} ${getY(chartVal(actualData[0]))}`;
+    for (let i = 0; i < actualData.length - 1; i++) {
+      const prevX = getX(i);
+      const prevY = getY(chartVal(actualData[i]));
+      const currX = getX(i + 1);
+      const currY = getY(chartVal(actualData[i + 1]));
+      const cp1x = prevX + (currX - prevX) / 2;
+      path += ` C ${cp1x} ${prevY}, ${cp1x} ${currY}, ${currX} ${currY}`;
+    }
+    return path;
+  }, [actualData, chartMode, roundedMax]);
+
+  const areaPath = useMemo(() => {
+    if (actualData.length === 0) return '';
+    let path = `M ${getX(0)} ${PAD_BOTTOM}`;
+    path += ` L ${getX(0)} ${getY(chartVal(actualData[0]))}`;
+    for (let i = 0; i < actualData.length - 1; i++) {
+      const prevX = getX(i);
+      const prevY = getY(chartVal(actualData[i]));
+      const currX = getX(i + 1);
+      const currY = getY(chartVal(actualData[i + 1]));
+      const cp1x = prevX + (currX - prevX) / 2;
+      path += ` C ${cp1x} ${prevY}, ${cp1x} ${currY}, ${currX} ${currY}`;
+    }
+    path += ` L ${getX(actualData.length - 1)} ${PAD_BOTTOM}`;
+    path += ' Z';
+    return path;
+  }, [actualData, chartMode, roundedMax]);
+
   const groupedTransactions = useMemo(() => {
+    if (sortBy === 'price') {
+      const sorted = [...boughtProducts].sort((a, b) => (b.finalPrice || 0) - (a.finalPrice || 0));
+      return [{ monthLabel: 'Nach Preis sortiert', products: sorted }];
+    }
+
     const sorted = [...boughtProducts].sort(
       (a, b) => new Date(b.dateBought || b.dateAdded).getTime() - new Date(a.dateBought || a.dateAdded).getTime()
     );
@@ -159,7 +306,7 @@ export const BudgetView: React.FC = () => {
     });
     
     return groups;
-  }, [boughtProducts]);
+  }, [boughtProducts, sortBy]);
 
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 min-h-[calc(100vh-100px)]">
@@ -237,15 +384,71 @@ export const BudgetView: React.FC = () => {
       </div>
 
       {/* Main Content Split */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8 items-start">
         {/* Chart Area */}
         <div className="lg:col-span-2 bg-[var(--theme-glass-bg)] border border-[var(--theme-glass-border)] backdrop-blur-xl p-6 rounded-3xl shadow-sm flex flex-col min-h-[400px] relative">
-          <div className="flex justify-between items-center mb-8">
-            <h3 className="font-bold">Ausgabenverlauf</h3>
-            <span className="text-xs text-text-secondary">Ausgaben (€)</span>
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start md:items-center gap-4 mb-8">
+            <div className="flex flex-col gap-1.5">
+              <h3 className="font-bold text-base md:text-lg">Ausgabenverlauf</h3>
+              {/* Context-aware Chart Legend */}
+              <div className="flex flex-wrap gap-x-4 gap-y-1.5 items-center text-[10px] text-text-secondary font-semibold">
+                <div className="flex items-center gap-1.5">
+                  <span className={cn(
+                    "w-3 h-1.5 rounded-full inline-block shrink-0 shadow-sm",
+                    isOverBudget
+                      ? "bg-heart"
+                      : settings.isGlassEnabled
+                      ? "bg-text-primary"
+                      : "bg-accent"
+                  )}></span>
+                  <span>Ausgaben</span>
+                </div>
+                {chartMode === 'cumulative' && timeRange !== 'total' && (
+                  <div className="flex items-center gap-1.5 animate-in fade-in duration-300">
+                    <span className="w-4 border-t-2 border-dashed border-text-secondary/40 h-0 inline-block shrink-0"></span>
+                    <span>Soll-Pace</span>
+                  </div>
+                )}
+                {chartMode === 'cumulative' && timeRange === 'month' && actualData.length > 0 && (
+                  <div className="flex items-center gap-1.5 animate-in fade-in duration-300">
+                    <span className={cn(
+                      "w-4 border-t-2 border-dashed h-0 inline-block shrink-0",
+                      projectedEndSpend > settings.monthlyBudget ? "border-heart" : "border-emerald-500"
+                    )}></span>
+                    <span>Prognose (Burn-Rate)</span>
+                  </div>
+                )}
+              </div>
+            </div>
+            
+            {/* Chart Mode Toggle */}
+            <div className="bg-black/5 dark:bg-white/5 border border-[var(--theme-glass-border)] p-0.5 flex items-center rounded-full text-[10px] self-start sm:self-auto">
+              <button
+                onClick={() => setChartMode('daily')}
+                className={cn(
+                  "px-3 py-1 rounded-full font-bold transition-all duration-300",
+                  chartMode === 'daily'
+                    ? "bg-accent text-bg-primary shadow-sm"
+                    : "text-text-secondary hover:text-text-primary"
+                )}
+              >
+                Täglich
+              </button>
+              <button
+                onClick={() => setChartMode('cumulative')}
+                className={cn(
+                  "px-3 py-1 rounded-full font-bold transition-all duration-300",
+                  chartMode === 'cumulative'
+                    ? "bg-accent text-bg-primary shadow-sm"
+                    : "text-text-secondary hover:text-text-primary"
+                )}
+              >
+                Gesamtverlauf
+              </button>
+            </div>
           </div>
           
-          {/* SVG Bar Chart with Integrated Grid */}
+          {/* SVG Area Chart with Integrated Grid */}
           <div className="flex-1 relative mt-4 mx-2 md:mx-6 mb-10 h-[200px] md:h-[250px]">
             <svg 
               className="w-full h-full overflow-visible" 
@@ -253,32 +456,59 @@ export const BudgetView: React.FC = () => {
               preserveAspectRatio="none"
             >
               <defs>
-                <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop 
-                    offset="0%" 
-                    stopColor="currentColor" 
-                    stopOpacity="0.8" 
-                    className={settings.isGlassEnabled ? "text-text-primary" : "text-accent"} 
+                {/* Area Fill Gradient */}
+                <linearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop
+                    offset="0%"
+                    stopColor="currentColor"
+                    stopOpacity="0.45"
+                    className={
+                      isOverBudget
+                        ? "text-heart"
+                        : settings.isGlassEnabled
+                        ? "text-text-primary"
+                        : "text-accent"
+                    }
                   />
-                  <stop 
-                    offset="100%" 
-                    stopColor="currentColor" 
-                    stopOpacity="0.2" 
-                    className={settings.isGlassEnabled ? "text-text-primary" : "text-accent"} 
+                  <stop
+                    offset="100%"
+                    stopColor="currentColor"
+                    stopOpacity="0.0"
+                    className={
+                      isOverBudget
+                        ? "text-heart"
+                        : settings.isGlassEnabled
+                        ? "text-text-primary"
+                        : "text-accent"
+                    }
                   />
                 </linearGradient>
-                <linearGradient id="barHoverGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop 
-                    offset="0%" 
-                    stopColor="currentColor" 
-                    stopOpacity="1" 
-                    className={settings.isGlassEnabled ? "text-text-primary" : "text-accent-hover"} 
+
+                {/* Curve Stroke Gradient */}
+                <linearGradient id="curveGradient" x1="0" y1="0" x2="1" y2="0">
+                  <stop
+                    offset="0%"
+                    stopColor="currentColor"
+                    stopOpacity="0.9"
+                    className={
+                      isOverBudget
+                        ? "text-heart"
+                        : settings.isGlassEnabled
+                        ? "text-text-primary"
+                        : "text-accent"
+                    }
                   />
-                  <stop 
-                    offset="100%" 
-                    stopColor="currentColor" 
-                    stopOpacity="0.8" 
-                    className={settings.isGlassEnabled ? "text-text-primary" : "text-accent"} 
+                  <stop
+                    offset="100%"
+                    stopColor="currentColor"
+                    stopOpacity="1.0"
+                    className={
+                      isOverBudget
+                        ? "text-heart"
+                        : settings.isGlassEnabled
+                        ? "text-text-primary"
+                        : "text-accent"
+                    }
                   />
                 </linearGradient>
               </defs>
@@ -298,56 +528,127 @@ export const BudgetView: React.FC = () => {
                 <text x={MARGIN_LEFT - 10} y={getY(0) + 4} fill="currentColor" fontSize="10" textAnchor="end" className="text-text-secondary font-medium opacity-80">0 €</text>
               </g>
 
-              {/* Data Bars */}
-              {chartData.map((d, i) => {
-                const yPos = getY(d.value);
-                const barHeight = Math.max(PAD_BOTTOM - yPos, 0);
-                const isHovered = hoveredDay?.label === d.label;
-                const isEmpty = d.value === 0;
+              {/* Reference Target/Pace Lines */}
+              {timeRange !== 'total' && chartMode === 'cumulative' ? (
+                chartData.length > 0 && (
+                  <line
+                    x1={getX(0)}
+                    y1={getY(getSollPaceVal(0))}
+                    x2={getX(chartData.length - 1)}
+                    y2={getY(getSollPaceVal(chartData.length - 1))}
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeDasharray="5 5"
+                    className="text-text-secondary/40"
+                  />
+                )
+              ) : null}
 
-                const finalYPos = isEmpty ? PAD_BOTTOM - 2 : yPos;
-                const finalHeight = isEmpty ? 2 : barHeight;
-                const radius = Math.min(barWidth / 2, 4);
+              {/* The filled Area */}
+              {chartData.length > 0 && (
+                <path
+                  d={areaPath}
+                  fill="url(#areaGradient)"
+                  className="transition-all duration-500 ease-in-out pointer-events-none"
+                />
+              )}
+
+              {/* The Curve line */}
+              {chartData.length > 0 && (
+                <path
+                  d={linePath}
+                  stroke="url(#curveGradient)"
+                  strokeWidth="3"
+                  fill="none"
+                  className="transition-all duration-500 ease-in-out pointer-events-none"
+                />
+              )}
+
+              {/* Forecast Line & Projection Label */}
+              {timeRange === 'month' && chartMode === 'cumulative' && actualData.length > 0 && (
+                <g>
+                  {/* Forecast Line */}
+                  <line
+                    x1={getX(actualData.length - 1)}
+                    y1={getY(latestCumulativeSpend)}
+                    x2={getX(chartData.length - 1)}
+                    y2={getY(projectedEndSpend)}
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeDasharray="4 4"
+                    className={projectedEndSpend > settings.monthlyBudget ? "text-heart" : "text-emerald-500"}
+                    style={{
+                      filter: 'drop-shadow(0 0 4px currentColor)'
+                    }}
+                  />
+
+                  {/* Projected End Value Dot */}
+                  <circle
+                    cx={getX(chartData.length - 1)}
+                    cy={getY(projectedEndSpend)}
+                    r="4"
+                    className={projectedEndSpend > settings.monthlyBudget ? "fill-heart text-heart" : "fill-emerald-500 text-emerald-500"}
+                  />
+                </g>
+              )}
+
+              {/* Invisible touch/hover columns and active markers */}
+              {chartData.map((d, i) => {
+                const yPos = getY(chartVal(d) || 0);
+                const isHovered = hoveredDay?.label === d.label && d.label !== '';
+
+                // Do not allow hovering Day 0 or future days
+                if (d.isFuture || d.dateKey.endsWith('-00')) return null;
 
                 return (
                   <g 
                     key={i} 
                     className="group cursor-pointer"
-                    onMouseEnter={() => setHoveredDay(d)}
+                    onMouseEnter={() => setHoveredDay(d as any)}
                     onMouseLeave={() => setHoveredDay(null)}
+                    onTouchStart={() => setHoveredDay(d as any)}
                   >
-                    {/* Interaction Area / Hover Background (Invisible) */}
+                    {/* Interaction Area (Invisible) */}
                     <rect 
-                      x={getX(i) - barWidth/2} 
+                      x={getX(i) - BAR_PITCH / 2} 
                       y={PAD_TOP - 20} 
-                      width={barWidth} 
-                      height={DRAW_HEIGHT + 20} 
+                      width={BAR_PITCH} 
+                      height={DRAW_HEIGHT + 40} 
                       fill="transparent"
                       className="cursor-pointer"
                     />
 
-                    {/* The actual Bar */}
-                    <rect 
-                      x={getX(i) - barWidth/2}
-                      y={finalYPos}
-                      width={barWidth}
-                      height={finalHeight}
-                      rx={radius}
-                      fill={isHovered ? "url(#barHoverGradient)" : isEmpty ? "var(--theme-glass-border)" : "url(#barGradient)"}
-                      className="transition-all duration-300 pointer-events-none"
-                    />
-                    
-                    {/* Glowing Accent for Hovered Bar */}
-                    {!isEmpty && (
-                      <rect 
-                        x={getX(i) - barWidth/2}
-                        y={finalYPos}
-                        width={barWidth}
-                        height={finalHeight}
-                        rx={radius}
-                        fill="url(#barHoverGradient)"
-                        filter="blur(6px)"
-                        className={`transition-opacity duration-300 pointer-events-none ${isHovered ? 'opacity-50' : 'opacity-0'}`}
+                    {/* Vertical guideline on hover */}
+                    {isHovered && (
+                      <line
+                        x1={getX(i)}
+                        y1={PAD_TOP}
+                        x2={getX(i)}
+                        y2={PAD_BOTTOM}
+                        stroke="var(--theme-glass-border)"
+                        strokeWidth="1"
+                        strokeDasharray="3 3"
+                        className="pointer-events-none animate-in fade-in duration-200"
+                      />
+                    )}
+
+                    {/* Hover marker dot (static, no sliding) */}
+                    {isHovered && (
+                      <circle
+                        cx={getX(i)}
+                        cy={yPos}
+                        r="5"
+                        className={cn(
+                          "pointer-events-none animate-in zoom-in-50 duration-200",
+                          isOverBudget
+                            ? "fill-heart text-heart"
+                            : settings.isGlassEnabled
+                            ? "fill-text-primary text-text-primary"
+                            : "fill-accent text-accent"
+                        )}
+                        style={{
+                          filter: 'drop-shadow(0 0 6px currentColor)'
+                        }}
                       />
                     )}
                   </g>
@@ -360,13 +661,18 @@ export const BudgetView: React.FC = () => {
               {chartData.map((day, idx) => {
                 const xPercent = (getX(idx) / 600) * 100;
                 
-                // Hide labels if there are too many (e.g. Month view) to prevent overlap
-                const shouldHide = chartData.length > 15 && idx % 2 !== 0 && chartData.length - 1 !== idx;
+                // Hide labels responsively to prevent overlap on mobile/tablet
+                const shouldHideOnMobile = chartData.length > 15 && idx % 4 !== 0 && idx !== chartData.length - 1;
+                const shouldHideOnTablet = chartData.length > 15 && idx % 2 !== 0 && idx !== chartData.length - 1;
                 
                 return (
                   <div 
                     key={idx} 
-                    className={`absolute flex flex-col items-center top-0 origin-center transition-opacity ${shouldHide ? 'opacity-0 md:opacity-100' : 'opacity-100'}`}
+                    className={cn(
+                      "absolute flex flex-col items-center top-0 origin-center transition-opacity",
+                      shouldHideOnMobile ? "hidden md:flex" : "flex",
+                      shouldHideOnTablet ? "md:hidden lg:flex" : "md:flex"
+                    )}
                     style={{ left: `${xPercent}%`, transform: 'translateX(-50%)' }}
                   >
                     <div className="w-[1px] h-2 bg-[var(--theme-glass-border)] mb-2"></div>
@@ -384,12 +690,22 @@ export const BudgetView: React.FC = () => {
           <div className="flex flex-col sm:flex-row gap-4">
             {/* Budget Tracker (Half Width) */}
             <div className="bg-[var(--theme-glass-bg)] border border-[var(--theme-glass-border)] backdrop-blur-xl p-5 rounded-3xl shadow-sm flex flex-col flex-1 relative overflow-hidden group hover:shadow-lg transition-shadow duration-300">
-              <div className="absolute -top-12 -right-12 w-32 h-32 bg-emerald-500/10 rounded-full blur-2xl group-hover:bg-emerald-500/20 transition-all duration-700"></div>
+              <div className={cn(
+                "absolute -top-12 -right-12 w-32 h-32 rounded-full blur-2xl transition-all duration-700",
+                spentThisMonth > settings.monthlyBudget
+                  ? "bg-heart/10 group-hover:bg-heart/20"
+                  : "bg-emerald-500/10 group-hover:bg-emerald-500/20"
+              )}></div>
               
               <div className="relative z-10 flex flex-col h-full">
                 <div className="flex justify-between items-start mb-6">
                   <h3 className="font-bold text-sm">Budget Tracker</h3>
-                  <span className="text-xs font-bold bg-emerald-500/10 text-emerald-500 px-2.5 py-1 rounded-full border border-emerald-500/20">
+                  <span className={cn(
+                    "text-xs font-bold px-2.5 py-1 rounded-full border transition-colors",
+                    spentThisMonth > settings.monthlyBudget
+                      ? "bg-heart/10 text-heart border-heart/20"
+                      : "bg-emerald-500/10 text-emerald-500 border-emerald-500/20"
+                  )}>
                     {settings.monthlyBudget > 0 ? Math.round((spentThisMonth / settings.monthlyBudget) * 100) : 0}% genutzt
                   </span>
                 </div>
@@ -401,15 +717,26 @@ export const BudgetView: React.FC = () => {
                        <p className="text-4xl font-bold">{spentThisMonth.toLocaleString('de-DE', {minimumFractionDigits: 0, maximumFractionDigits: 0})}</p>
                        <span className="text-xl font-bold text-text-secondary">€</span>
                      </div>
-                     <span className="text-sm font-bold text-emerald-500 mt-1 bg-emerald-500/10 w-max px-2 py-1 rounded-md">
-                       Noch {(settings.monthlyBudget - spentThisMonth).toLocaleString('de-DE', {minimumFractionDigits: 0, maximumFractionDigits: 0})} € übrig
-                     </span>
+                     {spentThisMonth > settings.monthlyBudget ? (
+                       <span className="text-sm font-bold text-heart mt-1 bg-heart/10 w-max px-2 py-1 rounded-md">
+                         {(spentThisMonth - settings.monthlyBudget).toLocaleString('de-DE', {minimumFractionDigits: 0, maximumFractionDigits: 0})} € über dem Budget
+                       </span>
+                     ) : (
+                       <span className="text-sm font-bold text-emerald-500 mt-1 bg-emerald-500/10 w-max px-2 py-1 rounded-md">
+                         Noch {(settings.monthlyBudget - spentThisMonth).toLocaleString('de-DE', {minimumFractionDigits: 0, maximumFractionDigits: 0})} € übrig
+                       </span>
+                     )}
                   </div>
                   
                   {/* Enhanced Progress Bar */}
                   <div className="w-full h-3 bg-black/10 dark:bg-white/10 rounded-full overflow-hidden shadow-inner relative mb-2">
                     <div 
-                      className="absolute top-0 left-0 h-full bg-gradient-to-r from-emerald-400 to-emerald-500 rounded-full transition-all duration-1000 ease-out overflow-hidden" 
+                      className={cn(
+                        "absolute top-0 left-0 h-full rounded-full transition-all duration-1000 ease-out overflow-hidden bg-gradient-to-r",
+                        spentThisMonth > settings.monthlyBudget
+                          ? "from-heart/80 to-heart"
+                          : "from-emerald-400 to-emerald-500"
+                      )}
                       style={{ width: `${Math.min((spentThisMonth / (settings.monthlyBudget || 1)) * 100, 100)}%` }}
                     >
                       <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full animate-[shimmer_2s_infinite]"></div>
@@ -474,7 +801,7 @@ export const BudgetView: React.FC = () => {
               <div className="flex flex-col h-full flex-1 min-h-[150px] animate-in fade-in">
                 
                 {/* List of Products */}
-                <div className="flex flex-col gap-4 overflow-y-auto flex-1 pr-2 mb-6 scrollbar-thin">
+                <div className="flex flex-col gap-4 overflow-y-auto max-h-[160px] md:max-h-[200px] flex-1 pr-2 mb-6 scrollbar-thin">
                   {hoveredDay.products.length > 0 ? (
                     hoveredDay.products.map((p, idx) => (
                       <div key={idx} className="flex items-center gap-4 group/item">
@@ -499,30 +826,48 @@ export const BudgetView: React.FC = () => {
                   )}
                 </div>
 
-                {/* Supermarket Receipt Total Line */}
-                {hoveredDay.products.length > 0 && (
-                  <div className="mt-auto relative pt-5 pb-2">
-                    {/* Dashed Line SVG for perfect "Receipt" look */}
-                    <div className="absolute top-0 left-0 right-0 h-[2px] w-full" style={{ backgroundImage: 'linear-gradient(to right, var(--text-dark) 40%, transparent 40%)', backgroundSize: '8px 1px', backgroundRepeat: 'repeat-x', opacity: 0.2 }}></div>
-                    
-                    {/* The receipt cut-out circles at the edges to simulate tape roll */}
-                    <div className="absolute -left-8 -top-[7px] w-4 h-4 bg-[var(--bg-color)] rounded-full shadow-inner"></div>
-                    <div className="absolute -right-8 -top-[7px] w-4 h-4 bg-[var(--bg-color)] rounded-full shadow-inner"></div>
-                    
-                    <div className="flex justify-between items-end">
-                      <div className="flex flex-col">
-                        <span className="text-[10px] text-text-secondary uppercase tracking-widest font-bold mb-1">Endsumme</span>
-                        <span className="text-[10px] text-text-secondary">{hoveredDay.products.length} {hoveredDay.products.length === 1 ? 'Position' : 'Positionen'}</span>
-                      </div>
-                      <div className="flex items-baseline gap-1">
-                        <span className="text-sm font-bold text-text-secondary">€</span>
-                        <span className="text-3xl font-bold font-mono tracking-tight text-text-primary group-hover:text-accent transition-colors duration-500">
-                          {hoveredDay.value.toLocaleString('de-DE', {minimumFractionDigits: 2, maximumFractionDigits: 2})}
-                        </span>
-                      </div>
+                {/* Supermarket Receipt Total & Budget Summary */}
+                <div className="mt-auto relative pt-5 pb-2">
+                  {/* Dashed Line SVG for perfect "Receipt" look */}
+                  <div className="absolute top-0 left-0 right-0 h-[2px] w-full" style={{ backgroundImage: 'linear-gradient(to right, var(--text-dark) 40%, transparent 40%)', backgroundSize: '8px 1px', backgroundRepeat: 'repeat-x', opacity: 0.2 }}></div>
+                  
+                  {/* The receipt cut-out circles at the edges to simulate tape roll */}
+                  <div className="absolute -left-8 -top-[7px] w-4 h-4 bg-[var(--bg-color)] rounded-full shadow-inner"></div>
+                  <div className="absolute -right-8 -top-[7px] w-4 h-4 bg-[var(--bg-color)] rounded-full shadow-inner"></div>
+                  
+                  <div className="flex justify-between items-end mb-4">
+                    <div className="flex flex-col">
+                      <span className="text-[10px] text-text-secondary uppercase tracking-widest font-bold mb-1">Endsumme</span>
+                      <span className="text-[10px] text-text-secondary">{hoveredDay.products.length} {hoveredDay.products.length === 1 ? 'Position' : 'Positionen'}</span>
+                    </div>
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-sm font-bold text-text-secondary">€</span>
+                      <span className="text-3xl font-bold font-mono tracking-tight text-text-primary group-hover:text-accent transition-colors duration-500">
+                        {hoveredDay.dailyValue.toLocaleString('de-DE', {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+                      </span>
                     </div>
                   </div>
-                )}
+
+                  {/* Supermarket Receipt Budget Summary */}
+                  <div className="pt-3 border-t border-dashed border-text-secondary/20 flex flex-col gap-1 text-[10px] text-text-secondary font-mono">
+                    <div className="flex justify-between">
+                      <span>{timeRange === 'total' ? 'MONATSBUDGET:' : 'TAGESBUDGET:'}</span>
+                      <span>
+                        {(timeRange === 'total'
+                          ? settings.monthlyBudget
+                          : settings.monthlyBudget / 30
+                        ).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €
+                      </span>
+                    </div>
+                    <div className="flex justify-between font-bold">
+                      <span>DIFFERENZ:</span>
+                      <span className={hoveredDay.dailyValue > (timeRange === 'total' ? settings.monthlyBudget : settings.monthlyBudget / 30) ? "text-heart" : "text-emerald-500"}>
+                        {(hoveredDay.dailyValue - (timeRange === 'total' ? settings.monthlyBudget : settings.monthlyBudget / 30) > 0 ? '+' : '')}
+                        {(hoveredDay.dailyValue - (timeRange === 'total' ? settings.monthlyBudget : settings.monthlyBudget / 30)).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €
+                      </span>
+                    </div>
+                  </div>
+                </div>
               </div>
             ) : (
               <div className="flex flex-col items-center justify-center flex-1 opacity-40 animate-in fade-in min-h-[150px]">
@@ -542,7 +887,35 @@ export const BudgetView: React.FC = () => {
       
       {/* Transactions */}
       <div className="mt-4">
-        <h3 className="font-bold mb-6 px-2 text-xl tracking-wide">Transaktionen</h3>
+        <div className="flex justify-between items-center mb-6 px-2">
+          <h3 className="font-bold text-xl tracking-wide">Transaktionen</h3>
+          
+          {/* Sort By Toggle */}
+          <div className="bg-[var(--theme-glass-bg)] border border-[var(--theme-glass-border)] backdrop-blur-md px-1 py-1 flex items-center rounded-full shadow-sm text-xs">
+            <button
+              onClick={() => setSortBy('date')}
+              className={cn(
+                "px-3 py-1.5 rounded-full font-bold transition-all duration-300",
+                sortBy === 'date'
+                  ? "bg-accent text-bg-primary shadow-sm"
+                  : "text-text-secondary hover:text-text-primary bg-black/5 dark:bg-white/5"
+              )}
+            >
+              Datum
+            </button>
+            <button
+              onClick={() => setSortBy('price')}
+              className={cn(
+                "px-3 py-1.5 rounded-full font-bold transition-all duration-300",
+                sortBy === 'price'
+                  ? "bg-accent text-bg-primary shadow-sm"
+                  : "text-text-secondary hover:text-text-primary bg-black/5 dark:bg-white/5"
+              )}
+            >
+              Preis
+            </button>
+          </div>
+        </div>
         <div className="flex flex-col px-2 mb-8">
           {groupedTransactions.length > 0 ? (
             groupedTransactions.map((group, gIdx) => (

@@ -2,10 +2,11 @@ import React, { useMemo, useState, useRef, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom';
 import { useAppStore } from '../store/useAppStore';
 import { FilterChip } from '../components/common/FilterChip';
-import { Bell, Euro, Heart, Settings, Plus, X, ExternalLink, Globe, Tag, Link2, Store } from 'lucide-react';
+import { Bell, Heart, Settings, Plus, X, ExternalLink, Globe, Tag, Link2, Store } from 'lucide-react';
 import type { Product, Website } from '../types';
 import { CategoryEditMenu } from '../components/features/CategoryEditMenu';
 import { motion, AnimatePresence } from 'framer-motion';
+import { cn } from '../utils/cn';
 
 /* ── Default/Standard Shops ────────────────────────────────── */
 const DEFAULT_SHOPS: Website[] = [
@@ -324,24 +325,66 @@ export const DashboardView: React.FC = () => {
         {/* Budget Widget */}
         <div
           onClick={() => navigate('/budget')}
-          className="glass-panel p-6 cursor-pointer hover:-translate-y-1.5 hover:scale-[1.02] hover:shadow-xl transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] transform-gpu"
+          className="glass-panel p-5 cursor-pointer hover:-translate-y-1.5 hover:scale-[1.02] hover:shadow-xl transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] transform-gpu relative overflow-hidden group"
         >
-          <div className="flex justify-between items-center mb-6 text-text-secondary">
-            <span className="font-semibold uppercase text-xs tracking-wider">Monatsbudget</span>
-            <Euro size={16} />
-          </div>
-          <div className="flex flex-col items-center">
-            <div className="text-4xl font-bold mb-1">
-              {spentThisMonth.toLocaleString('de-DE')} €
+          {/* Background Blob */}
+          <div className={cn(
+            "absolute -top-12 -right-12 w-32 h-32 rounded-full blur-2xl transition-all duration-700",
+            isOverBudget
+              ? "bg-heart/10 group-hover:bg-heart/20"
+              : "bg-emerald-500/10 group-hover:bg-emerald-500/20"
+          )}></div>
+
+          <div className="relative z-10 flex flex-col h-full">
+            <div className="flex justify-between items-start mb-6">
+              <h3 className="font-bold text-sm">Budget Tracker</h3>
+              <span className={cn(
+                "text-[10px] md:text-xs font-bold px-2.5 py-1 rounded-full border transition-colors",
+                isOverBudget
+                  ? "bg-heart/10 text-heart border-heart/20"
+                  : "bg-emerald-500/10 text-emerald-500 border-emerald-500/20"
+              )}>
+                {settings.monthlyBudget > 0 ? Math.round((spentThisMonth / settings.monthlyBudget) * 100) : 0}% genutzt
+              </span>
             </div>
-            <div className="text-xs text-text-secondary mb-4">
-              von <span className="font-bold text-text-primary">{settings.monthlyBudget.toLocaleString('de-DE')} €</span> Budget
-            </div>
-            <div className="w-full h-2 bg-black/20 rounded-full overflow-hidden mb-2 relative">
-              <div
-                className={`h-full rounded-full transition-all duration-1000 ${isOverBudget ? 'bg-heart' : 'bg-emerald-500'}`}
-                style={{ width: `${budgetPct}%` }}
-              />
+
+            <div className="flex flex-col flex-1 justify-center">
+              <div className="flex flex-col gap-1 mb-6">
+                <span className="text-xs text-text-secondary font-medium uppercase tracking-wider">Ausgegeben</span>
+                <div className="flex items-baseline gap-1.5">
+                  <p className="text-4xl font-bold">{spentThisMonth.toLocaleString('de-DE', {minimumFractionDigits: 0, maximumFractionDigits: 0})}</p>
+                  <span className="text-xl font-bold text-text-secondary">€</span>
+                </div>
+                {isOverBudget ? (
+                  <span className="text-xs md:text-sm font-bold text-heart mt-1 bg-heart/10 w-max px-2 py-1 rounded-md">
+                    {(spentThisMonth - settings.monthlyBudget).toLocaleString('de-DE', {minimumFractionDigits: 0, maximumFractionDigits: 0})} € über dem Budget
+                  </span>
+                ) : (
+                  <span className="text-xs md:text-sm font-bold text-emerald-500 mt-1 bg-emerald-500/10 w-max px-2 py-1 rounded-md">
+                    Noch {(settings.monthlyBudget - spentThisMonth).toLocaleString('de-DE', {minimumFractionDigits: 0, maximumFractionDigits: 0})} € übrig
+                  </span>
+                )}
+              </div>
+
+              {/* Enhanced Progress Bar */}
+              <div className="w-full h-3 bg-black/10 dark:bg-white/10 rounded-full overflow-hidden shadow-inner relative mb-2">
+                <div 
+                  className={cn(
+                    "absolute top-0 left-0 h-full rounded-full transition-all duration-1000 ease-out overflow-hidden bg-gradient-to-r",
+                    isOverBudget
+                      ? "from-heart/80 to-heart"
+                      : "from-emerald-400 to-emerald-500"
+                  )}
+                  style={{ width: `${budgetPct}%` }}
+                >
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full animate-[shimmer_2s_infinite]"></div>
+                </div>
+              </div>
+
+              <div className="flex justify-between text-[10px] md:text-xs text-text-secondary font-bold mt-1">
+                <span>0 €</span>
+                <span>Gesamt: {settings.monthlyBudget.toLocaleString('de-DE')} €</span>
+              </div>
             </div>
           </div>
         </div>

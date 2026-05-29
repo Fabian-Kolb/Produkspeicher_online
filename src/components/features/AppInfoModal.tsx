@@ -17,6 +17,31 @@ interface LogEntry {
 
 const CHANGELOG: LogEntry[] = [
   {
+    version: '0.8.4',
+    date: '29. Mai 2026',
+    changes: {
+      added: [
+        'Täglich/Gesamtverlauf Budget-Diagramm: Umschalter für tägliche Ausgaben-Wellen vs. kumulativen Monatsverlauf.',
+        'Gestrichelte Soll-Pace-Kurve: Im Gesamtverlauf zeigt eine diagonal ansteigende Kurve den idealen Ausgabenpfad im Monat an.',
+        'Interaktiver Burn-Rate-Forecast: In der kumulativen Monatsansicht wird eine gestrichelte Prognoselinie bis zum Monatsende projiziert (grün bei Einhaltung, rot/orange bei Budgetüberschreitung) basierend auf dem täglichen Konsumverhalten.',
+        'Interaktive Diagramm-Legende: Eine dynamische Legende in der Diagramm-Überschrift erklärt nun kontextabhängig die verschiedenen Linientypen (Ausgaben, Soll-Pace, Prognose).'
+      ],
+      improved: [
+        'Standardmäßige Gesamtverlauf-Monatsansicht: Die Budgetseite öffnet sich standardmäßig in der kumulativen Monatsansicht zur direkten Visualisierung von Soll-Pace und Prognosen.',
+        'Ausrichtung des Soll-Pace-Starts: Die Soll-Pace-Linie startet nun exakt im Koordinatenursprung (0 €) bei Tag 0.',
+        'Soll-Pace-Sichtbarkeit verbessert: Die Soll-Pace-Linie ist durch eine angepasste Farb- und Kontraststärke in hellen und dunklen Themes bestens erkennbar.',
+        'Bereinigung des Gesamt-Zeitraums: Das horizontale Monatsbudget-Limit und die entsprechende Beschriftung wurden aus der 6-Monate-Übersicht (Gesamt) entfernt, da sie dort inhaltlich nicht zutreffend waren.',
+        'Einheitliches Design des Budget-Trackers: Der Budget-Tracker auf dem Dashboard wurde optisch komplett an die Premium-Variante der Budgetseite angeglichen (inkl. Shimmer-Effekt, Background-Glow, Restbudget-Badge und wahlweise grün/rotem Warnzustand).',
+        'Dynamischer Warnzustand für Budget-Tracker: Beide Tracker-Karten färben sich augenblicklich rot (Heart-Farbton), zeigen das genaue Ausmaß der Überschreitung an und passen den Begleittext entsprechend an, sobald das Monatsbudget überschritten wird.',
+        'Diagramm-Skill aktualisiert: Die Entwickler-Richtlinien für Diagramme im Projekt wurden an das neue System angepasst.'
+      ],
+      fixed: [
+        'UTC-Zeitzonen-Offset Fehler: Die Zuordnung von getätigten Einkäufen zu Datumsschlüsseln wurde von UTC-Methoden auf die lokale Zeitzone umgestellt.',
+        'NaN-Fehler bei virtuellem Tag 0: Behebung eines Javascript-Datumsfehlers bei der Berechnung von Tag 0.'
+      ]
+    }
+  },
+  {
     version: '0.8.3',
     date: '28. Mai 2026',
     changes: {

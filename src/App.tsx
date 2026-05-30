@@ -22,7 +22,7 @@ function App() {
   // Tracks whether the login came from the form (not a page refresh)
   const loginFromForm = useRef(false);
 
-  const { fetchAllData, setUserName } = useAppStore();
+  const { fetchAllData, setUserName, setAvatarUrl } = useAppStore();
 
   useEffect(() => {
     // Initial session check
@@ -33,6 +33,8 @@ function App() {
         fetchAllData(session.user.id);
         const name = session.user.user_metadata?.display_name || 'User';
         setUserName(name);
+        const avatar = session.user.user_metadata?.avatar_url || null;
+        setAvatarUrl(avatar);
         
         const hasDisplayName = !!session.user.user_metadata?.display_name;
         if (!hasDisplayName) setShowOnboarding(true);
@@ -50,6 +52,8 @@ function App() {
         setSession(session);
         const name = session.user.user_metadata?.display_name || 'User';
         setUserName(name);
+        const avatar = session.user.user_metadata?.avatar_url || null;
+        setAvatarUrl(avatar);
 
         const hasDisplayName = !!session.user.user_metadata?.display_name;
 
@@ -70,6 +74,7 @@ function App() {
       } else {
         setSession(null);
         setUserName(null);
+        setAvatarUrl(null);
         setShowLogin(true);
         setShowOnboarding(false);
       }

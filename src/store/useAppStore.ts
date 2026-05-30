@@ -18,8 +18,10 @@ interface AppState {
   // Auth helper
   userId: string | null;
   userName: string | null;
+  avatarUrl: string | null;
   setUserId: (id: string | null) => void;
   setUserName: (name: string | null) => void;
+  setAvatarUrl: (url: string | null) => void;
   fetchAllData: (userId: string) => Promise<void>;
 
   // Actions
@@ -97,9 +99,11 @@ export const useAppStore = create<AppState>()((set, get) => ({
   settings: defaultSettings,
   userId: null,
   userName: null,
+  avatarUrl: null,
 
   setUserId: (userId) => set({ userId }),
   setUserName: (userName) => set({ userName }),
+  setAvatarUrl: (avatarUrl) => set({ avatarUrl }),
 
   toggleDemoMode: () => {
     const newVal = !get().isDemoMode;

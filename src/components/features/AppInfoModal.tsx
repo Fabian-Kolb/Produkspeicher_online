@@ -17,6 +17,62 @@ interface LogEntry {
 
 const CHANGELOG: LogEntry[] = [
   {
+    version: '0.8.8',
+    date: '30. Mai 2026',
+    changes: {
+      added: [
+        'Wochen-Prognose (Forecast): Das Woche-Diagramm (cumulative Trendkurve) zeigt nun ebenfalls eine gestrichelte Prognoselinie bis zum Sonntag der aktuellen Woche, basierend auf dem durchschnittlichen Konsumverhalten der vergangenen Wochentage.',
+        'Wochen-Prognose-Ausblendung: Die Wochenprognose wird sonntags automatisch ausgeblendet, da die Woche an diesem Tag bereits abgeschlossen ist.',
+        'Interaktive Kalender-Wochenauswahl: Im Woche-Modus (ehemals "7 Tage") führt die Auswahl eines Monats nun zu einem zweiten Schritt, der die Kalenderwochen dieses Monats zur genauen Auswahl anzeigt.',
+        'Freie Spanne für Gesamtübersicht: Im Gesamt-Modus kann der Nutzer durch aufeinanderfolgende Klicks im Kalender eine vollkommen flexible Start- und Endmonatsspanne bestimmen.',
+        'Wochentage auf X-Achse: Das Woche-Diagramm zeigt anstelle von kalendarischen Datumsangaben Wochentage ("Mo" bis "So") als Beschriftung.',
+        'Mobile X-Achsen-Scrollbarkeit erweitert: Die Scrollbarkeit und Kanten-Ausblendung auf Mobilgeräten ist nun auch für die Woche- und Gesamt-Diagramme aktiv (mit angepasster Breite von 500px).'
+      ],
+      improved: [
+        'Y-Achsen-Maximum im Woche-Modus: Der Skalierungswert (roundedMax) des Woche-Diagramms berechnet sich nun auf Basis des wöchentlichen Budgets, statt des monatlichen Budgets, was eine deutlich präzisere Kurven- und Säulendarstellung bewirkt.',
+        'Zentriertes Schließen des Kalenders: Alle Kalender-Unterzustände und Range-Highlights werden beim Schließen sauber zurückgesetzt.'
+      ]
+    }
+  },
+  {
+    version: '0.8.7',
+    date: '30. Mai 2026',
+    changes: {
+      added: [
+        'Logout-Option im Profil- und Account-Modal hinzugefügt.',
+        'Profilbild (oder Platzhalter) im Header integriert, das per Klick direkt das Profil-Modal öffnet (anstelle des alten Logout-Buttons).'
+      ]
+    }
+  },
+  {
+    version: '0.8.6',
+    date: '30. Mai 2026',
+    changes: {
+      added: [
+        'Historischer Budget-Zeitkapsel-Explorer: Ein voll funktionsfähiger Zeitraum-Navigation-Umschalter ermöglicht es, monats- oder wochenweise in die Vergangenheit zu reisen. Alle Statistiken, Budgets, Kategorien und Transaktionslisten passen sich dem historischen Kontext an.',
+        'Desktop-Kalender-Popover & Mobile Bottom Drawer: Per Klick auf das Datum öffnet sich auf Desktops ein elegantes Dropdown-Raster und auf Mobilgeräten ein verglastes Slide-up-Bodenpanel (Bottom Drawer) zur schnellen Monats-/Jahreswahl.',
+        'Horizontale X-Achsen-Scrollbarkeit auf Mobilgeräten: In der Monatsansicht wird das Diagramm auf Handys mit einer lesbaren Mindestbreite von 750px gerendert und ist wischbar. Ein intelligenter Effekt scrollt den Chart beim Laden automatisch an das rechte Ende (zum aktuellsten Tag).'
+      ],
+      improved: [
+        'Kontextbasierte Budget-Tracker-Texte: Für beendete historische Monate ändert sich die Anzeige von "Noch X € übrig" auf "Budget-Ergebnis: X € gespart" oder "X € über dem Budget abgeschlossen".',
+        'Ausblenden der Prognose-Linie für historische Monate: Die gestrichelte Burn-Rate-Forecast-Linie wird nur im aktuell laufenden Monat gerendert.'
+      ]
+    }
+  },
+  {
+    version: '0.8.5',
+    date: '30. Mai 2026',
+    changes: {
+      added: [
+        'Icon-basierte Diagramm-Steuerung: Die Text-Buttons im Ausgabenverlauf wurden durch reine, ansprechende Icons (Säulen vs. Trendkurve) ersetzt.',
+        'Visuelle Diagramm-Typen (Säulen vs. Trend): Tägliche Ausgabenspitzen (und monatliche Spikes im Gesamt-Zeitraum) werden nun als modernes Säulendiagramm dargestellt, während der kumulative Verlauf weiterhin als weiche Trendkurve gerendert wird.'
+      ],
+      improved: [
+        'Automatische Deaktivierung des Modus-Toggles: Im 6-Monate-Gesamtzeitraum wird der Steuerungsschalter automatisch ausgeblendet, da dort ausschließlich monatliche Spikes sinnvoll sind.'
+      ]
+    }
+  },
+  {
     version: '0.8.4',
     date: '29. Mai 2026',
     changes: {
@@ -148,7 +204,7 @@ const CHANGELOG: LogEntry[] = [
         'Premium-Fokus- und Hover-Animationen für alle Textboxen, Suchfelder und Eingaben hinzugefügt. Fokussierte Eingabefelder heben sich nun taktil hervor durch minimale Skalierung (101.5% bis 102%) und einen leuchtenden Border-Glow in der aktiven Accent-Farbe.'
       ],
       improved: [
-        'Eingabefelder-Expansion: Suchfelder im Katalog, in Favoriten und Bundles vergrößern sich bei Fokus flüssig von 256px auf 320px Breite auf größeren Bildschirmen.',
+        'Engabefelder-Expansion: Suchfelder im Katalog, in Favoriten und Bundles vergrößern sich bei Fokus flüssig von 256px auf 320px Breite auf größeren Bildschirmen.',
         'Notizen-Feld-Expansion: Das Details/Notizen-Textfeld in der Produkt-Modalansicht vergrößert bei Fokus organisch seine minimale Höhe von 100px auf 160px.'
       ]
     }

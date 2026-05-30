@@ -4,7 +4,7 @@ import { supabase } from '../../lib/supabase';
 import { useUIStore } from '../../store/useUIStore';
 import { useAppStore } from '../../store/useAppStore';
 import { cn } from '../../utils/cn';
-import { X, ImagePlus, User, Loader2, Save, Trash2 } from 'lucide-react';
+import { X, ImagePlus, User, Loader2, Save, Trash2, LogOut } from 'lucide-react';
 
 export const ProfileSettingsModal: React.FC = () => {
   const { isProfileModalOpen, toggleProfileModal } = useUIStore();
@@ -113,6 +113,21 @@ export const ProfileSettingsModal: React.FC = () => {
     }
   };
 
+  const handleLogout = async () => {
+    try {
+      setIsSubmitting(true);
+      setErrorMsg('');
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      toggleProfileModal();
+    } catch (err: any) {
+      console.error(err);
+      setErrorMsg(err.message || 'Fehler beim Abmelden.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   if (!isProfileModalOpen) return null;
 
   return (
@@ -206,6 +221,15 @@ export const ProfileSettingsModal: React.FC = () => {
             >
               {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
               Speichern
+            </button>
+
+            <button
+              onClick={handleLogout}
+              disabled={isSubmitting}
+              className="w-full py-4 rounded-2xl font-black text-xs uppercase tracking-[0.2em] flex items-center justify-center gap-3 transition-all disabled:opacity-50 shadow-lg bg-heart text-white hover:bg-heart/90 hover:scale-[1.02] active:scale-[0.98]"
+            >
+              {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : <LogOut className="w-5 h-5" />}
+              Abmelden / Logout
             </button>
             
             <button

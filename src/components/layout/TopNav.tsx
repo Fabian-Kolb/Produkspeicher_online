@@ -1,17 +1,16 @@
 import React, { useRef, useState, useLayoutEffect, useEffect } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { Menu, Moon, Sun, LogOut } from 'lucide-react';
+import { Menu, Moon, Sun, User } from 'lucide-react';
 import { useUIStore } from '../../store/useUIStore';
 import { useAppStore } from '../../store/useAppStore';
-import { supabase } from '../../lib/supabase';
 import { cn } from '../../utils/cn';
 import logoDark from '../../assets/logo/logo_dark.png';
 import logoWhite from '../../assets/logo/logo_white.png';
 import { motion } from 'framer-motion';
 
 export const TopNav: React.FC = () => {
-  const toggleMainMenu = useUIStore((s) => s.toggleMainMenu);
-  const { settings, updateSettings } = useAppStore();
+  const { toggleMainMenu, toggleProfileModal } = useUIStore();
+  const { settings, updateSettings, avatarUrl, userName } = useAppStore();
   const location = useLocation();
 
   const tabsRef = useRef<{ [key: string]: HTMLAnchorElement | null }>({});
@@ -140,13 +139,17 @@ export const TopNav: React.FC = () => {
           </div>
         </button>
 
-        {/* Logout Button */}
+        {/* Profile / Account Button */}
         <button
-          onClick={async () => await supabase.auth.signOut()}
-          className="w-8 h-8 md:w-10 md:h-10 bg-bg-primary rounded-full shadow-sm flex items-center justify-center hover:bg-red-500/10 text-red-500 transition-colors border border-border-primary/50 group"
-          title="Logout"
+          onClick={toggleProfileModal}
+          className="w-8 h-8 md:w-10 md:h-10 bg-bg-primary rounded-full shadow-sm flex items-center justify-center hover:bg-black/5 dark:hover:bg-white/5 transition-all duration-300 border border-border-primary/50 overflow-hidden cursor-pointer hover:scale-105 active:scale-95"
+          title="Profil & Account"
         >
-          <LogOut size={16} className="group-hover:scale-110 transition-transform" />
+          {avatarUrl ? (
+            <img src={avatarUrl} alt={userName || 'Profil'} className="w-full h-full object-cover" />
+          ) : (
+            <User size={16} className="text-text-secondary" />
+          )}
         </button>
 
         {/* Hamburger */}

@@ -17,6 +17,23 @@ interface LogEntry {
 
 const CHANGELOG: LogEntry[] = [
   {
+    version: '0.8.9',
+    date: '30. Mai 2026',
+    changes: {
+      added: [
+        'Präzise Klick-Zonen im Diagramm: In der kumulativen Trendkurve wurde eine unsichtbare 20px-Klickzone um jeden Punkt integriert, um die Auswahl per Touch/Maus extrem treffsicher zu gestalten. In der Balkenansicht sind nun direkt die Balken-Rechtecke anklickbar.',
+        'Diagramm-Hintergrund-Deselektion: Ein Klick auf die freie Diagrammfläche des SVGs deselektiert den aktuell ausgewählten Tag augenblicklich.',
+        'Segmentierter Budget-Rechner in KPI-Karte: Die vierte Statistikkarte bietet nun beim Editieren einen segmentierten Umschalter für [Tag], [Woche] oder [Monat]. Der Wert kann in der Wunsch-Einheit eingegeben werden und wird im Hintergrund automatisch in das monatliche Budget konvertiert und persistent gespeichert.',
+        'Dynamische Beleg-Überschriften: Die Belegkarte rechts passt ihren Titel automatisch an und heißt im Gesamt-Modus "MONATSBELEG", während sie in der Wochen-/Monatsansicht "TAGESBELEG" heißt.',
+        'Premium Differenz-Visualisierung: Negative Beträge bei der Budgetdifferenz im Beleg wurden durch absolute Zahlen ersetzt, die unmissverständlich als grüne "ERSPARNIS" oder rote "ÜBERSCHREITUNG" dargestellt werden.'
+      ],
+      improved: [
+        'Hover-Verhalten korrigiert: Das Hovern über dem Diagramm manipuliert nun nicht mehr die Opazität der anderen Balken, um störende Helligkeitssprünge beim Bewegen des Mauszeigers zu vermeiden. Das Ausblenden nicht ausgewählter Elemente wird rein durch die aktive Selektion (Klick) gesteuert.',
+        'Feste Belegkarten-Höhe: Die Höhe der Belegkarte bleibt unabhängig vom ausgewählten Tag permanent auf h-[390px] fixiert, was unschöne vertikale Layout-Verschiebungen ausschließt.'
+      ]
+    }
+  },
+  {
     version: '0.8.8',
     date: '30. Mai 2026',
     changes: {

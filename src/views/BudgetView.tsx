@@ -1019,6 +1019,7 @@ export const BudgetView: React.FC = () => {
                   className="w-full h-full overflow-visible" 
                   viewBox="0 0 600 250" 
                   preserveAspectRatio="none"
+                  onClick={() => setSelectedDay(null)}
                 >
               <defs>
                 {/* Bar Fill Gradient */}
@@ -1160,7 +1161,7 @@ export const BudgetView: React.FC = () => {
                         rx={Math.min(barWidth / 2, 6)}
                         fill="currentColor"
                         className={cn(
-                          "transition-all duration-300 ease-in-out origin-bottom",
+                          "transition-all duration-300 ease-in-out origin-bottom pointer-events-none",
                           isOverBudget ? "text-heart" : "text-accent",
                           selectedDay
                             ? (selectedDay.dateKey === d.dateKey ? "opacity-100" : "opacity-45")
@@ -1168,7 +1169,7 @@ export const BudgetView: React.FC = () => {
                         )}
                         style={{
                           filter: selectedDay?.dateKey === d.dateKey 
-                            ? 'drop-shadow(0 0 8px currentColor)' 
+                            ? 'drop-shadow(0 0 10px currentColor)' 
                             : 'none'
                         }}
                       />
@@ -1264,16 +1265,41 @@ export const BudgetView: React.FC = () => {
                 return (
                   <g 
                     key={i} 
-                    className="group cursor-pointer"
+                    className="group"
                     onMouseEnter={() => setHoveredDay(d as any)}
                     onMouseLeave={() => setHoveredDay(null)}
                     onTouchStart={() => setHoveredDay(d as any)}
                     onClick={(e) => {
                       e.stopPropagation();
-                      if (selectedDay?.dateKey === d.dateKey) {
-                        setSelectedDay(null);
+                      
+                      // Calculate click Y in SVG coordinates
+                      const rect = e.currentTarget.getBoundingClientRect();
+                      const clickYRelative = e.clientY - rect.top;
+                      const svgY = (clickYRelative / rect.height) * (DRAW_HEIGHT + 40) + (PAD_TOP - 20);
+                      
+                      let isClickOnTarget = false;
+                      
+                      if (chartMode === 'daily' || timeRange === 'total') {
+                        // In Bar Mode, target is the bar itself (from yPos to PAD_BOTTOM)
+                        // Add 15px top/bottom tolerance for easier interaction
+                        const barYStart = getY(d.dailyValue);
+                        isClickOnTarget = d.dailyValue > 0 && svgY >= (barYStart - 15) && svgY <= (PAD_BOTTOM + 15);
                       } else {
-                        setSelectedDay(d as any);
+                        // In Cumulative Mode, target is the point at yPos
+                        // Within 25px tolerance
+                        const pointY = getY(chartVal(d) || 0);
+                        isClickOnTarget = Math.abs(svgY - pointY) <= 25;
+                      }
+                      
+                      if (isClickOnTarget) {
+                        if (selectedDay?.dateKey === d.dateKey) {
+                          setSelectedDay(null);
+                        } else {
+                          setSelectedDay(d as any);
+                        }
+                      } else {
+                        // Clicked outside the bar/point -> deselect
+                        setSelectedDay(null);
                       }
                     }}
                   >

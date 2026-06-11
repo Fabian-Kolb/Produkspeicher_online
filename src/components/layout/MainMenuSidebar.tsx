@@ -4,10 +4,11 @@ import { useUIStore } from '../../store/useUIStore';
 import { useAppStore } from '../../store/useAppStore';
 import logoDark from '../../assets/logo/logo_dark.png';
 import logoWhite from '../../assets/logo/logo_white.png';
+import { triggerHaptic } from '../../utils/haptics';
 
 export const MainMenuSidebar: React.FC = () => {
   const { isMainMenuOpen, toggleMainMenu, toggleThemeManager, toggleProfileModal, toggleAppInfoModal } = useUIStore();
-  const { settings, isDemoMode, toggleDemoMode } = useAppStore();
+  const { settings, isDemoMode, toggleDemoMode, updateSettings } = useAppStore();
 
   
   const handleInfo = () => {
@@ -84,6 +85,40 @@ export const MainMenuSidebar: React.FC = () => {
           <MenuButton icon={<Trash2 size={18} />} onClick={handleReset} isDestructive>
             Reset / Löschen
           </MenuButton>
+
+          {/* Divider */}
+          <div className="h-[1px] bg-border-primary/50 my-2" />
+          
+          {/* Section Header */}
+          <div className="text-[10px] font-black tracking-widest text-text-secondary uppercase mb-1 px-1">
+            Einstellungen
+          </div>
+          
+          {/* Vibration Toggle Switch Card */}
+          <div className="flex items-center justify-between px-4 py-3 rounded-xl bg-text-primary/[0.03] border border-border-primary/30">
+            <span className="text-sm font-medium text-text-primary">Vibrations-Feedback</span>
+            <button
+              onClick={() => {
+                const targetVal = !settings.isVibrationEnabled;
+                updateSettings({ isVibrationEnabled: targetVal });
+                if (targetVal) {
+                  // Vibrate to confirm it's turned back on
+                  setTimeout(() => triggerHaptic(15), 50);
+                }
+              }}
+              className={cn(
+                "relative w-11 h-6 rounded-full flex items-center px-0.5 transition-colors cursor-pointer select-none",
+                settings.isVibrationEnabled ? "bg-accent" : "bg-text-primary/10"
+              )}
+            >
+              <div
+                className={cn(
+                  "w-5 h-5 rounded-full bg-bg-primary shadow-sm transition-transform duration-300",
+                  settings.isVibrationEnabled ? "translate-x-5" : "translate-x-0"
+                )}
+              />
+            </button>
+          </div>
         </div>
       </div>
     </>

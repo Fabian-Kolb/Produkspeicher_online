@@ -61,6 +61,7 @@ export interface AppSettings {
   customThemes: CustomTheme[];
   activeThemeId: string;
   mobileGrid?: 'single' | 'multi';
+  isVibrationEnabled?: boolean;
 }
 
 export interface AppState {

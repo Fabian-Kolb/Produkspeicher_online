@@ -1,8 +1,13 @@
+import { useAppStore } from '../store/useAppStore';
+
 /**
  * Triggers a short vibration (haptic feedback) on supported mobile devices.
  * @param ms Duration of the vibration in milliseconds.
  */
 export const triggerHaptic = (ms = 15) => {
+  const isVibrationEnabled = useAppStore.getState().settings.isVibrationEnabled ?? true;
+  if (!isVibrationEnabled) return;
+
   if (
     typeof window !== 'undefined' &&
     window.navigator &&

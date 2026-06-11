@@ -64,9 +64,9 @@ export const AppContainer: React.FC = () => {
   const routeIndex = ROUTES.indexOf(location.pathname);
   const currentIndex = routeIndex !== -1 ? routeIndex : 0;
 
-  // Sync carousel translation with active index on location change
+  // Sync carousel translation with active index on location change (only if not actively dragging)
   useEffect(() => {
-    if (carouselRef.current) {
+    if (carouselRef.current && !isDragging.current) {
       carouselRef.current.style.transition = 'transform 0.4s cubic-bezier(0.16, 1, 0.3, 1)';
       carouselRef.current.style.transform = `translateX(-${currentIndex * (100 / 6)}%)`;
     }
@@ -80,6 +80,8 @@ export const AppContainer: React.FC = () => {
   const preventNextClick = useRef<boolean>(false);
   const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastCenteredPage = useRef<number>(-1);
+  const isDragging = useRef<boolean>(false);
+  const hasNavigatedInSession = useRef<boolean>(false);
 
   const onTouchStart = (e: React.TouchEvent) => {
     // 1. Disable swipe gestures if any modal is open
@@ -103,6 +105,7 @@ export const AppContainer: React.FC = () => {
     touchStartInNavbar.current = isNavbar;
     hasSwipedNavbar.current = false;
     lastCenteredPage.current = currentIndex;
+    hasNavigatedInSession.current = false;
 
     // 2. Ignore swipe gestures starting inside scrollable panels/widgets or input elements
     // (Bypass this check for navbar gestures so navbar buttons/links can be swiped)
@@ -168,9 +171,10 @@ export const AppContainer: React.FC = () => {
     // Handle horizontal page drag
     if (dragDirection.current === 'horizontal') {
       if (e.cancelable) e.preventDefault(); // Prevent native vertical scrolling
+      isDragging.current = true; // Mark as dragging to prevent location-sync snapping
 
-      // Apply higher sensitivity scaling for navbar gestures (6.5x speed to scroll multiple pages)
-      const sensitivity = touchStartInNavbar.current ? 6.5 : 1.0;
+      // Apply higher sensitivity scaling for navbar gestures (14.0x speed to scroll multiple pages very fast)
+      const sensitivity = touchStartInNavbar.current ? 14.0 : 1.0;
       const scaledDx = dx * sensitivity;
 
       if (touchStartInNavbar.current && Math.abs(dx) > 5) {
@@ -182,12 +186,21 @@ export const AppContainer: React.FC = () => {
       const currentOffset = -currentIndex * pageWidth;
       const targetOffset = currentOffset + scaledDx;
 
-      // Real-time haptic tick feedback as individual pages are crossed in the carousel
-      if (touchStartInNavbar.current) {
-        const currentCenteredPage = Math.max(0, Math.min(ROUTES.length - 1, Math.round(-targetOffset / pageWidth)));
-        if (currentCenteredPage !== lastCenteredPage.current) {
-          lastCenteredPage.current = currentCenteredPage;
+      // Real-time haptic tick feedback & Live category/tab navigation as pages are crossed in the carousel
+      const currentCenteredPage = Math.max(0, Math.min(ROUTES.length - 1, Math.round(-targetOffset / pageWidth)));
+      if (currentCenteredPage !== lastCenteredPage.current) {
+        lastCenteredPage.current = currentCenteredPage;
+        
+        if (touchStartInNavbar.current) {
           triggerHaptic(12); // Short vibration click
+          
+          // Live-navigate to update active indicators in TopNav/BottomNav in real-time
+          if (!hasNavigatedInSession.current) {
+            hasNavigatedInSession.current = true;
+            navigate(ROUTES[currentCenteredPage]); // First change is a push
+          } else {
+            navigate(ROUTES[currentCenteredPage], { replace: true }); // Subsequent changes are replacements
+          }
         }
       }
 
@@ -218,13 +231,16 @@ export const AppContainer: React.FC = () => {
       longPressTimer.current = null;
     }
 
-    if (!touchStart.current || !carouselRef.current) return;
+    if (!touchStart.current || !carouselRef.current) {
+      isDragging.current = false;
+      return;
+    }
 
     const currentX = e.changedTouches[0].clientX;
     const dx = currentX - touchStart.current.x;
 
     if (dragDirection.current === 'horizontal') {
-      const sensitivity = touchStartInNavbar.current ? 6.5 : 1.0;
+      const sensitivity = touchStartInNavbar.current ? 14.0 : 1.0;
       const scaledDx = dx * sensitivity;
 
       const pageWidth = window.innerWidth;
@@ -242,17 +258,24 @@ export const AppContainer: React.FC = () => {
       let targetIndex = currentIndex - finalPagesShifted;
       targetIndex = Math.max(0, Math.min(ROUTES.length - 1, targetIndex));
 
+      // Mark dragging finished before we perform the final snapping
+      isDragging.current = false;
+
+      // Animate the carousel smoothly to its resting position.
+      carouselRef.current.style.transition = 'transform 0.4s cubic-bezier(0.16, 1, 0.3, 1)';
+      carouselRef.current.offsetHeight; // Force reflow
+      carouselRef.current.style.transform = `translateX(-${targetIndex * (100 / 6)}%)`;
+
+      // If we didn't navigate yet, or if the final target is different from where we are currently centered
       if (targetIndex !== currentIndex) {
-        carouselRef.current.style.transition = 'transform 0.4s cubic-bezier(0.16, 1, 0.3, 1)';
-        carouselRef.current.offsetHeight; // Force reflow
-        carouselRef.current.style.transform = `translateX(-${targetIndex * (100 / 6)}%)`;
-        navigate(ROUTES[targetIndex]);
-      } else {
-        // Snap back to current index
-        carouselRef.current.style.transition = 'transform 0.4s cubic-bezier(0.16, 1, 0.3, 1)';
-        carouselRef.current.offsetHeight; // Force reflow
-        carouselRef.current.style.transform = `translateX(-${currentIndex * (100 / 6)}%)`;
+        if (!hasNavigatedInSession.current) {
+          navigate(ROUTES[targetIndex]);
+        } else {
+          navigate(ROUTES[targetIndex], { replace: true });
+        }
       }
+    } else {
+      isDragging.current = false;
     }
 
     if (hasSwipedNavbar.current) {

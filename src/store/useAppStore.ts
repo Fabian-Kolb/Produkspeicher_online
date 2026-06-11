@@ -71,6 +71,7 @@ const defaultSettings: AppSettings = {
   customThemes: [],
   activeThemeId: 'default-dark-glass',
   mobileGrid: 'multi',
+  isVibrationEnabled: true,
 };
 
 // Helper function to update app_state in Supabase

@@ -17,6 +17,19 @@ interface LogEntry {
 
 const CHANGELOG: LogEntry[] = [
   {
+    version: '0.8.13',
+    date: '11. Juni 2026',
+    changes: {
+      added: [
+        'Pinch-to-Zoom-Gestensteuerung (Zwei-Finger-Zoom) für das Budget-Diagramm implementiert (X- und Y-Achse unabhängig zoombar).'
+      ],
+      improved: [
+        'Stationäre Gridlinien im Diagramm mit dynamischen Y-Achsen-Beschriftungen bei vertikalem Zoom. SVG-Elemente werden nun sauber an den Rändern abgeschnitten.',
+        'Schwebender "Zoom zurücksetzen"-Button ermöglicht das schnelle Wiederherstellen der Standardansicht.'
+      ]
+    }
+  },
+  {
     version: '0.8.12',
     date: '11. Juni 2026',
     changes: {

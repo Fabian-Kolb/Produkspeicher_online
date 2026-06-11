@@ -28,6 +28,8 @@ export const CategoryEditMenu: React.FC<CategoryEditMenuProps> = ({
   const [showAddInput, setShowAddInput] = useState(false);
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const [pendingDelete, setPendingDelete] = useState<string | null>(null);
+  const [hoveredDeleteCat, setHoveredDeleteCat] = useState<string | null>(null);
+  const [showTooltip, setShowTooltip] = useState(false);
   const addInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -35,6 +37,15 @@ export const CategoryEditMenu: React.FC<CategoryEditMenuProps> = ({
       addInputRef.current.focus();
     }
   }, [showAddInput]);
+
+  useEffect(() => {
+    if (!showTooltip) return;
+    const handleOutsideClick = () => {
+      setShowTooltip(false);
+    };
+    document.addEventListener('click', handleOutsideClick);
+    return () => document.removeEventListener('click', handleOutsideClick);
+  }, [showTooltip]);
 
   const displayCats = useMemo(() => ['Alle', ...categories], [categories]);
 
@@ -68,28 +79,63 @@ export const CategoryEditMenu: React.FC<CategoryEditMenuProps> = ({
   };
 
   return (
-    <div className="w-full glass-panel p-6 flex flex-col gap-4 animate-in fade-in slide-in-from-top-4 duration-300 relative shadow-xl">
-      {/* Title */}
-      <div className="flex items-center justify-between pb-3 border-b border-border-primary/20">
-        <div>
-          <h3 className="text-sm font-bold text-text-primary tracking-wide">{title}</h3>
-          <p className="text-xs text-text-secondary mt-0.5">{subtitle}</p>
+    <div className="w-full glass-panel p-6 flex flex-col gap-3 animate-in fade-in slide-in-from-top-4 duration-300 relative shadow-xl">
+      {/* Title/Tooltip Button & Close Button */}
+      <div className="flex items-center justify-between pb-2 border-b border-border-primary/20 gap-2 relative">
+        {/* Title */}
+        <h3 className="text-base font-bold text-text-primary tracking-wide">{title}</h3>
+
+        {/* Action Buttons */}
+        <div className="flex items-center gap-2">
+          {/* Info/Tooltip Button */}
+          <div className="relative z-25">
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowTooltip(!showTooltip);
+              }}
+              onMouseEnter={() => setShowTooltip(true)}
+              onMouseLeave={() => setShowTooltip(false)}
+              className="w-8 h-8 rounded-full bg-text-primary/5 text-text-secondary hover:text-text-primary hover:bg-text-primary/10 flex items-center justify-center transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer"
+            >
+              <span className="text-sm font-bold select-none">?</span>
+            </button>
+            
+            {/* Tooltip containing subtitle (positioned downwards to avoid overflow clipping) */}
+            <span 
+              className={cn(
+                "absolute top-full right-0 mt-2 w-72 p-3 rounded-2xl glass-panel shadow-xl pointer-events-none transition-all duration-300 z-50 origin-top-right block text-left",
+                showTooltip 
+                  ? "opacity-100 scale-100 translate-y-0" 
+                  : "opacity-0 scale-95 -translate-y-1 pointer-events-none"
+              )}
+            >
+              <span className="text-xs text-text-primary font-semibold mb-1 block">Anleitung</span>
+              <span className="text-[11px] text-text-secondary leading-relaxed normal-case font-normal block">
+                {subtitle}
+              </span>
+            </span>
+          </div>
+
+          {/* Close Button */}
+          <button
+            onClick={onClose}
+            className="w-8 h-8 rounded-full bg-text-primary/5 text-text-secondary hover:text-text-primary hover:bg-text-primary/10 flex items-center justify-center transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer"
+            title="Schließen"
+          >
+            <X size={15} />
+          </button>
         </div>
-        <button
-          onClick={onClose}
-          className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/5 text-text-secondary hover:text-text-primary hover:bg-black/10 dark:hover:bg-white/10 flex items-center justify-center transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer"
-          title="Schließen"
-        >
-          <X size={15} />
-        </button>
       </div>
 
       {/* Filter Chips List */}
-      <div className="flex flex-wrap items-center gap-2 pt-1">
+      <div className="flex flex-wrap items-center gap-2 pt-0">
         {displayCats.map((cat, idx) => {
           const isVirtual = cat === 'Alle';
           const isDragging = draggedIndex === idx;
           const isPendingDelete = pendingDelete === cat;
+          const isHoveredDelete = hoveredDeleteCat === cat;
 
           if (isPendingDelete && !isVirtual) {
             return (
@@ -103,6 +149,7 @@ export const CategoryEditMenu: React.FC<CategoryEditMenuProps> = ({
                     e.stopPropagation();
                     onDelete(cat);
                     setPendingDelete(null);
+                    setHoveredDeleteCat(null);
                   }}
                   className="p-0.5 rounded-full hover:bg-heart/20 text-heart cursor-pointer transition-colors"
                   title="Bestätigen"
@@ -142,7 +189,11 @@ export const CategoryEditMenu: React.FC<CategoryEditMenuProps> = ({
                 editable={!isVirtual}
                 shaking={false}
                 className={cn(
-                  isVirtual ? "!border-solid" : "group-hover:border-heart group-hover:text-heart group-hover:bg-heart/5 transition-all duration-200",
+                  isVirtual 
+                    ? "!border-solid" 
+                    : isHoveredDelete
+                      ? "border-heart text-heart bg-heart/5 transition-all duration-200"
+                      : "group-hover:border-accent group-hover:text-accent group-hover:bg-accent/5 transition-all duration-200",
                   "pointer-events-none select-none"
                 )}
               >
@@ -156,7 +207,9 @@ export const CategoryEditMenu: React.FC<CategoryEditMenuProps> = ({
                     e.stopPropagation();
                     setPendingDelete(cat);
                   }}
-                  className="absolute -top-1.5 -right-1.5 w-5 h-5 flex items-center justify-center rounded-full bg-heart text-white text-[10px] shadow-md scale-0 group-hover:scale-100 active:scale-95 transition-all duration-200 z-10 cursor-pointer pointer-events-auto"
+                  onMouseEnter={() => setHoveredDeleteCat(cat)}
+                  onMouseLeave={() => setHoveredDeleteCat(null)}
+                  className="absolute -top-1.5 -right-1.5 w-5 h-5 flex items-center justify-center rounded-full bg-heart text-white text-[10px] shadow-md scale-0 group-hover:scale-100 hover:!scale-125 active:scale-95 transition-all duration-200 z-10 cursor-pointer pointer-events-auto"
                 >
                   <X size={10} />
                 </button>
@@ -192,7 +245,7 @@ export const CategoryEditMenu: React.FC<CategoryEditMenuProps> = ({
                 }
               }}
               placeholder={placeholder}
-              className="w-32 sm:w-40 bg-black/5 dark:bg-white/5 border border-border-primary/30 rounded-full text-sm text-text-primary outline-none px-4 py-1.5 placeholder:text-text-secondary/45 hover:border-text-secondary focus:border-text-secondary hover:scale-[1.02] focus:scale-[1.02] transition-all duration-300 transform-gpu origin-center"
+              className="w-32 sm:w-40 bg-text-primary/5 border border-border-primary/30 rounded-full text-sm text-text-primary outline-none px-4 py-1.5 placeholder:text-text-secondary/45 hover:border-text-secondary focus:border-text-secondary hover:scale-[1.02] focus:scale-[1.02] transition-all duration-300 transform-gpu origin-center"
             />
             <button
               onClick={handleAddCat}
@@ -206,7 +259,7 @@ export const CategoryEditMenu: React.FC<CategoryEditMenuProps> = ({
                 setShowAddInput(false);
                 setNewCatName('');
               }}
-              className="p-1.5 rounded-full text-text-secondary hover:text-text-primary hover:bg-white/5 transition-colors cursor-pointer"
+              className="p-1.5 rounded-full text-text-secondary hover:text-text-primary hover:bg-text-primary/5 transition-colors cursor-pointer"
               title="Abbrechen"
             >
               <X size={14} />

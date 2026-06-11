@@ -17,6 +17,50 @@ interface LogEntry {
 
 const CHANGELOG: LogEntry[] = [
   {
+    version: '0.8.12',
+    date: '11. Juni 2026',
+    changes: {
+      improved: [
+        'KPI-Statistikkarten (Ausgaben, Ø Preis, Käufe) auf der Budgetseite für Mobilgeräte platzsparend in einer 3-spaltigen Zeile nebeneinander platziert und das Monatsbudget darunter angeordnet.',
+        'Zahnrad-Symbol als Haupt-Navigationstaste für die Kategoriesteuerung wiederhergestellt.',
+        'Fragezeichen-Button mit interaktivem Info-Tooltip links neben dem Schließen-Kreuz im Kategoriesteuerung-Fenster hinzugefügt.',
+        'Kopfzeilentext (Titel/Untertitel) aus der Kategoriesteuerung entfernt und in den Hover-Tooltip des neuen Fragezeichens überführt.',
+        'Hover-Färbung von Kategorien im Kategoriesteuerung-Fenster auf Blau vereinheitlicht.',
+        'Delete-Button (Kreuz) vergrößert sich bei Hover taktil (125% Skalierung) und färbt das betroffene Element rot.',
+        'Fehlverhalten beim Budget-Diagramm behoben: Ein neuer rechter Seitenabstand (MARGIN_RIGHT = 20) verhindert das Überstehen der rechten Achsen-Labels und SVG-Punkte, was unnötige Scrollbars auf breiten Bildschirmen beseitigt.'
+      ]
+    }
+  },
+  {
+    version: '0.8.11',
+    date: '11. Juni 2026',
+    changes: {
+      improved: [
+        'Vollständige Umstellung aller verbleibenden statischen Farb-Overlays (z. B. in Budget, Listen, Navigationen) auf dynamische Theme-Variablen (bg-text-primary/5 und /10).',
+        'Save- und Cancel-Buttons im Theme-Creator modularisiert und auf die globale Button-Komponente umgestellt.',
+        'Regeln für variable Overlays und Button-Nutzung im Interaction-Design Skill hinterlegt.'
+      ]
+    }
+  },
+  {
+    version: '0.8.10',
+    date: '11. Juni 2026',
+    changes: {
+      added: [
+        'Escape-Tastatursteuerung im Bearbeitungsmodus für Produkte (ProductModal) implementiert.'
+      ],
+      fixed: [
+        'Vertikales Scrollen im Budget-Diagramm verhindert (X-Achsen-Datumsbeschriftung verschoben)',
+        'Zuschneiden des aktiven Navigations-Indikators (Pille) im Desktop-Header behoben'
+      ],
+      improved: [
+        'Schließen-Button im Produkt-Editor optisch vereinheitlicht (Pill-Style).',
+        'Projekt-Skills bereinigt und an den echten Code-Stand angepasst (Entfernung von Wiggle-Animationen, Tag 0 Ursprung, 2px-Notches, strict-any Verbot).',
+        'Budget-Diagramm-Skalierung optimiert (Mindestbreite 750px/500px vor horizontalem Scrollen mit Premium Scrollbar)'
+      ]
+    }
+  },
+  {
     version: '0.8.9',
     date: '30. Mai 2026',
     changes: {

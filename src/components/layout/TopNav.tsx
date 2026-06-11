@@ -82,7 +82,7 @@ export const TopNav: React.FC = () => {
 
       {/* Desktop Nav Pills – hidden on mobile (BottomNav takes over) */}
       <nav 
-        className="relative hidden md:flex items-center gap-1 bg-black/[0.07] dark:bg-white/10 border border-black/5 dark:border-white/5 p-1 rounded-full shadow-inner"
+        className="relative hidden md:flex items-center gap-1 bg-text-primary/[0.07] border border-text-primary/5 p-1 rounded-full shadow-inner overflow-hidden"
       >
         {/* Sliding background indicator */}
         {indicatorStyle.width > 0 && (
@@ -109,7 +109,7 @@ export const TopNav: React.FC = () => {
                 "px-5 py-2 rounded-full text-sm font-medium transition-colors duration-300 select-none outline-none cursor-pointer z-10 bg-transparent",
                 isActive
                   ? "text-bg-primary"
-                  : 'text-text-secondary hover:text-text-primary hover:bg-black/10 dark:hover:bg-white/5'
+                  : 'text-text-secondary hover:text-text-primary hover:bg-text-primary/10'
               )
             }
           >
@@ -131,7 +131,7 @@ export const TopNav: React.FC = () => {
               activeThemeId: nextThemeId
             });
           }}
-          className="relative w-12 md:w-14 h-7 md:h-8 rounded-full bg-black/10 dark:bg-white/10 flex items-center px-1 transition-colors"
+          className="relative w-12 md:w-14 h-7 md:h-8 rounded-full bg-text-primary/10 flex items-center px-1 transition-colors"
           title={settings.theme === 'light' ? 'Dunkles Design aktivieren' : 'Helles Design aktivieren'}
         >
           <div className={`w-5 md:w-6 h-5 md:h-6 rounded-full bg-bg-primary shadow-md flex items-center justify-center transition-transform duration-300 ${settings.theme === 'dark' ? 'translate-x-5 md:translate-x-6' : 'translate-x-0'}`}>
@@ -142,7 +142,7 @@ export const TopNav: React.FC = () => {
         {/* Profile / Account Button */}
         <button
           onClick={toggleProfileModal}
-          className="w-8 h-8 md:w-10 md:h-10 bg-bg-primary rounded-full shadow-sm flex items-center justify-center hover:bg-black/5 dark:hover:bg-white/5 transition-all duration-300 border border-border-primary/50 overflow-hidden cursor-pointer hover:scale-105 active:scale-95"
+          className="w-8 h-8 md:w-10 md:h-10 bg-bg-primary rounded-full shadow-sm flex items-center justify-center hover:bg-text-primary/5 transition-all duration-300 border border-border-primary/50 overflow-hidden cursor-pointer hover:scale-105 active:scale-95"
           title="Profil & Account"
         >
           {avatarUrl ? (
@@ -155,7 +155,7 @@ export const TopNav: React.FC = () => {
         {/* Hamburger */}
         <button
           onClick={toggleMainMenu}
-          className="w-8 h-8 md:w-10 md:h-10 bg-bg-primary rounded-full shadow-sm flex items-center justify-center hover:bg-black/5 dark:hover:bg-white/5 transition-colors border border-border-primary/50"
+          className="w-8 h-8 md:w-10 md:h-10 bg-bg-primary rounded-full shadow-sm flex items-center justify-center hover:bg-text-primary/5 transition-colors border border-border-primary/50"
         >
           <Menu size={18} />
         </button>

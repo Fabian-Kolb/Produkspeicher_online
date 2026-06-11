@@ -38,7 +38,7 @@ const MarqueeOverflow: React.FC<{ children: React.ReactNode; className?: string 
 };
 
 export const BundlesView: React.FC = () => {
-  const { bundles, products, categories, subCats, addBundle, updateBundle, deleteBundle, settings } = useAppStore();
+  const { bundles, products, categories, subCats, addBundle, updateBundle, deleteBundle } = useAppStore();
   const { activeBundleId, setActiveBundleId, bundleDraft, setBundleDraft, openProductDetailModal } = useUIStore();
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -225,12 +225,7 @@ export const BundlesView: React.FC = () => {
                       </div>
 
                       {/* Right side: Price + Actions */}
-                      <div className={cn(
-                        "backdrop-blur-md rounded-2xl md:rounded-3xl p-3 md:p-4 flex flex-col items-end gap-2 md:gap-3 shrink-0 self-end md:self-start border transition-all",
-                        settings.isGlassEnabled
-                          ? "bg-white/10 border-white/20"
-                          : "bg-slate-500/10 border-slate-500/20 shadow-sm"
-                      )}>
+                      <div className="backdrop-blur-md rounded-2xl md:rounded-3xl p-3 md:p-4 flex flex-col items-end gap-2 md:gap-3 shrink-0 self-end md:self-start border border-text-primary/15 bg-text-primary/10 transition-all shadow-sm">
                         <span className="text-lg md:text-2xl font-bold text-text-primary">{totalPrice.toFixed(2)} €</span>
                         <div className="flex items-center gap-1.5 md:gap-2">
                           <button
@@ -441,7 +436,7 @@ export const BundlesView: React.FC = () => {
                         onClick={() => { handleAddItem(product.id); setMobileEditorTab('bundle'); }}
                         className="glass-panel group relative flex flex-col overflow-hidden hover:-translate-y-1.5 hover:scale-[1.02] hover:shadow-xl transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] transform-gpu rounded-2xl p-2 md:p-3 cursor-pointer"
                       >
-                        <div className="relative w-full aspect-square rounded-xl overflow-hidden bg-black/20 mb-2">
+                        <div className="relative w-full aspect-square rounded-xl overflow-hidden bg-text-primary/10 mb-2">
                           <img
                             src={product.imgs[0] || 'https://via.placeholder.com/400'}
                             alt={product.name}

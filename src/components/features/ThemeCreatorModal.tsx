@@ -6,6 +6,7 @@ import { useAppStore } from '../../store/useAppStore';
 import { applyGlobalTheme, applyBaseMode, THEME_PRESETS, rgbaToHexAndAlpha, hexToRgba } from '../../utils/themeHelpers';
 import { cn } from '../../utils/cn';
 import type { CustomTheme } from '../../types';
+import { Button } from '../common/Button';
 
 const COLOR_LABELS: Record<string, string> = {
   bg: 'App-Hintergrund',
@@ -174,14 +175,14 @@ export const ThemeCreatorModal: React.FC = () => {
             {activeTab === 'custom' && isMobile && (
               <button 
                 onClick={handleCancelEditing} 
-                className="p-2 -ml-2 rounded-full hover:bg-black/10 dark:hover:bg-white/10 transition-colors"
+                className="p-2 -ml-2 rounded-full text-text-secondary hover:text-text-primary hover:bg-text-primary/10 transition-colors"
               >
                 ← Back
               </button>
             )}
             <h2 className="text-2xl font-playfair font-bold">Design & Themes</h2>
           </div>
-          <button onClick={toggleThemeManager} className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-black/10 transition-colors">
+          <button onClick={toggleThemeManager} className="w-10 h-10 flex items-center justify-center rounded-full text-text-secondary hover:text-text-primary hover:bg-text-primary/10 transition-colors">
             <X size={24} />
           </button>
         </div>
@@ -271,7 +272,7 @@ export const ThemeCreatorModal: React.FC = () => {
                         </button>
                         <button 
                           onClick={() => { setActiveTab('custom'); setEditingThemeId(t.id); setDraftTheme(t); }}
-                          className="w-10 h-10 flex items-center justify-center rounded-xl border border-border-primary hover:bg-black/5 shrink-0"
+                          className="w-10 h-10 flex items-center justify-center rounded-xl border border-border-primary text-text-secondary hover:text-text-primary hover:bg-text-primary/10 transition-colors shrink-0"
                           title="Bearbeiten"
                         >
                           ✏️
@@ -319,8 +320,8 @@ export const ThemeCreatorModal: React.FC = () => {
                         placeholder="Theme Name"
                       />
                       <div className="flex gap-3 w-full sm:w-auto justify-end shrink-0">
-                        <button onClick={handleCancelEditing} className="px-4 py-2 rounded-xl text-sm font-medium border border-border-primary hover:bg-black/5">Abbrechen</button>
-                        <button onClick={handleSaveDraft} className="px-5 py-2 rounded-xl text-sm font-medium bg-accent text-bg-primary hover:opacity-90 shadow-md">Speichern</button>
+                        <Button variant="secondary" onClick={handleCancelEditing}>Abbrechen</Button>
+                        <Button variant="primary" onClick={handleSaveDraft}>Speichern</Button>
                       </div>
                     </div>
 

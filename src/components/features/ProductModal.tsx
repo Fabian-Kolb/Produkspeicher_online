@@ -36,6 +36,15 @@ export const ProductModal: React.FC = () => {
     }
   }, [isProductModalOpen, editingProductId, products]);
 
+  // Keyboard support: Close on Escape
+  useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isProductModalOpen) closeProductModal();
+    };
+    window.addEventListener('keydown', handleEsc);
+    return () => window.removeEventListener('keydown', handleEsc);
+  }, [isProductModalOpen, closeProductModal]);
+
   if (!isProductModalOpen || !editingProductId) return null;
 
   const handleSave = () => {
@@ -90,7 +99,7 @@ export const ProductModal: React.FC = () => {
           <h2 className="text-2xl font-playfair font-bold">
             Produkt bearbeiten
           </h2>
-          <button onClick={handleCancel} className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-black/10 transition-colors">
+          <button onClick={handleCancel} className="w-10 h-10 flex items-center justify-center rounded-full text-text-secondary hover:text-text-primary hover:bg-text-primary/10 transition-colors">
             <X size={24} />
           </button>
         </div>
@@ -133,7 +142,7 @@ export const ProductModal: React.FC = () => {
             </div>
             <div>
               <label className="text-xs font-bold text-text-secondary uppercase tracking-wider mb-2 block">Endpreis (€)</label>
-              <Input type="number" value={formData.finalPrice?.toFixed(2)} readOnly className="bg-black/5" />
+              <Input type="number" value={formData.finalPrice?.toFixed(2)} readOnly className="opacity-60" />
             </div>
           </div>
 

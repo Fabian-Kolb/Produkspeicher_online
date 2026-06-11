@@ -89,4 +89,24 @@
   .focus-ring {
     @apply focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent;
   }
+  .scrollbar-premium {
+    scrollbar-width: thin;
+    scrollbar-color: var(--accent-color) transparent;
+  }
+  .scrollbar-premium::-webkit-scrollbar {
+    display: block;
+    height: 6px;
+    width: 6px;
+  }
+  .scrollbar-premium::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .scrollbar-premium::-webkit-scrollbar-thumb {
+    background: var(--theme-glass-border);
+    border-radius: 9999px;
+  }
+  .scrollbar-premium::-webkit-scrollbar-thumb:hover {
+    background: var(--accent-color);
+  }
 }
+

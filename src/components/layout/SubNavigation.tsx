@@ -75,7 +75,7 @@ export const SubNavigation: React.FC<{
             "px-3.5 py-2 md:px-5 md:py-2.5 rounded-full text-xs md:text-sm font-medium transition-colors duration-300 whitespace-nowrap outline-none flex items-center justify-center shrink-0 cursor-pointer select-none z-10 bg-transparent",
             mainCat === 'Alle' && !isCategoryMenuOpen
               ? "text-bg-primary font-medium"
-              : "text-text-secondary hover:text-text-primary hover:bg-black/5 dark:hover:bg-white/5"
+              : "text-text-secondary hover:text-text-primary hover:bg-text-primary/5"
           )}
         >
           Alle
@@ -90,7 +90,7 @@ export const SubNavigation: React.FC<{
               "px-3.5 py-2 md:px-5 md:py-2.5 rounded-full text-xs md:text-sm font-medium transition-colors duration-300 whitespace-nowrap outline-none flex items-center justify-center shrink-0 cursor-pointer select-none z-10 bg-transparent",
               mainCat === cat && !isCategoryMenuOpen
                 ? "text-bg-primary font-medium"
-                : "text-text-secondary hover:text-text-primary hover:bg-black/5 dark:hover:bg-white/5"
+                : "text-text-secondary hover:text-text-primary hover:bg-text-primary/5"
             )}
           >
             {cat}
@@ -106,7 +106,7 @@ export const SubNavigation: React.FC<{
             "w-9 h-9 md:w-10 md:h-10 flex items-center justify-center rounded-full transition-colors duration-300 mr-1 cursor-pointer select-none bg-transparent shrink-0 z-10",
             isCategoryMenuOpen 
               ? "text-bg-primary" 
-              : "text-text-secondary hover:text-text-primary hover:bg-black/5 dark:hover:bg-white/5"
+              : "text-text-secondary hover:text-text-primary hover:bg-text-primary/5"
           )}
         >
           <Settings 

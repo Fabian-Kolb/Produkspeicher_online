@@ -277,8 +277,9 @@ export const BudgetView: React.FC = () => {
   const PAD_TOP = 40;
   const PAD_BOTTOM = 220;
   const MARGIN_LEFT = 50; // New gutter for Y-axis labels
+  const MARGIN_RIGHT = 20; // Gutter to prevent right-edge clipping & unnecessary scrollbars
   const DRAW_HEIGHT = PAD_BOTTOM - PAD_TOP;
-  const DRAW_WIDTH = 600 - MARGIN_LEFT;
+  const DRAW_WIDTH = 600 - MARGIN_LEFT - MARGIN_RIGHT;
 
   const chartVal = (d: any) => (chartMode === 'cumulative' && timeRange !== 'total') ? d.cumulativeValue : d.dailyValue;
 
@@ -498,7 +499,7 @@ export const BudgetView: React.FC = () => {
                       ? "opacity-25 cursor-not-allowed"
                       : isSelected
                       ? "bg-accent text-bg-primary shadow-sm"
-                      : "hover:bg-black/5 dark:hover:bg-white/5 text-text-secondary hover:text-text-primary border border-transparent hover:border-[var(--theme-glass-border)]"
+                      : "hover:bg-text-primary/5 text-text-secondary hover:text-text-primary border border-transparent hover:border-[var(--theme-glass-border)]"
                   )}
                 >
                   {w.label}
@@ -540,7 +541,7 @@ export const BudgetView: React.FC = () => {
         <div className="flex justify-between items-center border-b border-[var(--theme-glass-border)] pb-3">
           <button 
             onClick={() => setPickerYear(p => p - 1)}
-            className="p-1 rounded-full hover:bg-black/5 dark:hover:bg-white/5 text-text-secondary hover:text-text-primary transition-colors"
+            className="p-1 rounded-full hover:bg-text-primary/5 text-text-secondary hover:text-text-primary transition-colors"
           >
             <ChevronLeft size={16} />
           </button>
@@ -554,7 +555,7 @@ export const BudgetView: React.FC = () => {
             disabled={pickerYear >= today.getFullYear()}
             className={cn(
               "p-1 rounded-full transition-all",
-              pickerYear >= today.getFullYear() ? "opacity-35 cursor-not-allowed" : "hover:bg-black/5 dark:hover:bg-white/5 text-text-secondary hover:text-text-primary"
+              pickerYear >= today.getFullYear() ? "opacity-35 cursor-not-allowed" : "hover:bg-text-primary/5 text-text-secondary hover:text-text-primary"
             )}
           >
             <ChevronRight size={16} />
@@ -623,7 +624,7 @@ export const BudgetView: React.FC = () => {
                     ? "bg-accent text-bg-primary shadow-sm"
                     : isWithinRange
                     ? "bg-accent/20 text-text-primary"
-                    : "hover:bg-black/5 dark:hover:bg-white/5 text-text-secondary hover:text-text-primary"
+                    : "hover:bg-text-primary/5 text-text-secondary hover:text-text-primary"
                 )}
               >
                 {m.short}
@@ -649,7 +650,7 @@ export const BudgetView: React.FC = () => {
             setPickerYear(now.getFullYear());
             handleCloseDatePicker();
           }}
-          className="mt-2 py-2 w-full rounded-xl bg-black/5 dark:bg-white/5 text-text-primary text-xs font-bold hover:bg-black/10 dark:hover:bg-white/10 transition-colors border border-[var(--theme-glass-border)]"
+          className="mt-2 py-2 w-full rounded-xl bg-text-primary/5 text-text-primary text-xs font-bold hover:bg-text-primary/10 transition-colors border border-[var(--theme-glass-border)]"
         >
           {timeRange === '7d' 
             ? "Aktuelle Woche (Heute)" 
@@ -771,7 +772,7 @@ export const BudgetView: React.FC = () => {
                 "px-4 py-1.5 rounded-full text-xs font-bold transition-all duration-300 whitespace-nowrap",
                 timeRange === range 
                   ? "bg-accent text-bg-primary shadow-md"
-                  : "text-text-secondary hover:text-text-primary bg-black/5 dark:bg-white/5"
+                  : "text-text-secondary hover:text-text-primary bg-text-primary/5"
               )}
             >
               {range === '7d' ? 'Woche' : range === 'month' ? 'Monat' : 'Gesamt'}
@@ -781,26 +782,32 @@ export const BudgetView: React.FC = () => {
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <div className="bg-[var(--theme-glass-bg)] border border-[var(--theme-glass-border)] backdrop-blur-xl p-6 rounded-2xl shadow-sm">
-          <h3 className="text-[10px] font-bold text-text-secondary uppercase tracking-wider mb-2">Ausgaben ({timeRangeLabel})</h3>
-          <p className="text-2xl font-bold">{timeRangeSpend.toLocaleString('de-DE', {minimumFractionDigits: 2, maximumFractionDigits: 2})} €</p>
+      <div className="grid grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-6 mb-8">
+        <div className="bg-[var(--theme-glass-bg)] border border-[var(--theme-glass-border)] backdrop-blur-xl p-3 sm:p-6 rounded-2xl shadow-sm">
+          <h3 className="text-[10px] font-bold text-text-secondary uppercase tracking-wider mb-2">
+            Ausgaben<span className="hidden sm:inline"> ({timeRangeLabel})</span>
+          </h3>
+          <p className="text-sm sm:text-2xl font-bold">{timeRangeSpend.toLocaleString('de-DE', {minimumFractionDigits: 2, maximumFractionDigits: 2})} €</p>
         </div>
-        <div className="bg-[var(--theme-glass-bg)] border border-[var(--theme-glass-border)] backdrop-blur-xl p-6 rounded-2xl shadow-sm">
-          <h3 className="text-[10px] font-bold text-text-secondary uppercase tracking-wider mb-2">Ø Preis ({timeRangeLabel})</h3>
-          <p className="text-2xl font-bold">{averagePrice.toLocaleString('de-DE', {minimumFractionDigits: 2, maximumFractionDigits: 2})} €</p>
+        <div className="bg-[var(--theme-glass-bg)] border border-[var(--theme-glass-border)] backdrop-blur-xl p-3 sm:p-6 rounded-2xl shadow-sm">
+          <h3 className="text-[10px] font-bold text-text-secondary uppercase tracking-wider mb-2">
+            Ø Preis<span className="hidden sm:inline"> ({timeRangeLabel})</span>
+          </h3>
+          <p className="text-sm sm:text-2xl font-bold">{averagePrice.toLocaleString('de-DE', {minimumFractionDigits: 2, maximumFractionDigits: 2})} €</p>
         </div>
-        <div className="bg-[var(--theme-glass-bg)] border border-[var(--theme-glass-border)] backdrop-blur-xl p-6 rounded-2xl shadow-sm">
-          <h3 className="text-[10px] font-bold text-text-secondary uppercase tracking-wider mb-2">Käufe ({timeRangeLabel})</h3>
-          <p className="text-2xl font-bold">{timeRangeProductsCount}</p>
+        <div className="bg-[var(--theme-glass-bg)] border border-[var(--theme-glass-border)] backdrop-blur-xl p-3 sm:p-6 rounded-2xl shadow-sm">
+          <h3 className="text-[10px] font-bold text-text-secondary uppercase tracking-wider mb-2">
+            Käufe<span className="hidden sm:inline"> ({timeRangeLabel})</span>
+          </h3>
+          <p className="text-sm sm:text-2xl font-bold">{timeRangeProductsCount}</p>
         </div>
-        <div className="bg-[var(--theme-glass-bg)] border border-[var(--theme-glass-border)] backdrop-blur-xl p-6 rounded-2xl shadow-sm group transition-all duration-300 hover:shadow-md flex flex-col justify-center">
+        <div className="col-span-3 lg:col-span-1 bg-[var(--theme-glass-bg)] border border-[var(--theme-glass-border)] backdrop-blur-xl p-3 sm:p-6 rounded-2xl shadow-sm group transition-all duration-300 hover:shadow-md flex flex-col justify-center">
           <div className="flex justify-between items-center mb-1.5">
             <h3 className="text-[10px] font-bold text-text-secondary uppercase tracking-wider">Monatsbudget</h3>
             {!isEditingBudget && (
               <button 
                 onClick={() => { setIsEditingBudget(true); handleEditModeChange('month'); }} 
-                className="opacity-0 group-hover:opacity-100 transition-opacity text-text-secondary hover:text-text-primary p-1 bg-black/5 dark:bg-white/5 rounded"
+                className="opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity text-text-secondary hover:text-text-primary p-1 bg-text-primary/5 rounded"
                 title="Budget bearbeiten"
               >
                 <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
@@ -809,7 +816,7 @@ export const BudgetView: React.FC = () => {
           </div>
           {isEditingBudget ? (
             <div className="flex flex-col gap-2 animate-in fade-in duration-300">
-              <div className="flex bg-black/5 dark:bg-white/5 border border-[var(--theme-glass-border)] p-0.5 rounded-lg text-[9px] font-bold self-start select-none">
+              <div className="flex bg-text-primary/5 border border-[var(--theme-glass-border)] p-0.5 rounded-lg text-[9px] font-bold self-start select-none">
                 {(['day', 'week', 'month'] as const).map((mode) => (
                   <button
                     key={mode}
@@ -833,7 +840,7 @@ export const BudgetView: React.FC = () => {
                   onChange={(e) => setTempBudget(e.target.value)}
                   onBlur={handleBudgetSubmit}
                   onKeyDown={(e) => { if (e.key === 'Enter') handleBudgetSubmit(); }}
-                  className="w-20 bg-black/5 dark:bg-white/5 border border-border-primary/50 hover:border-text-secondary focus:border-text-secondary px-2 py-0.5 rounded-lg text-lg font-bold outline-none text-text-primary hover:-translate-y-0.5 focus:-translate-y-0.5 hover:scale-[1.03] focus:scale-[1.03] hover:shadow-md focus:shadow-md transition-all duration-300"
+                  className="w-20 bg-text-primary/5 border border-border-primary/50 hover:border-text-secondary focus:border-text-secondary px-2 py-0.5 rounded-lg text-lg font-bold outline-none text-text-primary hover:-translate-y-0.5 focus:-translate-y-0.5 hover:scale-[1.03] focus:scale-[1.03] hover:shadow-md focus:shadow-md transition-all duration-300"
                   autoFocus
                 />
                 <span className="text-sm font-bold">€</span>
@@ -880,10 +887,10 @@ export const BudgetView: React.FC = () => {
                 <h3 className="font-bold text-base md:text-lg shrink-0">Ausgabenverlauf</h3>
                 
                 {/* Paginator / Time Traveler */}
-                <div className="flex items-center gap-1 bg-black/5 dark:bg-white/5 border border-[var(--theme-glass-border)] rounded-full px-1.5 py-0.5 shadow-sm text-xs select-none relative">
+                <div className="flex items-center gap-1 bg-text-primary/5 border border-[var(--theme-glass-border)] rounded-full px-1.5 py-0.5 shadow-sm text-xs select-none relative">
                   <button 
                     onClick={handlePrevPeriod}
-                    className="p-1 rounded-full hover:bg-black/10 dark:hover:bg-white/10 text-text-secondary hover:text-text-primary transition-colors"
+                    className="p-1 rounded-full hover:bg-text-primary/10 text-text-secondary hover:text-text-primary transition-colors"
                     title="Vorheriger Zeitraum"
                   >
                     <ChevronLeft size={14} />
@@ -894,7 +901,7 @@ export const BudgetView: React.FC = () => {
                       setPickerYear(currentPeriodDate.getFullYear());
                       setIsDatePickerOpen(true);
                     }}
-                    className="px-2.5 py-0.5 rounded-full font-bold text-[10px] uppercase tracking-wider text-text-secondary hover:text-text-primary hover:bg-black/5 dark:hover:bg-white/5 transition-all flex items-center gap-1.5"
+                    className="px-2.5 py-0.5 rounded-full font-bold text-[10px] uppercase tracking-wider text-text-secondary hover:text-text-primary hover:bg-text-primary/5 transition-all flex items-center gap-1.5"
                     title="Monat auswählen"
                   >
                     <span>{formattedActivePeriod}</span>
@@ -908,7 +915,7 @@ export const BudgetView: React.FC = () => {
                       "p-1 rounded-full transition-colors",
                       isNextDisabled
                         ? "opacity-25 cursor-not-allowed"
-                        : "hover:bg-black/10 dark:hover:bg-white/10 text-text-secondary hover:text-text-primary"
+                        : "hover:bg-text-primary/10 text-text-secondary hover:text-text-primary"
                     )}
                     title="Nächster Zeitraum"
                   >
@@ -1001,7 +1008,7 @@ export const BudgetView: React.FC = () => {
             
             <div 
               ref={scrollContainerRef}
-              className="w-full h-full overflow-x-auto scrollbar-none"
+              className="w-full h-full overflow-x-auto overflow-y-hidden scrollbar-premium pb-6"
             >
               <motion.div
                 key={`${timeRange}-${chartMode}-${currentPeriodDate.getTime()}`}
@@ -1009,10 +1016,10 @@ export const BudgetView: React.FC = () => {
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.3 }}
                 className={cn(
-                  "h-full relative",
+                  "h-full relative w-full",
                   timeRange === 'month' 
-                    ? "min-w-[750px] md:min-w-0" 
-                    : "min-w-[500px] md:min-w-0"
+                    ? "min-w-[750px]" 
+                    : "min-w-[500px]"
                 )}
               >
                 <svg 
@@ -1110,15 +1117,15 @@ export const BudgetView: React.FC = () => {
               {/* Y-Axis Grid Lines & Labels (Inside SVG for perfect alignment) */}
               <g className="grid-lines">
                 {/* Max Line */}
-                <line x1={MARGIN_LEFT} y1={getY(roundedMax)} x2="600" y2={getY(roundedMax)} stroke="var(--theme-glass-border)" strokeWidth="1" strokeDasharray="4 4" className="opacity-60" />
+                <line x1={MARGIN_LEFT} y1={getY(roundedMax)} x2={600 - MARGIN_RIGHT} y2={getY(roundedMax)} stroke="var(--theme-glass-border)" strokeWidth="1" strokeDasharray="4 4" className="opacity-60" />
                 <text x={MARGIN_LEFT - 10} y={getY(roundedMax) + 4} fill="currentColor" fontSize="10" textAnchor="end" className="text-text-secondary font-medium opacity-80">{Math.round(roundedMax).toLocaleString('de-DE')} €</text>
 
                 {/* Middle Line */}
-                <line x1={MARGIN_LEFT} y1={getY(roundedMax / 2)} x2="600" y2={getY(roundedMax / 2)} stroke="var(--theme-glass-border)" strokeWidth="1" strokeDasharray="4 4" className="opacity-60" />
+                <line x1={MARGIN_LEFT} y1={getY(roundedMax / 2)} x2={600 - MARGIN_RIGHT} y2={getY(roundedMax / 2)} stroke="var(--theme-glass-border)" strokeWidth="1" strokeDasharray="4 4" className="opacity-60" />
                 <text x={MARGIN_LEFT - 10} y={getY(roundedMax / 2) + 4} fill="currentColor" fontSize="10" textAnchor="end" className="text-text-secondary font-medium opacity-80">{Math.round(roundedMax / 2).toLocaleString('de-DE')} €</text>
 
                 {/* Origin Line (0 Euro) */}
-                <line x1={MARGIN_LEFT} y1={getY(0)} x2="600" y2={getY(0)} stroke="var(--theme-glass-border)" strokeWidth="1.5" />
+                <line x1={MARGIN_LEFT} y1={getY(0)} x2={600 - MARGIN_RIGHT} y2={getY(0)} stroke="var(--theme-glass-border)" strokeWidth="1.5" />
                 <text x={MARGIN_LEFT - 10} y={getY(0) + 4} fill="currentColor" fontSize="10" textAnchor="end" className="text-text-secondary font-medium opacity-80">0 €</text>
               </g>
 
@@ -1354,7 +1361,7 @@ export const BudgetView: React.FC = () => {
             </svg>
 
             {/* X-Axis Labels (Exact absolute positioning to match SVG points) */}
-            <div className="absolute inset-x-0 -bottom-8 h-10 pointer-events-none">
+            <div className="absolute inset-x-0 bottom-0 h-8 pointer-events-none">
               {chartData.map((day, idx) => {
                 const xPercent = (getX(idx) / 600) * 100;
                 
@@ -1431,7 +1438,7 @@ export const BudgetView: React.FC = () => {
                   </div>
                   
                   {/* Enhanced Progress Bar */}
-                  <div className="w-full h-3 bg-black/10 dark:bg-white/10 rounded-full overflow-hidden shadow-inner relative mb-2">
+                  <div className="w-full h-3 bg-text-primary/10 rounded-full overflow-hidden shadow-inner relative mb-2">
                     <div 
                       className={cn(
                         "absolute top-0 left-0 h-full rounded-full transition-all duration-1000 ease-out overflow-hidden bg-gradient-to-r",
@@ -1464,7 +1471,7 @@ export const BudgetView: React.FC = () => {
                         <span className="truncate pr-2 font-semibold text-text-primary">{cat.name}</span>
                         <span className="font-bold shrink-0">{cat.amount.toLocaleString('de-DE', {maximumFractionDigits: 0})} €</span>
                       </div>
-                      <div className="w-full h-2 bg-black/5 dark:bg-white/10 rounded-full overflow-hidden flex-shrink-0">
+                      <div className="w-full h-2 bg-text-primary/10 rounded-full overflow-hidden flex-shrink-0">
                         <div 
                           className={cn(
                             "h-2.5 rounded-full transition-all duration-1000",
@@ -1511,7 +1518,7 @@ export const BudgetView: React.FC = () => {
                     selectedDay.products.map((p, idx) => (
                       <div key={idx} className="flex items-center gap-4 group/item">
                         {p.imgs && p.imgs.length > 0 ? (
-                          <img src={p.imgs[p.mainImgIdx || 0]} alt={p.name} className="w-12 h-12 rounded-xl object-cover bg-black/10 dark:bg-white/10 shrink-0 shadow-sm" />
+                          <img src={p.imgs[p.mainImgIdx || 0]} alt={p.name} className="w-12 h-12 rounded-xl object-cover bg-text-primary/10 shrink-0 shadow-sm" />
                         ) : (
                           <div className="w-12 h-12 rounded-xl bg-[var(--theme-glass-border)] flex items-center justify-center text-lg font-bold text-text-secondary shrink-0 shadow-sm">
                             {p.name.charAt(0).toUpperCase()}
@@ -1576,7 +1583,7 @@ export const BudgetView: React.FC = () => {
               </div>
             ) : (
               <div className="flex flex-col items-center justify-center flex-1 opacity-40 animate-in fade-in">
-                <div className="w-16 h-16 mb-4 rounded-2xl bg-black/5 dark:bg-white/5 flex items-center justify-center">
+                <div className="w-16 h-16 mb-4 rounded-2xl bg-text-primary/5 flex items-center justify-center">
                   <svg className="w-8 h-8 text-text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
@@ -1605,7 +1612,7 @@ export const BudgetView: React.FC = () => {
                 "px-3 py-1.5 rounded-full font-bold transition-all duration-300",
                 sortBy === 'date'
                   ? "bg-accent text-bg-primary shadow-sm"
-                  : "text-text-secondary hover:text-text-primary bg-black/5 dark:bg-white/5"
+                  : "text-text-secondary hover:text-text-primary bg-text-primary/5"
               )}
             >
               Datum
@@ -1616,7 +1623,7 @@ export const BudgetView: React.FC = () => {
                 "px-3 py-1.5 rounded-full font-bold transition-all duration-300",
                 sortBy === 'price'
                   ? "bg-accent text-bg-primary shadow-sm"
-                  : "text-text-secondary hover:text-text-primary bg-black/5 dark:bg-white/5"
+                  : "text-text-secondary hover:text-text-primary bg-text-primary/5"
               )}
             >
               Preis
@@ -1704,7 +1711,7 @@ export const BudgetView: React.FC = () => {
                 <h4 className="font-bold text-base text-text-primary">Zeitraum auswählen</h4>
                 <button 
                   onClick={handleCloseDatePicker}
-                  className="p-1.5 rounded-full bg-black/5 dark:bg-white/5 text-text-secondary hover:text-text-primary"
+                  className="p-1.5 rounded-full bg-text-primary/5 text-text-secondary hover:text-text-primary"
                 >
                   <X size={16} />
                 </button>

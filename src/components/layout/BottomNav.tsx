@@ -3,6 +3,7 @@ import { NavLink } from 'react-router-dom';
 import { LayoutDashboard, BookOpen, Heart, Layers, Wallet, Tag } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { useAppStore } from '../../store/useAppStore';
+import { triggerHaptic } from '../../utils/haptics';
 
 const navItems = [
   { to: '/',          label: 'Start',     Icon: LayoutDashboard },
@@ -32,6 +33,7 @@ export const BottomNav: React.FC = () => {
           key={to}
           to={to}
           end={to === '/'}
+          onClick={() => triggerHaptic(15)}
           className={({ isActive }) =>
             cn(
               'flex-1 flex flex-col items-center justify-center gap-0.5 py-2 px-1',

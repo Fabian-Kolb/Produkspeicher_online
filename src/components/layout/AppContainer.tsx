@@ -9,8 +9,8 @@ import { ProductDetailModal } from '../features/ProductDetailModal';
 import { AppInfoModal } from '../features/AppInfoModal';
 import { ProfileSettingsModal } from '../auth/ProfileSettingsModal';
 import { useAppStore } from '../../store/useAppStore';
-import { useUIStore } from '../../store/useUIStore';
 import { applyGlobalTheme, applyBaseMode, THEME_PRESETS } from '../../utils/themeHelpers';
+import { triggerHaptic } from '../../utils/haptics';
 
 // View Imports
 import { DashboardView } from '../../views/DashboardView';
@@ -77,6 +77,8 @@ export const AppContainer: React.FC = () => {
   const touchStartInNavbar = useRef<boolean>(false);
   const hasSwipedNavbar = useRef<boolean>(false);
   const preventNextClick = useRef<boolean>(false);
+  const longPressTimer = useRef<NodeJS.Timeout | null>(null);
+  const lastCenteredPage = useRef<number>(-1);
 
   const onTouchStart = (e: React.TouchEvent) => {
     // 1. Disable swipe gestures if any modal is open
@@ -99,6 +101,7 @@ export const AppContainer: React.FC = () => {
     const isNavbar = !!(target.closest('nav') || target.closest('header'));
     touchStartInNavbar.current = isNavbar;
     hasSwipedNavbar.current = false;
+    lastCenteredPage.current = currentIndex;
 
     // 2. Ignore swipe gestures starting inside scrollable panels/widgets or input elements
     // (Bypass this check for navbar gestures so navbar buttons/links can be swiped)
@@ -118,6 +121,14 @@ export const AppContainer: React.FC = () => {
       y: e.touches[0].clientY
     };
     dragDirection.current = null;
+
+    // Trigger subtle click vibration if user touches and holds in the navbar area
+    if (isNavbar) {
+      if (longPressTimer.current) clearTimeout(longPressTimer.current);
+      longPressTimer.current = setTimeout(() => {
+        triggerHaptic(20);
+      }, 200);
+    }
   };
 
   const onTouchMove = (e: React.TouchEvent) => {
@@ -128,6 +139,12 @@ export const AppContainer: React.FC = () => {
 
     const dx = currentX - touchStart.current.x;
     const dy = currentY - touchStart.current.y;
+
+    // Cancel long-press feedback if thumb moved significantly early
+    if (longPressTimer.current && (Math.abs(dx) > 8 || Math.abs(dy) > 8)) {
+      clearTimeout(longPressTimer.current);
+      longPressTimer.current = null;
+    }
 
     // Detect and lock swipe direction
     if (dragDirection.current === null) {
@@ -164,6 +181,15 @@ export const AppContainer: React.FC = () => {
       const currentOffset = -currentIndex * pageWidth;
       const targetOffset = currentOffset + scaledDx;
 
+      // Real-time haptic tick feedback as individual pages are crossed in the carousel
+      if (touchStartInNavbar.current) {
+        const currentCenteredPage = Math.max(0, Math.min(ROUTES.length - 1, Math.round(-targetOffset / pageWidth)));
+        if (currentCenteredPage !== lastCenteredPage.current) {
+          lastCenteredPage.current = currentCenteredPage;
+          triggerHaptic(12); // Short vibration click
+        }
+      }
+
       let finalDx = scaledDx;
 
       if (targetOffset > 0) {
@@ -185,6 +211,12 @@ export const AppContainer: React.FC = () => {
   };
 
   const onTouchEnd = (e: React.TouchEvent) => {
+    // Clear long press timer
+    if (longPressTimer.current) {
+      clearTimeout(longPressTimer.current);
+      longPressTimer.current = null;
+    }
+
     if (!touchStart.current || !carouselRef.current) return;
 
     const currentX = e.changedTouches[0].clientX;

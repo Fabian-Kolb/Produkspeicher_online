@@ -4,6 +4,7 @@ import { useAppStore } from '../../store/useAppStore';
 import { CategoryEditMenu } from '../features/CategoryEditMenu';
 import React, { useRef, useState, useLayoutEffect, useEffect } from 'react';
 import { cn } from '../../utils/cn';
+import { triggerHaptic } from '../../utils/haptics';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export const SubNavigation: React.FC<{
@@ -70,7 +71,10 @@ export const SubNavigation: React.FC<{
 
         <button
           ref={el => { tabsRef.current['Alle'] = el; }}
-          onClick={() => setMainCat('Alle')}
+          onClick={() => {
+            triggerHaptic(15);
+            setMainCat('Alle');
+          }}
           className={cn(
             "px-3.5 py-2 md:px-5 md:py-2.5 rounded-full text-xs md:text-sm font-medium transition-colors duration-300 whitespace-nowrap outline-none flex items-center justify-center shrink-0 cursor-pointer select-none z-10 bg-transparent",
             mainCat === 'Alle' && !isCategoryMenuOpen
@@ -85,7 +89,10 @@ export const SubNavigation: React.FC<{
           <button
             key={cat}
             ref={el => { tabsRef.current[cat] = el; }}
-            onClick={() => setMainCat(cat)}
+            onClick={() => {
+              triggerHaptic(15);
+              setMainCat(cat);
+            }}
             className={cn(
               "px-3.5 py-2 md:px-5 md:py-2.5 rounded-full text-xs md:text-sm font-medium transition-colors duration-300 whitespace-nowrap outline-none flex items-center justify-center shrink-0 cursor-pointer select-none z-10 bg-transparent",
               mainCat === cat && !isCategoryMenuOpen
@@ -101,7 +108,10 @@ export const SubNavigation: React.FC<{
 
         <button 
           ref={el => { tabsRef.current['settings'] = el; }}
-          onClick={toggleCategoryMenu}
+          onClick={() => {
+            triggerHaptic(15);
+            toggleCategoryMenu();
+          }}
           className={cn(
             "w-9 h-9 md:w-10 md:h-10 flex items-center justify-center rounded-full transition-colors duration-300 mr-1 cursor-pointer select-none bg-transparent shrink-0 z-10",
             isCategoryMenuOpen 

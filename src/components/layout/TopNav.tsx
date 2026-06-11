@@ -4,6 +4,7 @@ import { Menu, Moon, Sun, User } from 'lucide-react';
 import { useUIStore } from '../../store/useUIStore';
 import { useAppStore } from '../../store/useAppStore';
 import { cn } from '../../utils/cn';
+import { triggerHaptic } from '../../utils/haptics';
 import logoDark from '../../assets/logo/logo_dark.png';
 import logoWhite from '../../assets/logo/logo_white.png';
 import { motion } from 'framer-motion';
@@ -104,6 +105,7 @@ export const TopNav: React.FC = () => {
             to={item.to}
             end={item.to === '/'}
             ref={el => { tabsRef.current[item.to] = el; }}
+            onClick={() => triggerHaptic(15)}
             className={({ isActive }) =>
               cn(
                 "px-5 py-2 rounded-full text-sm font-medium transition-colors duration-300 select-none outline-none cursor-pointer z-10 bg-transparent",
@@ -123,6 +125,7 @@ export const TopNav: React.FC = () => {
         {/* Theme Toggle Switch */}
         <button
           onClick={() => {
+            triggerHaptic(15);
             const targetTheme = settings.theme === 'light' ? 'dark' : 'light';
             const isGlass = settings.isGlassEnabled;
             const nextThemeId = `default-${targetTheme}-${isGlass ? 'glass' : 'solid'}`;
@@ -141,7 +144,10 @@ export const TopNav: React.FC = () => {
 
         {/* Profile / Account Button */}
         <button
-          onClick={toggleProfileModal}
+          onClick={() => {
+            triggerHaptic(15);
+            toggleProfileModal();
+          }}
           className="w-8 h-8 md:w-10 md:h-10 bg-bg-primary rounded-full shadow-sm flex items-center justify-center hover:bg-text-primary/5 transition-all duration-300 border border-border-primary/50 overflow-hidden cursor-pointer hover:scale-105 active:scale-95"
           title="Profil & Account"
         >
@@ -154,7 +160,10 @@ export const TopNav: React.FC = () => {
 
         {/* Hamburger */}
         <button
-          onClick={toggleMainMenu}
+          onClick={() => {
+            triggerHaptic(15);
+            toggleMainMenu();
+          }}
           className="w-8 h-8 md:w-10 md:h-10 bg-bg-primary rounded-full shadow-sm flex items-center justify-center hover:bg-text-primary/5 transition-colors border border-border-primary/50"
         >
           <Menu size={18} />

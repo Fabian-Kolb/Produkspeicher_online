@@ -173,8 +173,8 @@ export const AppContainer: React.FC = () => {
       if (e.cancelable) e.preventDefault(); // Prevent native vertical scrolling
       isDragging.current = true; // Mark as dragging to prevent location-sync snapping
 
-      // Apply higher sensitivity scaling for navbar gestures (14.0x speed to scroll multiple pages very fast)
-      const sensitivity = touchStartInNavbar.current ? 14.0 : 1.0;
+      // Apply higher sensitivity scaling for navbar gestures (6.5x speed to scroll multiple pages)
+      const sensitivity = touchStartInNavbar.current ? 6.5 : 1.0;
       const scaledDx = dx * sensitivity;
 
       if (touchStartInNavbar.current && Math.abs(dx) > 5) {
@@ -240,7 +240,7 @@ export const AppContainer: React.FC = () => {
     const dx = currentX - touchStart.current.x;
 
     if (dragDirection.current === 'horizontal') {
-      const sensitivity = touchStartInNavbar.current ? 14.0 : 1.0;
+      const sensitivity = touchStartInNavbar.current ? 6.5 : 1.0;
       const scaledDx = dx * sensitivity;
 
       const pageWidth = window.innerWidth;

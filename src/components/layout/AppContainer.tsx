@@ -151,21 +151,32 @@ export const AppContainer: React.FC = () => {
     if (dragDirection.current === 'horizontal') {
       if (e.cancelable) e.preventDefault(); // Prevent native vertical scrolling
 
-      // Apply higher sensitivity scaling for navbar gestures (3.0x speed)
-      const sensitivity = touchStartInNavbar.current ? 3.0 : 1.0;
+      // Apply higher sensitivity scaling for navbar gestures (6.5x speed to scroll multiple pages)
+      const sensitivity = touchStartInNavbar.current ? 6.5 : 1.0;
       const scaledDx = dx * sensitivity;
 
       if (touchStartInNavbar.current && Math.abs(dx) > 5) {
         hasSwipedNavbar.current = true;
       }
 
-      let finalDx = scaledDx;
-      const isAtFirst = currentIndex === 0 && scaledDx > 0;
-      const isAtLast = currentIndex === ROUTES.length - 1 && scaledDx < 0;
+      // Advanced rubber-banding based on absolute viewport position boundaries
+      const pageWidth = window.innerWidth;
+      const currentOffset = -currentIndex * pageWidth;
+      const targetOffset = currentOffset + scaledDx;
 
-      // Rubber-banding physics on first/last tab
-      if (isAtFirst || isAtLast) {
-        finalDx = scaledDx * 0.25;
+      let finalDx = scaledDx;
+
+      if (targetOffset > 0) {
+        // Dragging past the first page (left boundary)
+        const allowedDrag = -currentOffset;
+        const excess = targetOffset;
+        finalDx = allowedDrag + excess * 0.25;
+      } else if (targetOffset < -(ROUTES.length - 1) * pageWidth) {
+        // Dragging past the last page (right boundary)
+        const minOffset = -(ROUTES.length - 1) * pageWidth;
+        const allowedDrag = minOffset - currentOffset;
+        const excess = targetOffset - minOffset;
+        finalDx = allowedDrag + excess * 0.25;
       }
 
       carouselRef.current.style.transition = 'none';
@@ -180,37 +191,31 @@ export const AppContainer: React.FC = () => {
     const dx = currentX - touchStart.current.x;
 
     if (dragDirection.current === 'horizontal') {
-      const sensitivity = touchStartInNavbar.current ? 3.0 : 1.0;
+      const sensitivity = touchStartInNavbar.current ? 6.5 : 1.0;
       const scaledDx = dx * sensitivity;
 
-      // Use a much lower threshold (e.g. 8% of screen width or max 40px) for navbar swipes
-      const threshold = touchStartInNavbar.current
-        ? Math.min(window.innerWidth * 0.08, 40)
-        : window.innerWidth * 0.2;
+      const pageWidth = window.innerWidth;
+      const snapThreshold = pageWidth * 0.25; // 25% of page width threshold for snapping
 
-      if (Math.abs(scaledDx) > threshold) {
-        if (scaledDx > 0 && currentIndex > 0) {
-          // Swipe Right -> Slide to previous route
-          const targetIndex = currentIndex - 1;
-          carouselRef.current.style.transition = 'transform 0.4s cubic-bezier(0.16, 1, 0.3, 1)';
-          carouselRef.current.offsetHeight; // Force reflow
-          carouselRef.current.style.transform = `translateX(-${targetIndex * (100 / 6)}%)`;
-          navigate(ROUTES[targetIndex]);
-        } else if (scaledDx < 0 && currentIndex < ROUTES.length - 1) {
-          // Swipe Left -> Slide to next route
-          const targetIndex = currentIndex + 1;
-          carouselRef.current.style.transition = 'transform 0.4s cubic-bezier(0.16, 1, 0.3, 1)';
-          carouselRef.current.offsetHeight; // Force reflow
-          carouselRef.current.style.transform = `translateX(-${targetIndex * (100 / 6)}%)`;
-          navigate(ROUTES[targetIndex]);
-        } else {
-          // Dragged boundary -> Snap back
-          carouselRef.current.style.transition = 'transform 0.4s cubic-bezier(0.16, 1, 0.3, 1)';
-          carouselRef.current.offsetHeight; // Force reflow
-          carouselRef.current.style.transform = `translateX(-${currentIndex * (100 / 6)}%)`;
-        }
+      // Calculate number of full pages shifted + fractional remainder snapping
+      const pagesShifted = Math.trunc(scaledDx / pageWidth);
+      const remainder = scaledDx % pageWidth;
+
+      let finalPagesShifted = pagesShifted;
+      if (Math.abs(remainder) > snapThreshold) {
+        finalPagesShifted += Math.sign(remainder);
+      }
+
+      let targetIndex = currentIndex - finalPagesShifted;
+      targetIndex = Math.max(0, Math.min(ROUTES.length - 1, targetIndex));
+
+      if (targetIndex !== currentIndex) {
+        carouselRef.current.style.transition = 'transform 0.4s cubic-bezier(0.16, 1, 0.3, 1)';
+        carouselRef.current.offsetHeight; // Force reflow
+        carouselRef.current.style.transform = `translateX(-${targetIndex * (100 / 6)}%)`;
+        navigate(ROUTES[targetIndex]);
       } else {
-        // Did not meet swipe threshold -> Snap back
+        // Snap back to current index
         carouselRef.current.style.transition = 'transform 0.4s cubic-bezier(0.16, 1, 0.3, 1)';
         carouselRef.current.offsetHeight; // Force reflow
         carouselRef.current.style.transform = `translateX(-${currentIndex * (100 / 6)}%)`;

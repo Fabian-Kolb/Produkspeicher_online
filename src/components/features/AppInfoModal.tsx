@@ -21,11 +21,12 @@ const CHANGELOG: LogEntry[] = [
     date: '11. Juni 2026',
     changes: {
       added: [
-        'Echtzeit-Wisch-Navigation für Navbars: Schnelles horizontales Scrollen per Wischgeste direkt auf der oberen und unteren Menüleiste im mobilen Modus hinzugefügt.'
+        'Echtzeit-Wisch-Navigation für Navbars: Unbegrenztes horizontales Durchscrollen (Multi-Page Swiping) direkt auf der oberen und unteren Menüleiste im mobilen Modus.'
       ],
       improved: [
-        'Präzisions-Gestensteuerung: Dreifache Wisch-Empfindlichkeit und verringerter Umblätterschwellenwert auf den Navbars für mühelosen Seitenwechsel mit minimaler Daumenbewegung.',
-        'Fehlauslösungsschutz: Klick-Interzepierung verhindert unbeabsichtigtes Aktivieren von Tab-Buttons beim Loslassen einer Wischgeste auf den Navigationsleisten.'
+        'Präzisions-Gestensteuerung: 6.5x Scroll-Empfindlichkeit ermöglicht das Durchqueren aller 6 Seiten mit einer einzigen Daumenbewegung über die Breite des Displays.',
+        'Intelligente Scroll-Physik: Dynamische Berechnung der Seiten-Wechsel-Schwellenwerte für präzises Snapping an beliebigen Seitenindizes und flüssige Rand-Dämpfung (Rubber-Banding) über die gesamte Karussell-Breite.',
+        'Fehlauslösungsschutz: Klick-Interzepierung verhindert das unbeabsichtigte Auslösen von Tab-Links beim Anheben des Daumens nach dem Wischen.'
       ]
     }
   },

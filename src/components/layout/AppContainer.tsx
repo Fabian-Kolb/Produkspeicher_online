@@ -82,6 +82,7 @@ export const AppContainer: React.FC = () => {
   const lastCenteredPage = useRef<number>(-1);
   const isDragging = useRef<boolean>(false);
   const hasNavigatedInSession = useRef<boolean>(false);
+  const startIndex = useRef<number>(0);
 
   const onTouchStart = (e: React.TouchEvent) => {
     // 1. Disable swipe gestures if any modal is open
@@ -105,6 +106,7 @@ export const AppContainer: React.FC = () => {
     touchStartInNavbar.current = isNavbar;
     hasSwipedNavbar.current = false;
     lastCenteredPage.current = currentIndex;
+    startIndex.current = currentIndex; // Save starting page index
     hasNavigatedInSession.current = false;
 
     // 2. Ignore swipe gestures starting inside scrollable panels/widgets or input elements
@@ -183,7 +185,7 @@ export const AppContainer: React.FC = () => {
 
       // Advanced rubber-banding based on absolute viewport position boundaries
       const pageWidth = window.innerWidth;
-      const currentOffset = -currentIndex * pageWidth;
+      const currentOffset = -startIndex.current * pageWidth;
       const targetOffset = currentOffset + scaledDx;
 
       // Real-time haptic tick feedback & Live category/tab navigation as pages are crossed in the carousel
@@ -220,7 +222,7 @@ export const AppContainer: React.FC = () => {
       }
 
       carouselRef.current.style.transition = 'none';
-      carouselRef.current.style.transform = `translateX(calc(-${currentIndex * (100 / 6)}% + ${finalDx}px))`;
+      carouselRef.current.style.transform = `translateX(calc(-${startIndex.current * (100 / 6)}% + ${finalDx}px))`;
     }
   };
 
@@ -255,7 +257,7 @@ export const AppContainer: React.FC = () => {
         finalPagesShifted += Math.sign(remainder);
       }
 
-      let targetIndex = currentIndex - finalPagesShifted;
+      let targetIndex = startIndex.current - finalPagesShifted;
       targetIndex = Math.max(0, Math.min(ROUTES.length - 1, targetIndex));
 
       // Mark dragging finished before we perform the final snapping

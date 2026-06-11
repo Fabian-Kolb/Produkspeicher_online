@@ -9,6 +9,7 @@ import { ProductDetailModal } from '../features/ProductDetailModal';
 import { AppInfoModal } from '../features/AppInfoModal';
 import { ProfileSettingsModal } from '../auth/ProfileSettingsModal';
 import { useAppStore } from '../../store/useAppStore';
+import { useUIStore } from '../../store/useUIStore';
 import { applyGlobalTheme, applyBaseMode, THEME_PRESETS } from '../../utils/themeHelpers';
 import { triggerHaptic } from '../../utils/haptics';
 
@@ -77,7 +78,7 @@ export const AppContainer: React.FC = () => {
   const touchStartInNavbar = useRef<boolean>(false);
   const hasSwipedNavbar = useRef<boolean>(false);
   const preventNextClick = useRef<boolean>(false);
-  const longPressTimer = useRef<NodeJS.Timeout | null>(null);
+  const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastCenteredPage = useRef<number>(-1);
 
   const onTouchStart = (e: React.TouchEvent) => {

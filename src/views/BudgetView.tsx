@@ -981,123 +981,122 @@ export const BudgetView: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8 items-start">
         {/* Chart Area */}
         <div className="lg:col-span-2 bg-[var(--theme-glass-bg)] border border-[var(--theme-glass-border)] backdrop-blur-xl p-6 rounded-3xl shadow-sm flex flex-col min-h-[400px] relative">
-          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start md:items-center gap-4 mb-8">
-            <div className="flex flex-col gap-1.5 w-full sm:w-auto">
-              <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-                <h3 className="font-bold text-base md:text-lg shrink-0">Ausgabenverlauf</h3>
+          <div className="flex flex-col gap-3 mb-5">
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-2 w-full">
+              <h3 className="font-bold text-base md:text-lg shrink-0">Ausgabenverlauf</h3>
+              
+              {/* Paginator / Time Traveler */}
+              <div className="flex items-center gap-1 bg-text-primary/5 border border-[var(--theme-glass-border)] rounded-full px-1.5 py-0.5 shadow-sm text-xs select-none relative">
+                <button 
+                  onClick={handlePrevPeriod}
+                  className="p-1 rounded-full hover:bg-text-primary/10 text-text-secondary hover:text-text-primary transition-colors"
+                  title="Vorheriger Zeitraum"
+                >
+                  <ChevronLeft size={14} />
+                </button>
                 
-                {/* Paginator / Time Traveler */}
-                <div className="flex items-center gap-1 bg-text-primary/5 border border-[var(--theme-glass-border)] rounded-full px-1.5 py-0.5 shadow-sm text-xs select-none relative">
-                  <button 
-                    onClick={handlePrevPeriod}
-                    className="p-1 rounded-full hover:bg-text-primary/10 text-text-secondary hover:text-text-primary transition-colors"
-                    title="Vorheriger Zeitraum"
-                  >
-                    <ChevronLeft size={14} />
-                  </button>
-                  
-                  <button
-                    onClick={() => {
-                      setPickerYear(currentPeriodDate.getFullYear());
-                      setIsDatePickerOpen(true);
-                    }}
-                    className="px-2.5 py-0.5 rounded-full font-bold text-[10px] uppercase tracking-wider text-text-secondary hover:text-text-primary hover:bg-text-primary/5 transition-all flex items-center gap-1.5"
-                    title="Monat auswählen"
-                  >
-                    <span>{formattedActivePeriod}</span>
-                    <Calendar size={11} className="opacity-70" />
-                  </button>
-                  
-                  <button 
-                    onClick={handleNextPeriod}
-                    disabled={isNextDisabled}
-                    className={cn(
-                      "p-1 rounded-full transition-colors",
-                      isNextDisabled
-                        ? "opacity-25 cursor-not-allowed"
-                        : "hover:bg-text-primary/10 text-text-secondary hover:text-text-primary"
-                    )}
-                    title="Nächster Zeitraum"
-                  >
-                    <ChevronRight size={14} />
-                  </button>
+                <button
+                  onClick={() => {
+                    setPickerYear(currentPeriodDate.getFullYear());
+                    setIsDatePickerOpen(true);
+                  }}
+                  className="px-2.5 py-0.5 rounded-full font-bold text-[10px] uppercase tracking-wider text-text-secondary hover:text-text-primary hover:bg-text-primary/5 transition-all flex items-center gap-1.5"
+                  title="Monat auswählen"
+                >
+                  <span>{formattedActivePeriod}</span>
+                  <Calendar size={11} className="opacity-70" />
+                </button>
+                
+                <button 
+                  onClick={handleNextPeriod}
+                  disabled={isNextDisabled}
+                  className={cn(
+                    "p-1 rounded-full transition-colors",
+                    isNextDisabled
+                      ? "opacity-25 cursor-not-allowed"
+                      : "hover:bg-text-primary/10 text-text-secondary hover:text-text-primary"
+                  )}
+                  title="Nächster Zeitraum"
+                >
+                  <ChevronRight size={14} />
+                </button>
 
-                  {/* Desktop Date Selection Popover */}
-                  {isDatePickerOpen && (
-                    <>
-                      <div 
-                        className="hidden sm:block fixed inset-0 z-40 bg-transparent" 
-                        onClick={handleCloseDatePicker}
-                      />
-                      <div className="hidden sm:block absolute top-full left-1/2 -translate-x-1/2 mt-2 z-50 bg-[var(--theme-glass-bg)] border border-[var(--theme-glass-border)] backdrop-blur-2xl p-4 rounded-2xl shadow-xl w-[300px]">
-                        {renderDatePickerContent()}
-                      </div>
-                    </>
-                  )}
-                </div>
-              </div>
-              {/* Context-aware Chart Legend */}
-              <div className="flex flex-wrap gap-x-4 gap-y-1.5 items-center text-[10px] text-text-secondary font-semibold">
-                <div className="flex items-center gap-1.5">
-                  <span className={cn(
-                    "w-3 h-1.5 rounded-full inline-block shrink-0 shadow-sm",
-                    isOverBudget
-                      ? "bg-heart"
-                      : settings.isGlassEnabled
-                      ? "bg-text-primary"
-                      : "bg-accent"
-                  )}></span>
-                  <span>Ausgaben</span>
-                </div>
-                {chartMode === 'cumulative' && timeRange !== 'total' && (
-                  <div className="flex items-center gap-1.5 animate-in fade-in duration-300">
-                    <span className="w-4 border-t-2 border-dashed border-text-secondary/40 h-0 inline-block shrink-0"></span>
-                    <span>Soll-Pace</span>
-                  </div>
-                )}
-                {chartMode === 'cumulative' && (timeRange === 'month' || timeRange === '7d') && actualData.length > 0 && (
-                  <div className="flex items-center gap-1.5 animate-in fade-in duration-300">
-                    <span className={cn(
-                      "w-4 border-t-2 border-dashed h-0 inline-block shrink-0",
-                      timeRange === '7d'
-                        ? (projectedEndWeekSpend > (settings.monthlyBudget / 30) * 7 ? "border-heart" : "border-emerald-500")
-                        : (projectedEndSpend > settings.monthlyBudget ? "border-heart" : "border-emerald-500")
-                    )}></span>
-                    <span>Prognose (Burn-Rate)</span>
-                  </div>
+                {/* Desktop Date Selection Popover */}
+                {isDatePickerOpen && (
+                  <>
+                    <div 
+                      className="hidden sm:block fixed inset-0 z-40 bg-transparent" 
+                      onClick={handleCloseDatePicker}
+                    />
+                    <div className="hidden sm:block absolute top-full left-1/2 -translate-x-1/2 mt-2 z-50 bg-[var(--theme-glass-bg)] border border-[var(--theme-glass-border)] backdrop-blur-2xl p-4 rounded-2xl shadow-xl w-[300px]">
+                      {renderDatePickerContent()}
+                    </div>
+                  </>
                 )}
               </div>
+
+              {/* Chart Mode Toggle */}
+              {timeRange !== 'total' && (
+                <div className="bg-black/5 dark:bg-white/5 border border-[var(--theme-glass-border)] p-0.5 flex items-center rounded-full shadow-sm shrink-0">
+                  <button
+                    onClick={() => setChartMode('daily')}
+                    className={cn(
+                      "p-1.5 rounded-full transition-all duration-300 flex items-center justify-center cursor-pointer",
+                      chartMode === 'daily'
+                        ? "bg-accent text-bg-primary shadow-sm"
+                        : "text-text-secondary hover:text-text-primary bg-transparent"
+                    )}
+                    title="Tägliche Ausgabenspitzen (Balken)"
+                  >
+                    <BarChart3 size={12} />
+                  </button>
+                  <button
+                    onClick={() => setChartMode('cumulative')}
+                    className={cn(
+                      "p-1.5 rounded-full transition-all duration-300 flex items-center justify-center cursor-pointer",
+                      chartMode === 'cumulative'
+                        ? "bg-accent text-bg-primary shadow-sm"
+                        : "text-text-secondary hover:text-text-primary bg-transparent"
+                    )}
+                    title="Kumulierter Gesamtverlauf (Trend)"
+                  >
+                    <TrendingUp size={12} />
+                  </button>
+                </div>
+              )}
             </div>
-            
-            {/* Chart Mode Toggle */}
-            {timeRange !== 'total' && (
-              <div className="bg-black/5 dark:bg-white/5 border border-[var(--theme-glass-border)] p-0.5 flex items-center rounded-full self-start sm:self-auto shadow-sm">
-                <button
-                  onClick={() => setChartMode('daily')}
-                  className={cn(
-                    "p-2 rounded-full transition-all duration-300 flex items-center justify-center",
-                    chartMode === 'daily'
-                      ? "bg-accent text-bg-primary shadow-sm"
-                      : "text-text-secondary hover:text-text-primary bg-transparent"
-                  )}
-                  title="Tägliche Ausgabenspitzen (Balken)"
-                >
-                  <BarChart3 size={16} />
-                </button>
-                <button
-                  onClick={() => setChartMode('cumulative')}
-                  className={cn(
-                    "p-2 rounded-full transition-all duration-300 flex items-center justify-center",
-                    chartMode === 'cumulative'
-                      ? "bg-accent text-bg-primary shadow-sm"
-                      : "text-text-secondary hover:text-text-primary bg-transparent"
-                  )}
-                  title="Kumulierter Gesamtverlauf (Trend)"
-                >
-                  <TrendingUp size={16} />
-                </button>
+
+            {/* Context-aware Chart Legend */}
+            <div className="flex flex-wrap gap-x-2.5 gap-y-1 items-center text-[9px] text-text-secondary font-semibold">
+              <div className="flex items-center gap-1">
+                <span className={cn(
+                  "w-2.5 h-1.5 rounded-full inline-block shrink-0 shadow-sm",
+                  isOverBudget
+                    ? "bg-heart"
+                    : settings.isGlassEnabled
+                    ? "bg-text-primary"
+                    : "bg-accent"
+                )}></span>
+                <span>Ausgaben</span>
               </div>
-            )}
+              {chartMode === 'cumulative' && timeRange !== 'total' && (
+                <div className="flex items-center gap-1 animate-in fade-in duration-300">
+                  <span className="w-3 border-t-[1.5px] border-dashed border-text-secondary/40 h-0 inline-block shrink-0"></span>
+                  <span>Soll-Pace</span>
+                </div>
+              )}
+              {chartMode === 'cumulative' && (timeRange === 'month' || timeRange === '7d') && actualData.length > 0 && (
+                <div className="flex items-center gap-1 animate-in fade-in duration-300">
+                  <span className={cn(
+                    "w-3 border-t-[1.5px] border-dashed h-0 inline-block shrink-0",
+                    timeRange === '7d'
+                      ? (projectedEndWeekSpend > (settings.monthlyBudget / 30) * 7 ? "border-heart" : "border-emerald-500")
+                      : (projectedEndSpend > settings.monthlyBudget ? "border-heart" : "border-emerald-500")
+                  )}></span>
+                  <span>Prognose (Burn-Rate)</span>
+                </div>
+              )}
+            </div>
           </div>
           
           {/* SVG Area Chart with Integrated Grid */}
@@ -1525,9 +1524,9 @@ export const BudgetView: React.FC = () => {
         {/* Right Column */}
         <div className="flex flex-col gap-6 h-full">
           
-          <div className="flex flex-col sm:flex-row gap-4">
+          <div className="grid grid-cols-2 gap-2.5 sm:gap-4 order-2 lg:order-1 min-w-0">
             {/* Budget Tracker (Half Width) */}
-            <div className="bg-[var(--theme-glass-bg)] border border-[var(--theme-glass-border)] backdrop-blur-xl p-5 rounded-3xl shadow-sm flex flex-col flex-1 relative overflow-hidden group hover:shadow-lg transition-shadow duration-300">
+            <div className="bg-[var(--theme-glass-bg)] border border-[var(--theme-glass-border)] backdrop-blur-xl p-3.5 xs:p-4 sm:p-5 rounded-3xl shadow-sm flex flex-col relative overflow-hidden group hover:shadow-lg transition-shadow duration-300 min-w-0">
               <div className={cn(
                 "absolute -top-12 -right-12 w-32 h-32 rounded-full blur-2xl transition-all duration-700",
                 spentThisMonth > settings.monthlyBudget
@@ -1535,42 +1534,42 @@ export const BudgetView: React.FC = () => {
                   : "bg-emerald-500/10 group-hover:bg-emerald-500/20"
               )}></div>
               
-              <div className="relative z-10 flex flex-col h-full">
-                <div className="flex justify-between items-start mb-6">
-                  <h3 className="font-bold text-sm">Budget Tracker</h3>
+              <div className="relative z-10 flex flex-col h-full justify-between">
+                <div className="flex flex-wrap justify-between items-center gap-1 mb-3 sm:mb-6">
+                  <h3 className="font-bold text-xs sm:text-sm truncate">Budget Tracker</h3>
                   <span className={cn(
-                    "text-xs font-bold px-2.5 py-1 rounded-full border transition-colors",
+                    "text-[9px] sm:text-xs font-bold px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-full border transition-colors shrink-0",
                     spentThisMonth > settings.monthlyBudget
                       ? "bg-heart/10 text-heart border-heart/20"
                       : "bg-emerald-500/10 text-emerald-500 border-emerald-500/20"
                   )}>
-                    {settings.monthlyBudget > 0 ? Math.round((spentThisMonth / settings.monthlyBudget) * 100) : 0}% genutzt
+                    {settings.monthlyBudget > 0 ? Math.round((spentThisMonth / settings.monthlyBudget) * 100) : 0}%
                   </span>
                 </div>
                 
                 <div className="flex flex-col flex-1 justify-center">
-                  <div className="flex flex-col gap-1 mb-6">
-                     <span className="text-xs text-text-secondary font-medium uppercase tracking-wider">Ausgegeben</span>
-                     <div className="flex items-baseline gap-1.5">
-                       <p className="text-4xl font-bold">{spentThisMonth.toLocaleString('de-DE', {minimumFractionDigits: 0, maximumFractionDigits: 0})}</p>
-                       <span className="text-xl font-bold text-text-secondary">€</span>
+                  <div className="flex flex-col gap-0.5 mb-3 sm:mb-6">
+                     <span className="text-[9px] sm:text-xs text-text-secondary font-medium uppercase tracking-wider">Ausgegeben</span>
+                     <div className="flex items-baseline gap-1">
+                       <p className="text-xl xs:text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight">{spentThisMonth.toLocaleString('de-DE', {minimumFractionDigits: 0, maximumFractionDigits: 0})}</p>
+                       <span className="text-xs sm:text-xl font-bold text-text-secondary">€</span>
                      </div>
                      {spentThisMonth > settings.monthlyBudget ? (
-                      <span className="text-sm font-bold text-heart mt-1 bg-heart/10 w-max px-2 py-1 rounded-md animate-in fade-in duration-300">
-                        {(spentThisMonth - settings.monthlyBudget).toLocaleString('de-DE', {minimumFractionDigits: 0, maximumFractionDigits: 0})} € über dem Budget {isCurrentMonth ? '' : 'abgeschlossen'}
+                      <span className="text-[9px] sm:text-xs font-bold text-heart mt-1 bg-heart/10 w-max px-1.5 py-0.5 sm:px-2 sm:py-1 rounded-md animate-in fade-in duration-300 truncate max-w-full">
+                        {(spentThisMonth - settings.monthlyBudget).toLocaleString('de-DE', {minimumFractionDigits: 0, maximumFractionDigits: 0})} € drüber
                       </span>
                     ) : (
-                      <span className="text-sm font-bold text-emerald-500 mt-1 bg-emerald-500/10 w-max px-2 py-1 rounded-md animate-in fade-in duration-300">
+                      <span className="text-[9px] sm:text-xs font-bold text-emerald-500 mt-1 bg-emerald-500/10 w-max px-1.5 py-0.5 sm:px-2 sm:py-1 rounded-md animate-in fade-in duration-300 truncate max-w-full">
                         {isCurrentMonth 
-                          ? `Noch ${(settings.monthlyBudget - spentThisMonth).toLocaleString('de-DE', {minimumFractionDigits: 0, maximumFractionDigits: 0})} € übrig`
-                          : `Budget-Ergebnis: ${(settings.monthlyBudget - spentThisMonth).toLocaleString('de-DE', {minimumFractionDigits: 0, maximumFractionDigits: 0})} € gespart`
+                          ? `${(settings.monthlyBudget - spentThisMonth).toLocaleString('de-DE', {minimumFractionDigits: 0, maximumFractionDigits: 0})} € übrig`
+                          : `${(settings.monthlyBudget - spentThisMonth).toLocaleString('de-DE', {minimumFractionDigits: 0, maximumFractionDigits: 0})} € gespart`
                         }
                       </span>
                     )}
                   </div>
                   
                   {/* Enhanced Progress Bar */}
-                  <div className="w-full h-3 bg-text-primary/10 rounded-full overflow-hidden shadow-inner relative mb-2">
+                  <div className="w-full h-2 sm:h-3 bg-text-primary/10 rounded-full overflow-hidden shadow-inner relative mb-1.5">
                     <div 
                       className={cn(
                         "absolute top-0 left-0 h-full rounded-full transition-all duration-1000 ease-out overflow-hidden bg-gradient-to-r",
@@ -1584,29 +1583,29 @@ export const BudgetView: React.FC = () => {
                     </div>
                   </div>
                   
-                  <div className="flex justify-between text-xs text-text-secondary font-bold mt-1">
+                  <div className="flex justify-between text-[9px] sm:text-xs text-text-secondary font-bold mt-0.5">
                     <span>0 €</span>
-                    <span>Gesamt: {settings.monthlyBudget.toLocaleString('de-DE')} €</span>
+                    <span className="truncate">Max: {settings.monthlyBudget.toLocaleString('de-DE')} €</span>
                   </div>
                 </div>
               </div>
             </div>
 
             {/* Top Kategorien (Half Width) */}
-            <div className="bg-[var(--theme-glass-bg)] border border-[var(--theme-glass-border)] backdrop-blur-xl p-5 rounded-3xl shadow-sm flex flex-col flex-1 relative">
-              <h3 className="font-bold mb-6 text-sm">Top Kategorien</h3>
-              <div className="flex flex-col gap-5 flex-1 justify-center">
+            <div className="bg-[var(--theme-glass-bg)] border border-[var(--theme-glass-border)] backdrop-blur-xl p-3.5 xs:p-4 sm:p-5 rounded-3xl shadow-sm flex flex-col relative min-w-0">
+              <h3 className="font-bold text-xs sm:text-sm mb-3 sm:mb-6">Top Kategorien</h3>
+              <div className="flex flex-col gap-3 sm:gap-5 flex-1 justify-center">
                 {topCategories.length > 0 ? (
                   topCategories.map((cat, idx) => (
-                    <div key={idx} className="flex flex-col gap-2">
-                      <div className="flex justify-between items-center text-sm">
-                        <span className="truncate pr-2 font-semibold text-text-primary">{cat.name}</span>
+                    <div key={idx} className="flex flex-col gap-1">
+                      <div className="flex justify-between items-center text-[11px] sm:text-sm">
+                        <span className="truncate pr-1.5 font-semibold text-text-primary">{cat.name}</span>
                         <span className="font-bold shrink-0">{cat.amount.toLocaleString('de-DE', {maximumFractionDigits: 0})} €</span>
                       </div>
-                      <div className="w-full h-2 bg-text-primary/10 rounded-full overflow-hidden flex-shrink-0">
+                      <div className="w-full h-1.5 sm:h-2 bg-text-primary/10 rounded-full overflow-hidden flex-shrink-0">
                         <div 
                           className={cn(
-                            "h-2.5 rounded-full transition-all duration-1000",
+                            "h-full rounded-full transition-all duration-1000",
                             settings.isGlassEnabled ? "bg-text-primary" : "bg-accent"
                           )}
                           style={{ width: `${Math.min((cat.amount / maxCategorySpend) * 100, 100)}%` }}
@@ -1615,14 +1614,14 @@ export const BudgetView: React.FC = () => {
                     </div>
                   ))
                 ) : (
-                  <p className="text-sm text-text-secondary italic">Keine Ausgaben</p>
+                  <p className="text-[11px] sm:text-sm text-text-secondary italic">Keine Ausgaben</p>
                 )}
               </div>
             </div>
           </div>
 
           {/* Tag/Monat Details (Interactive click box - Supermarket Receipt Style) */}
-          <div className="bg-[var(--theme-glass-bg)] border border-[var(--theme-glass-border)] backdrop-blur-xl p-6 rounded-3xl shadow-sm flex flex-col h-[390px] relative overflow-hidden group">
+          <div className="bg-[var(--theme-glass-bg)] border border-[var(--theme-glass-border)] backdrop-blur-xl p-4 sm:p-6 rounded-3xl shadow-sm flex flex-col h-[390px] relative overflow-hidden group order-1 lg:order-2">
             
             <div className="flex justify-between items-center mb-6">
               <h3 className="font-bold text-sm tracking-wide flex items-center gap-2">

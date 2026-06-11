@@ -17,6 +17,45 @@ interface LogEntry {
 
 const CHANGELOG: LogEntry[] = [
   {
+    version: '0.8.16',
+    date: '11. Juni 2026',
+    changes: {
+      added: [
+        'Echtzeit-Wisch-Navigation für Navbars: Schnelles horizontales Scrollen per Wischgeste direkt auf der oberen und unteren Menüleiste im mobilen Modus hinzugefügt.'
+      ],
+      improved: [
+        'Präzisions-Gestensteuerung: Dreifache Wisch-Empfindlichkeit und verringerter Umblätterschwellenwert auf den Navbars für mühelosen Seitenwechsel mit minimaler Daumenbewegung.',
+        'Fehlauslösungsschutz: Klick-Interzepierung verhindert unbeabsichtigtes Aktivieren von Tab-Buttons beim Loslassen einer Wischgeste auf den Navigationsleisten.'
+      ]
+    }
+  },
+  {
+    version: '0.8.15',
+    date: '11. Juni 2026',
+    changes: {
+      improved: [
+        'Diagramm-Modusschalter: Neben die Zeitraumauswahl (z. B. Juni 2026) verschoben, um mobile Touch-Flächen kompakter zu machen.',
+        'Kompakte Diagrammlegende: Schriftgröße verringert und Abstände optimiert, damit alle Legenden-Elemente auf Mobilgeräten in eine einzige Zeile passen.',
+        'Responsive Budget-Karten: Der Budget Tracker und die Top-Kategorien werden auf Mobilgeräten nebeneinander (2-Spalten-Raster) angezeigt. Abstände und Schriftgrößen wurden verkleinert, damit die Karten auch bei 360px Bildschirmbreite lesbar bleiben.',
+        'Hierarchie für Mobilgeräte: Die Belegkarte (Tagesbeleg) wird auf Mobilgeräten direkt unter dem Ausgabenverlauf (Diagramm) und über den Budget-Karten platziert, während das Desktop-Layout unverändert bleibt.'
+      ]
+    }
+  },
+  {
+    version: '0.8.14',
+    date: '11. Juni 2026',
+    changes: {
+      improved: [
+        'Monatsbudget-Interaktion: Deutlichere Klickbarkeit durch Stiftsymbol und interaktives Pill-Design.',
+        'Größere Modusschalter (Tag/Woche/Monat): Bessere mobile Touch-Flächen durch flex-1 Aufteilung.',
+        'Erweiterte Bedienung: Speichern-/Abbrechen-Buttons und Escape-Tastenschlüssel hinzugefügt.'
+      ],
+      fixed: [
+        'Umschalter-Fehlverhalten behoben: Eingabeschließung durch vorzeitigen onBlur-Verlust verhindert, dank robuster Click-Outside-Steuerung.'
+      ]
+    }
+  },
+  {
     version: '0.8.13',
     date: '11. Juni 2026',
     changes: {

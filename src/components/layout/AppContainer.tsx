@@ -74,6 +74,9 @@ export const AppContainer: React.FC = () => {
   // Touch Gesture Variables for Mobile Swiping
   const touchStart = useRef<{ x: number; y: number } | null>(null);
   const dragDirection = useRef<'horizontal' | 'vertical' | null>(null);
+  const touchStartInNavbar = useRef<boolean>(false);
+  const hasSwipedNavbar = useRef<boolean>(false);
+  const preventNextClick = useRef<boolean>(false);
 
   const onTouchStart = (e: React.TouchEvent) => {
     // 1. Disable swipe gestures if any modal is open
@@ -90,15 +93,22 @@ export const AppContainer: React.FC = () => {
       return;
     }
 
-    // 2. Ignore swipe gestures starting inside scrollable panels/widgets or input elements
     const target = e.target as HTMLElement;
-    if (
+    
+    // Check if swipe started in top header or bottom nav
+    const isNavbar = !!(target.closest('nav') || target.closest('header'));
+    touchStartInNavbar.current = isNavbar;
+    hasSwipedNavbar.current = false;
+
+    // 2. Ignore swipe gestures starting inside scrollable panels/widgets or input elements
+    // (Bypass this check for navbar gestures so navbar buttons/links can be swiped)
+    if (!isNavbar && (
       target.closest('.no-scrollbar') ||
       target.closest('.overflow-x-auto') ||
       target.closest('input') ||
       target.closest('select') ||
       target.closest('textarea')
-    ) {
+    )) {
       return;
     }
 
@@ -121,11 +131,18 @@ export const AppContainer: React.FC = () => {
 
     // Detect and lock swipe direction
     if (dragDirection.current === null) {
-      if (Math.abs(dx) > 10 || Math.abs(dy) > 10) {
-        if (Math.abs(dx) > Math.abs(dy) * 1.5) {
+      if (touchStartInNavbar.current) {
+        // Eagerly lock horizontal drag when swiping in navbar to prevent vertical interference
+        if (Math.abs(dx) > 5) {
           dragDirection.current = 'horizontal';
-        } else {
-          dragDirection.current = 'vertical';
+        }
+      } else {
+        if (Math.abs(dx) > 10 || Math.abs(dy) > 10) {
+          if (Math.abs(dx) > Math.abs(dy) * 1.5) {
+            dragDirection.current = 'horizontal';
+          } else {
+            dragDirection.current = 'vertical';
+          }
         }
       }
     }
@@ -134,13 +151,21 @@ export const AppContainer: React.FC = () => {
     if (dragDirection.current === 'horizontal') {
       if (e.cancelable) e.preventDefault(); // Prevent native vertical scrolling
 
-      let finalDx = dx;
-      const isAtFirst = currentIndex === 0 && dx > 0;
-      const isAtLast = currentIndex === ROUTES.length - 1 && dx < 0;
+      // Apply higher sensitivity scaling for navbar gestures (3.0x speed)
+      const sensitivity = touchStartInNavbar.current ? 3.0 : 1.0;
+      const scaledDx = dx * sensitivity;
+
+      if (touchStartInNavbar.current && Math.abs(dx) > 5) {
+        hasSwipedNavbar.current = true;
+      }
+
+      let finalDx = scaledDx;
+      const isAtFirst = currentIndex === 0 && scaledDx > 0;
+      const isAtLast = currentIndex === ROUTES.length - 1 && scaledDx < 0;
 
       // Rubber-banding physics on first/last tab
       if (isAtFirst || isAtLast) {
-        finalDx = dx * 0.25;
+        finalDx = scaledDx * 0.25;
       }
 
       carouselRef.current.style.transition = 'none';
@@ -155,17 +180,23 @@ export const AppContainer: React.FC = () => {
     const dx = currentX - touchStart.current.x;
 
     if (dragDirection.current === 'horizontal') {
-      const threshold = window.innerWidth * 0.2; // 20% swipe threshold
+      const sensitivity = touchStartInNavbar.current ? 3.0 : 1.0;
+      const scaledDx = dx * sensitivity;
 
-      if (Math.abs(dx) > threshold) {
-        if (dx > 0 && currentIndex > 0) {
+      // Use a much lower threshold (e.g. 8% of screen width or max 40px) for navbar swipes
+      const threshold = touchStartInNavbar.current
+        ? Math.min(window.innerWidth * 0.08, 40)
+        : window.innerWidth * 0.2;
+
+      if (Math.abs(scaledDx) > threshold) {
+        if (scaledDx > 0 && currentIndex > 0) {
           // Swipe Right -> Slide to previous route
           const targetIndex = currentIndex - 1;
           carouselRef.current.style.transition = 'transform 0.4s cubic-bezier(0.16, 1, 0.3, 1)';
           carouselRef.current.offsetHeight; // Force reflow
           carouselRef.current.style.transform = `translateX(-${targetIndex * (100 / 6)}%)`;
           navigate(ROUTES[targetIndex]);
-        } else if (dx < 0 && currentIndex < ROUTES.length - 1) {
+        } else if (scaledDx < 0 && currentIndex < ROUTES.length - 1) {
           // Swipe Left -> Slide to next route
           const targetIndex = currentIndex + 1;
           carouselRef.current.style.transition = 'transform 0.4s cubic-bezier(0.16, 1, 0.3, 1)';
@@ -186,9 +217,27 @@ export const AppContainer: React.FC = () => {
       }
     }
 
+    if (hasSwipedNavbar.current) {
+      preventNextClick.current = true;
+      // Reset preventNextClick flag after a small timeout to let the click event register
+      setTimeout(() => {
+        preventNextClick.current = false;
+      }, 300);
+    }
+
     // Reset touch variables
     touchStart.current = null;
     dragDirection.current = null;
+    touchStartInNavbar.current = false;
+    hasSwipedNavbar.current = false;
+  };
+
+  const onClickCapture = (e: React.MouseEvent) => {
+    if (preventNextClick.current) {
+      e.preventDefault();
+      e.stopPropagation();
+      preventNextClick.current = false;
+    }
   };
 
   return (
@@ -197,6 +246,7 @@ export const AppContainer: React.FC = () => {
       onTouchStart={onTouchStart}
       onTouchMove={onTouchMove}
       onTouchEnd={onTouchEnd}
+      onClickCapture={onClickCapture}
     >
       {/* Abstract Background Blobs */}
       {settings.isGlassEnabled && (

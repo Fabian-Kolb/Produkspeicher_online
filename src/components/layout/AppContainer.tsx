@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { Plus } from 'lucide-react';
 import { TopNav } from './TopNav';
 import { MainMenuSidebar } from './MainMenuSidebar';
 import { BottomNav } from './BottomNav';
@@ -28,6 +29,8 @@ export const AppContainer: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const carouselRef = useRef<HTMLDivElement>(null);
+  const openProductModal = useUIStore(state => state.openProductModal);
+  const showFab = location.pathname === '/' || location.pathname === '/katalog' || location.pathname === '/favoriten';
 
   // Apply theme on load and when settings change
   useEffect(() => {
@@ -177,7 +180,8 @@ export const AppContainer: React.FC = () => {
 
       // Apply higher sensitivity scaling for navbar gestures (6.5x speed to scroll multiple pages)
       const sensitivity = touchStartInNavbar.current ? 6.5 : 1.0;
-      const scaledDx = dx * sensitivity;
+      const directionMultiplier = touchStartInNavbar.current ? -1.0 : 1.0;
+      const scaledDx = dx * sensitivity * directionMultiplier;
 
       if (touchStartInNavbar.current && Math.abs(dx) > 5) {
         hasSwipedNavbar.current = true;
@@ -243,7 +247,8 @@ export const AppContainer: React.FC = () => {
 
     if (dragDirection.current === 'horizontal') {
       const sensitivity = touchStartInNavbar.current ? 6.5 : 1.0;
-      const scaledDx = dx * sensitivity;
+      const directionMultiplier = touchStartInNavbar.current ? -1.0 : 1.0;
+      const scaledDx = dx * sensitivity * directionMultiplier;
 
       const pageWidth = window.innerWidth;
       const snapThreshold = pageWidth * 0.25; // 25% of page width threshold for snapping
@@ -329,6 +334,20 @@ export const AppContainer: React.FC = () => {
       <ProductDetailModal />
       <AppInfoModal />
       <ProfileSettingsModal />
+
+      {/* Mobile Floating Action Button (FAB) */}
+      {showFab && (
+        <button
+          onClick={() => {
+            triggerHaptic(15);
+            openProductModal();
+          }}
+          className="md:hidden fixed bottom-24 right-6 z-40 w-12 h-12 rounded-full bg-accent text-bg-primary shadow-xl shadow-accent/20 flex items-center justify-center hover:bg-accent-hover active:scale-90 transition-all duration-300 cursor-pointer border border-accent-hover/30"
+          title="Produkt hinzufügen"
+        >
+          <Plus size={20} strokeWidth={2.5} />
+        </button>
+      )}
       
       {/* Main Content Area */}
       <main className="flex-1 w-full overflow-hidden relative bg-transparent z-10">

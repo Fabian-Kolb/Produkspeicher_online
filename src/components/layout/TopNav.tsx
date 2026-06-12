@@ -1,6 +1,6 @@
 import React, { useRef, useState, useLayoutEffect, useEffect } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { Menu, Moon, Sun, User } from 'lucide-react';
+import { Menu, Moon, Sun, User, Plus } from 'lucide-react';
 import { useUIStore } from '../../store/useUIStore';
 import { useAppStore } from '../../store/useAppStore';
 import { cn } from '../../utils/cn';
@@ -10,7 +10,7 @@ import logoWhite from '../../assets/logo/logo_white.png';
 import { motion } from 'framer-motion';
 
 export const TopNav: React.FC = () => {
-  const { toggleMainMenu, toggleProfileModal } = useUIStore();
+  const { toggleMainMenu, toggleProfileModal, openProductModal } = useUIStore();
   const { settings, updateSettings, avatarUrl, userName } = useAppStore();
   const location = useLocation();
 
@@ -122,40 +122,16 @@ export const TopNav: React.FC = () => {
 
       {/* Right Controls */}
       <div className="flex items-center gap-2 md:gap-4">
-        {/* Theme Toggle Switch */}
+        {/* Global Add Product Button - Desktop Only */}
         <button
           onClick={() => {
             triggerHaptic(15);
-            const targetTheme = settings.theme === 'light' ? 'dark' : 'light';
-            const isGlass = settings.isGlassEnabled;
-            const nextThemeId = `default-${targetTheme}-${isGlass ? 'glass' : 'solid'}`;
-            updateSettings({
-              theme: targetTheme,
-              activeThemeId: nextThemeId
-            });
+            openProductModal();
           }}
-          className="relative w-12 md:w-14 h-7 md:h-8 rounded-full bg-text-primary/10 flex items-center px-1 transition-colors"
-          title={settings.theme === 'light' ? 'Dunkles Design aktivieren' : 'Helles Design aktivieren'}
+          className="hidden md:flex h-10 items-center justify-center gap-1.5 bg-accent hover:bg-accent-hover text-bg-primary font-bold px-5 rounded-full text-sm shadow-md transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer select-none"
         >
-          <div className={`w-5 md:w-6 h-5 md:h-6 rounded-full bg-bg-primary shadow-md flex items-center justify-center transition-transform duration-300 ${settings.theme === 'dark' ? 'translate-x-5 md:translate-x-6' : 'translate-x-0'}`}>
-            {settings.theme === 'dark' ? <Moon size={12} className="text-text-primary" /> : <Sun size={12} className="text-text-primary" />}
-          </div>
-        </button>
-
-        {/* Profile / Account Button */}
-        <button
-          onClick={() => {
-            triggerHaptic(15);
-            toggleProfileModal();
-          }}
-          className="w-8 h-8 md:w-10 md:h-10 bg-bg-primary rounded-full shadow-sm flex items-center justify-center hover:bg-text-primary/5 transition-all duration-300 border border-border-primary/50 overflow-hidden cursor-pointer hover:scale-105 active:scale-95"
-          title="Profil & Account"
-        >
-          {avatarUrl ? (
-            <img src={avatarUrl} alt={userName || 'Profil'} className="w-full h-full object-cover" />
-          ) : (
-            <User size={16} className="text-text-secondary" />
-          )}
+          <Plus size={16} strokeWidth={2.5} />
+          <span>Neu</span>
         </button>
 
         {/* Hamburger */}

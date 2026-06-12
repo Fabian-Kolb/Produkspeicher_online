@@ -1,4 +1,4 @@
-import { Settings, Info, Trash2, X, Sparkles, User } from 'lucide-react';
+import { Settings, Info, Trash2, X, Sparkles, User, Moon, Sun } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { useUIStore } from '../../store/useUIStore';
 import { useAppStore } from '../../store/useAppStore';
@@ -8,7 +8,7 @@ import { triggerHaptic } from '../../utils/haptics';
 
 export const MainMenuSidebar: React.FC = () => {
   const { isMainMenuOpen, toggleMainMenu, toggleThemeManager, toggleProfileModal, toggleAppInfoModal } = useUIStore();
-  const { settings, isDemoMode, toggleDemoMode, updateSettings } = useAppStore();
+  const { settings, isDemoMode, toggleDemoMode, updateSettings, avatarUrl, userName } = useAppStore();
 
   
   const handleInfo = () => {
@@ -70,9 +70,26 @@ export const MainMenuSidebar: React.FC = () => {
           </button>
         </div>
         <div className="p-6 flex flex-col gap-3 relative overflow-y-auto max-h-[calc(100vh-80px)]">
-          <MenuButton icon={<User size={18} />} onClick={() => { toggleMainMenu(); toggleProfileModal(); }}>
-            Profil & Account
-          </MenuButton>
+          <button
+            onClick={() => {
+              triggerHaptic(15);
+              toggleMainMenu();
+              toggleProfileModal();
+            }}
+            className="w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-200 group text-left font-medium text-text-primary hover:bg-border-primary"
+          >
+            <span className="w-6 h-6 rounded-full overflow-hidden flex items-center justify-center bg-bg-primary border border-border-primary/50 group-hover:scale-110 transition-transform duration-200">
+              {avatarUrl ? (
+                <img src={avatarUrl} alt={userName || 'Profil'} className="w-full h-full object-cover" />
+              ) : (
+                <User size={14} className="text-text-secondary" />
+              )}
+            </span>
+            <div className="flex flex-col">
+              <span className="text-sm font-medium text-text-primary">{userName || 'Profil & Account'}</span>
+              {userName && <span className="text-[10px] text-text-secondary">Einstellungen verwalten</span>}
+            </div>
+          </button>
           <MenuButton icon={<Settings size={18} />} onClick={() => { toggleMainMenu(); toggleThemeManager(); }}>
             Design & Themes
           </MenuButton>
@@ -94,6 +111,34 @@ export const MainMenuSidebar: React.FC = () => {
             Einstellungen
           </div>
           
+          {/* Theme Toggle Switch Card */}
+          <div className="flex items-center justify-between px-4 py-3 rounded-xl bg-text-primary/[0.03] border border-border-primary/30">
+            <span className="text-sm font-medium text-text-primary">Dunkles Design</span>
+            <button
+              onClick={() => {
+                triggerHaptic(15);
+                const targetTheme = settings.theme === 'light' ? 'dark' : 'light';
+                const isGlass = settings.isGlassEnabled;
+                const nextThemeId = `default-${targetTheme}-${isGlass ? 'glass' : 'solid'}`;
+                updateSettings({
+                  theme: targetTheme,
+                  activeThemeId: nextThemeId
+                });
+              }}
+              className="relative w-11 h-6 rounded-full bg-text-primary/10 flex items-center px-0.5 transition-colors cursor-pointer select-none"
+              title={settings.theme === 'light' ? 'Dunkles Design aktivieren' : 'Helles Design aktivieren'}
+            >
+              <div
+                className={cn(
+                  "w-5 h-5 rounded-full bg-bg-primary shadow-sm flex items-center justify-center transition-transform duration-300",
+                  settings.theme === 'dark' ? "translate-x-5" : "translate-x-0"
+                )}
+              >
+                {settings.theme === 'dark' ? <Moon size={10} className="text-text-primary" /> : <Sun size={10} className="text-text-primary" />}
+              </div>
+            </button>
+          </div>
+
           {/* Vibration Toggle Switch Card */}
           <div className="flex items-center justify-between px-4 py-3 rounded-xl bg-text-primary/[0.03] border border-border-primary/30">
             <span className="text-sm font-medium text-text-primary">Vibrations-Feedback</span>

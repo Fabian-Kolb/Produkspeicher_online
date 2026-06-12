@@ -17,6 +17,18 @@ interface LogEntry {
 
 const CHANGELOG: LogEntry[] = [
   {
+    version: '0.8.21',
+    date: '12. Juni 2026',
+    changes: {
+      improved: [
+        'Shop-Verwaltungs-Pille optimiert: Die äußere Pille um "Shop hinzufügen" und das Zahnrad ist nun wieder schlicht weiß mit weißem Rand und Schatten (wie die Secondary Nav-Pillen).',
+        'Zahnrad-Design aktualisiert: Das Zahnrad leuchtet nun als blauer Kreis (bg-accent text-bg-primary) analog zu einem aktiven Filter-Chip, und der eigene Hover-Hintergrund wurde entfernt.',
+        'Modal-Hintergrund neutralisiert: Der bläuliche Slate-Backdrop des Produkt-Modals wurde durch ein neutrales, tiefes Schwarz (bg-black/60 / bg-black/40 mit Unschärfe) ersetzt.',
+        'Lichtere Filter-Chips: Die aktiven Zustände aller Filter-Chips (im Dashboard, Katalog, Favoriten etc.) wurden auf ein moderneres, helleres Blau (bg-accent/15 mit blauem Text und Rand) umgestellt.'
+      ]
+    }
+  },
+  {
     version: '0.8.20',
     date: '12. Juni 2026',
     changes: {

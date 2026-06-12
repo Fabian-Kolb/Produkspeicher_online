@@ -3,7 +3,6 @@ import { X, Save, Image as ImageIcon } from 'lucide-react';
 import { useUIStore } from '../../store/useUIStore';
 import { useAppStore } from '../../store/useAppStore';
 import { Input } from '../common/Input';
-import { Button } from '../common/Button';
 import { cn } from '../../utils/cn';
 import type { Product } from '../../types';
 import { triggerHaptic } from '../../utils/haptics';
@@ -256,19 +255,96 @@ export const ProductModal: React.FC = () => {
     setFormData(prev => ({ ...prev, imgs: (prev.imgs || []).filter((_, i) => i !== idx) }));
   };
 
+  const isGlass = settings.isGlassEnabled;
+
+  const labelClass = "text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1.5 block";
+
+  const inputClass = cn(
+    "!rounded-2xl !transition-all !duration-200 text-slate-800 placeholder-slate-400 !translate-y-0 !hover:translate-y-0 !focus:translate-y-0 !scale-100 !hover:scale-100 !focus:scale-100 !shadow-none !hover:shadow-none !focus:shadow-none",
+    isGlass
+      ? "!bg-white/40 !border-white/20 hover:!bg-white/50"
+      : "!bg-slate-50 !border-slate-200 hover:!bg-slate-100/30",
+    "focus:!bg-white focus:!border-blue-500 focus:ring-4 focus:ring-blue-500/10 focus:outline-none"
+  );
+
+  const textareaClass = cn(
+    "w-full rounded-2xl transition-all duration-200 text-slate-800 placeholder-slate-400 min-h-[100px] focus:min-h-[160px] p-4 outline-none border",
+    "!translate-y-0 !hover:translate-y-0 !focus:translate-y-0 !scale-100 !hover:scale-100 !focus:scale-100 !shadow-none !hover:shadow-none !focus:shadow-none",
+    isGlass
+      ? "!bg-white/40 !border-white/20 hover:!bg-white/50"
+      : "!bg-slate-50 !border-slate-200 hover:!bg-slate-100/30",
+    "focus:!bg-white focus:!border-blue-500 focus:ring-4 focus:ring-blue-500/10 focus:outline-none"
+  );
+
+  const dropdownTriggerClass = cn(
+    "w-full flex items-center justify-between outline-none transition-all duration-200 cursor-pointer text-left text-sm border",
+    "!rounded-full px-5 py-2.5 !translate-y-0 !hover:translate-y-0 !focus:translate-y-0 !scale-100 !hover:scale-100 !focus:scale-100 !shadow-none !hover:shadow-none !focus:shadow-none",
+    isGlass
+      ? "!bg-white/40 !border-white/20 hover:!bg-white/50 text-slate-800"
+      : "!bg-slate-50 !border-slate-200 hover:!bg-slate-100/30 text-slate-800",
+    "focus:!bg-white focus:!border-blue-500 focus:ring-4 focus:ring-blue-500/10 focus:outline-none"
+  );
+
+  const dropdownPanelClass = cn(
+    "absolute left-0 right-0 mt-2 z-50 rounded-2xl shadow-2xl p-3 flex flex-col gap-2 max-h-60 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-300 border",
+    isGlass
+      ? "bg-white/80 backdrop-blur-xl border-white/40 text-slate-800"
+      : "bg-white border-slate-200 text-slate-800"
+  );
+
+  const favoriteButtonClass = cn(
+    "w-full h-[46px] rounded-full border flex items-center justify-center gap-1.5 text-sm font-semibold transition-all duration-200 cursor-pointer select-none active:scale-95",
+    formData.isFavorite
+      ? "bg-blue-600 border-transparent text-white shadow-sm shadow-blue-500/10 hover:bg-blue-700"
+      : isGlass
+        ? "bg-white/40 border-white/20 text-slate-600 hover:bg-white/50"
+        : "bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100/70"
+  );
+
+  const sensorContainerClass = cn(
+    "border-2 border-dashed rounded-2xl p-6 text-center transition-all duration-200 cursor-pointer flex flex-col gap-4",
+    isDragging
+      ? isGlass
+        ? "border-white/60 bg-black/30 scale-[0.99]"
+        : "border-slate-400 bg-black/10 scale-[0.99]"
+      : isGlass
+        ? "border-white/40 bg-white/20 hover:bg-white/30 hover:border-white/60"
+        : "border-slate-200 bg-slate-50 hover:bg-slate-100/70 hover:border-slate-300"
+  );
+
+  const footerClass = cn(
+    "p-6 flex justify-end gap-3 rounded-b-[1.5rem] border-t",
+    isGlass
+      ? "bg-white/30 border-white/20"
+      : "bg-slate-50 border-slate-100"
+  );
+
+  const cancelButtonClass = cn(
+    "px-5 py-2.5 rounded-full text-sm font-medium text-slate-600 transition-colors cursor-pointer select-none active:scale-95",
+    isGlass ? "hover:bg-white/20 text-slate-700" : "hover:bg-slate-100"
+  );
+
+  const headerClass = cn(
+    "flex items-center justify-between p-4 sm:p-6 border-b shrink-0",
+    isGlass ? "border-white/20" : "border-slate-200"
+  );
+
   return (
     <div className={cn(
-      "fixed inset-0 z-[200] flex items-center justify-center p-2 sm:p-6 bg-black/60 animate-in fade-in duration-300",
-      settings.isGlassEnabled && "backdrop-blur-sm"
+      "fixed inset-0 z-[200] flex items-center justify-center p-2 sm:p-6 transition-all duration-300 animate-in fade-in",
+      isGlass ? "bg-black/40 backdrop-blur-sm" : "bg-black/60"
     )}>
-      <div className="w-full max-w-2xl max-h-[98vh] sm:max-h-[95vh] glass-panel overflow-hidden flex flex-col shadow-2xl animate-in zoom-in-95 duration-300">
+      <div className={cn(
+        "w-full max-w-2xl max-h-[98vh] sm:max-h-[95vh] overflow-hidden flex flex-col animate-in zoom-in-95 duration-300 rounded-[1.5rem]",
+        isGlass ? "bg-white/70 backdrop-blur-xl border border-white/40 shadow-2xl" : "bg-white border border-slate-200 shadow-xl"
+      )}>
 
         {/* Header */}
-        <div className="flex items-center justify-between p-4 sm:p-6 border-b border-border-primary shrink-0">
-          <h2 className="text-xl sm:text-2xl font-playfair font-bold">
+        <div className={headerClass}>
+          <h2 className="text-xl font-semibold text-slate-800 tracking-tight">
             {editingProductId ? 'Produkt bearbeiten' : 'Produkt hinzufügen'}
           </h2>
-          <button onClick={handleCancel} className="w-10 h-10 flex items-center justify-center rounded-full text-text-secondary hover:text-text-primary hover:bg-text-primary/10 transition-colors">
+          <button onClick={handleCancel} className="w-10 h-10 flex items-center justify-center rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100/50 transition-colors">
             <X size={24} />
           </button>
         </div>
@@ -279,73 +355,103 @@ export const ProductModal: React.FC = () => {
           {/* Name & Shop */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="text-xs font-bold text-text-secondary uppercase tracking-wider mb-2 block">Name</label>
-              <Input value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} placeholder="Produktname" />
+              <label className={labelClass}>Name</label>
+              <Input 
+                value={formData.name} 
+                onChange={e => setFormData({ ...formData, name: e.target.value })} 
+                placeholder="Produktname"
+                className={inputClass} 
+              />
             </div>
             <div>
-              <label className="text-xs font-bold text-text-secondary uppercase tracking-wider mb-2 block">Shop / Marke</label>
-              <Input value={formData.shop} onChange={e => setFormData({ ...formData, shop: e.target.value })} placeholder="Amazon, Thomann..." />
+              <label className={labelClass}>Shop / Marke</label>
+              <Input 
+                value={formData.shop} 
+                onChange={e => setFormData({ ...formData, shop: e.target.value })} 
+                placeholder="Amazon, Thomann..."
+                className={inputClass} 
+              />
             </div>
           </div>
 
           {/* URL */}
           <div>
-            <label className="text-xs font-bold text-text-secondary uppercase tracking-wider mb-2 block">URL</label>
-            <Input value={formData.url} onChange={e => setFormData({ ...formData, url: e.target.value })} placeholder="https://..." />
+            <label className={labelClass}>URL</label>
+            <Input 
+              value={formData.url} 
+              onChange={e => setFormData({ ...formData, url: e.target.value })} 
+              placeholder="https://..."
+              className={inputClass} 
+            />
           </div>
 
           {/* Price & Discount */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
-              <label className="text-xs font-bold text-text-secondary uppercase tracking-wider mb-2 block">Preis (€)</label>
-              <Input type="number" value={formData.price || ''} onChange={e => {
-                const p = Number(e.target.value);
-                const d = Number(formData.discount) || 0;
-                setFormData({ ...formData, price: p, finalPrice: p - (p * (d / 100)) });
-              }} />
+              <label className={labelClass}>Preis (€)</label>
+              <Input 
+                type="number" 
+                value={formData.price || ''} 
+                onChange={e => {
+                  const p = Number(e.target.value);
+                  const d = Number(formData.discount) || 0;
+                  setFormData({ ...formData, price: p, finalPrice: p - (p * (d / 100)) });
+                }}
+                className={inputClass} 
+              />
             </div>
             <div>
-              <label className="text-xs font-bold text-text-secondary uppercase tracking-wider mb-2 block">Rabatt (%)</label>
-              <Input type="number" value={formData.discount || ''} onChange={e => {
-                const d = Number(e.target.value);
-                const p = Number(formData.price) || 0;
-                setFormData({ ...formData, discount: d, finalPrice: p - (p * (d / 100)) });
-              }} />
+              <label className={labelClass}>Rabatt (%)</label>
+              <Input 
+                type="number" 
+                value={formData.discount || ''} 
+                onChange={e => {
+                  const d = Number(e.target.value);
+                  const p = Number(formData.price) || 0;
+                  setFormData({ ...formData, discount: d, finalPrice: p - (p * (d / 100)) });
+                }}
+                className={inputClass} 
+              />
             </div>
             <div>
-              <label className="text-xs font-bold text-text-secondary uppercase tracking-wider mb-2 block">Endpreis (€)</label>
-              <Input type="number" value={formData.finalPrice?.toFixed(2)} readOnly className="opacity-60" />
+              <label className={labelClass}>Endpreis (€)</label>
+              <Input 
+                type="number" 
+                value={formData.finalPrice?.toFixed(2)} 
+                readOnly 
+                className={cn(inputClass, "opacity-60")} 
+              />
             </div>
           </div>
 
           {/* Zeile 3: Hauptkategorie & Subkategorie */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="relative" ref={catDropdownRef}>
-              <label className="text-xs font-bold text-text-secondary uppercase tracking-wider mb-2 block">Haupt-Kategorie</label>
+              <label className={labelClass}>Haupt-Kategorie</label>
               <button
                 type="button"
                 onClick={() => {
                   triggerHaptic(10);
                   setIsCatDropdownOpen(!isCatDropdownOpen);
                 }}
-                className="w-full flex items-center justify-between bg-bg-card border border-border-primary text-text-primary rounded-full px-5 py-2.5 outline-none hover:border-text-secondary focus:border-text-secondary hover:-translate-y-0.5 focus:-translate-y-0.5 hover:scale-[1.015] focus:scale-[1.015] hover:shadow-md focus:shadow-md transition-all duration-500 ease-out transform-gpu origin-center cursor-pointer text-left text-sm"
+                className={dropdownTriggerClass}
               >
                 <span className="truncate">{formData.mainCat || 'Kategorie wählen'}</span>
-                <span className="text-text-secondary text-[10px] transform transition-transform duration-300 select-none pointer-events-none ml-2">
+                <span className="text-slate-400 text-[10px] transform transition-transform duration-300 select-none pointer-events-none ml-2">
                   {isCatDropdownOpen ? '▲' : '▼'}
                 </span>
               </button>
 
               {isCatDropdownOpen && (
-                <div className="absolute left-0 right-0 mt-2 z-50 glass-panel bg-bg-card border border-border-primary rounded-xl shadow-2xl p-3 flex flex-col gap-2 max-h-60 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-300">
+                <div className={dropdownPanelClass}>
                   <Input
                     value={catSearch}
                     onChange={e => setCatSearch(e.target.value)}
                     placeholder="Suchen / Hinzufügen..."
-                    className="py-1 text-xs"
+                    className={inputClass}
                     autoFocus
                   />
-                  <div className="flex flex-col gap-1 overflow-y-auto max-h-40 hidden-scrollbar">
+                  <div className="flex flex-col gap-1 overflow-y-auto max-h-40 hidden-scrollbar mt-1">
                     {filteredCategories.map(c => (
                       <button
                         key={c}
@@ -359,8 +465,8 @@ export const ProductModal: React.FC = () => {
                         className={cn(
                           "w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer",
                           formData.mainCat === c
-                            ? "bg-accent text-bg-primary"
-                            : "text-text-primary hover:bg-text-primary/5"
+                            ? "bg-blue-600 text-white"
+                            : "text-slate-700 hover:bg-slate-100/50"
                         )}
                       >
                         {c}
@@ -377,13 +483,13 @@ export const ProductModal: React.FC = () => {
                           setIsCatDropdownOpen(false);
                           setCatSearch('');
                         }}
-                        className="w-full text-left px-3 py-2 rounded-lg text-sm font-bold text-accent hover:bg-accent/10 cursor-pointer"
+                        className="w-full text-left px-3 py-2 rounded-lg text-sm font-semibold text-blue-600 hover:bg-blue-50 cursor-pointer"
                       >
                         + "{catSearch.trim()}" neu erstellen
                       </button>
                     )}
                     {filteredCategories.length === 0 && !catSearch.trim() && (
-                      <span className="text-xs text-text-secondary italic text-center py-2">Keine Kategorien vorhanden.</span>
+                      <span className="text-xs text-slate-400 italic text-center py-2">Keine Kategorien vorhanden.</span>
                     )}
                   </div>
                 </div>
@@ -391,35 +497,35 @@ export const ProductModal: React.FC = () => {
             </div>
 
             <div className="relative" ref={subCatDropdownRef}>
-              <label className="text-xs font-bold text-text-secondary uppercase tracking-wider mb-2 block">Sub-Kategorie</label>
+              <label className={labelClass}>Sub-Kategorie</label>
               <button
                 type="button"
                 onClick={() => {
                   triggerHaptic(10);
                   setIsSubCatDropdownOpen(!isSubCatDropdownOpen);
                 }}
-                className="w-full flex items-center justify-between bg-bg-card border border-border-primary text-text-primary rounded-full px-5 py-2.5 outline-none hover:border-text-secondary focus:border-text-secondary hover:-translate-y-0.5 focus:-translate-y-0.5 hover:scale-[1.015] focus:scale-[1.015] hover:shadow-md focus:shadow-md transition-all duration-500 ease-out transform-gpu origin-center cursor-pointer text-left text-sm"
+                className={dropdownTriggerClass}
               >
                 <span className="truncate">
                   {formData.subCats && formData.subCats.length > 0
                     ? formData.subCats.join(', ')
                     : 'Subkategorie wählen'}
                 </span>
-                <span className="text-text-secondary text-[10px] transform transition-transform duration-300 select-none pointer-events-none ml-2">
+                <span className="text-slate-400 text-[10px] transform transition-transform duration-300 select-none pointer-events-none ml-2">
                   {isSubCatDropdownOpen ? '▲' : '▼'}
                 </span>
               </button>
 
               {isSubCatDropdownOpen && (
-                <div className="absolute left-0 right-0 mt-2 z-50 glass-panel bg-bg-card border border-border-primary rounded-xl shadow-2xl p-3 flex flex-col gap-2 max-h-60 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-300">
+                <div className={dropdownPanelClass}>
                   <Input
                     value={subCatSearch}
                     onChange={e => setSubCatSearch(e.target.value)}
                     placeholder="Suchen / Hinzufügen..."
-                    className="py-1 text-xs"
+                    className={inputClass}
                     autoFocus
                   />
-                  <div className="flex flex-col gap-1 overflow-y-auto max-h-40 hidden-scrollbar">
+                  <div className="flex flex-col gap-1 overflow-y-auto max-h-40 hidden-scrollbar mt-1">
                     {filteredSubCategories.map(s => {
                       const isSelected = formData.subCats?.includes(s);
                       return (
@@ -437,8 +543,8 @@ export const ProductModal: React.FC = () => {
                           className={cn(
                             "w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer flex items-center justify-between",
                             isSelected
-                              ? "bg-accent text-bg-primary"
-                              : "text-text-primary hover:bg-text-primary/5"
+                              ? "bg-blue-600 text-white"
+                              : "text-slate-700 hover:bg-slate-100/50"
                           )}
                         >
                           <span>{s}</span>
@@ -457,13 +563,13 @@ export const ProductModal: React.FC = () => {
                           setFormData({ ...formData, subCats: [...current, newSub] });
                           setSubCatSearch('');
                         }}
-                        className="w-full text-left px-3 py-2 rounded-lg text-sm font-bold text-accent hover:bg-accent/10 cursor-pointer"
+                        className="w-full text-left px-3 py-2 rounded-lg text-sm font-semibold text-blue-600 hover:bg-blue-50 cursor-pointer"
                       >
                         + "{subCatSearch.trim()}" neu erstellen
                       </button>
                     )}
                     {filteredSubCategories.length === 0 && !subCatSearch.trim() && (
-                      <span className="text-xs text-text-secondary italic text-center py-2">Keine Unterkategorien vorhanden.</span>
+                      <span className="text-xs text-slate-400 italic text-center py-2">Keine Unterkategorien vorhanden.</span>
                     )}
                   </div>
                 </div>
@@ -474,7 +580,7 @@ export const ProductModal: React.FC = () => {
           {/* Zeile 4: Bewertung & Favorit */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="text-xs font-bold text-text-secondary uppercase tracking-wider mb-2 block">Bewertung (1-10)</label>
+              <label className={labelClass}>Bewertung (1-10)</label>
               <Input
                 type="number"
                 min="0"
@@ -486,19 +592,15 @@ export const ProductModal: React.FC = () => {
                   setFormData({ ...formData, rating: val });
                 }}
                 placeholder="z. B. 8.5"
+                className={inputClass}
               />
             </div>
             <div>
-              <label className="text-xs font-bold text-text-secondary uppercase tracking-wider mb-2 block">Als Favorit markieren</label>
+              <label className={labelClass}>Als Favorit markieren</label>
               <button
                 type="button"
                 onClick={() => setFormData({ ...formData, isFavorite: !formData.isFavorite })}
-                className={cn(
-                  "w-full h-[46px] rounded-full border flex items-center justify-center gap-1.5 text-sm font-bold transition-all duration-300 cursor-pointer select-none active:scale-95",
-                  formData.isFavorite
-                    ? "bg-accent text-bg-primary border-transparent shadow-md"
-                    : "border-border-primary text-text-secondary hover:text-text-primary hover:bg-text-primary/5"
-                )}
+                className={favoriteButtonClass}
               >
                 ❤️ Favorit
               </button>
@@ -507,7 +609,7 @@ export const ProductModal: React.FC = () => {
 
           {/* Bilder Drag & Drop Zone */}
           <div>
-            <label className="text-xs font-bold text-text-secondary uppercase tracking-wider mb-2 block">Bilder (URLs / Upload)</label>
+            <label className={labelClass}>Bilder (URLs / Upload)</label>
             <div
               onDragOver={e => {
                 e.preventDefault();
@@ -524,22 +626,17 @@ export const ProductModal: React.FC = () => {
                   }
                 }
               }}
-              className={cn(
-                "border-2 border-dashed rounded-2xl p-4 transition-all duration-300 flex flex-col gap-4 bg-bg-card/30",
-                isDragging
-                  ? "border-accent bg-accent/5 scale-[1.01]"
-                  : "border-border-primary hover:border-text-secondary"
-              )}
+              className={sensorContainerClass}
             >
               <div 
                 onClick={() => fileInputRef.current?.click()}
                 className="flex flex-col gap-1 text-center justify-center items-center py-3 cursor-pointer group"
               >
-                <ImageIcon size={28} className={cn("transition-colors duration-300", isDragging ? "text-accent" : "text-text-secondary group-hover:text-text-primary")} />
-                <span className="text-xs font-bold text-text-primary mt-1">
-                  Bilder hierher ziehen oder <span className="text-accent underline group-hover:text-accent/80 transition-colors">durchsuchen</span>
+                <ImageIcon size={28} className={cn("transition-colors duration-300", isDragging ? "text-slate-600 dark:text-slate-300" : "text-slate-400 group-hover:text-slate-600")} />
+                <span className="text-xs font-semibold text-slate-700 mt-1">
+                  Bilder hierher ziehen oder <span className="underline group-hover:text-slate-900 transition-colors">durchsuchen</span>
                 </span>
-                <span className="text-[10px] text-text-secondary">
+                <span className="text-[10px] text-slate-400 mt-0.5">
                   Unterstützt Drag & Drop, Klicken zum Auswählen oder Clipboard-Paste (Strg+V)
                 </span>
                 <input
@@ -573,30 +670,29 @@ export const ProductModal: React.FC = () => {
                   value={imgInput}
                   onChange={e => setImgInput(e.target.value)}
                   placeholder="Bild-URL einfügen..."
-                  className="bg-bg-card/50"
+                  className={inputClass}
                   icon={<ImageIcon size={16} />}
                 />
-                <Button
+                <button
                   type="button"
                   onClick={addImage}
-                  variant="primary"
-                  className="shrink-0 h-[46px] flex items-center justify-center px-6"
+                  className="shrink-0 h-[46px] flex items-center justify-center px-6 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm transition-all duration-200 active:scale-95 shadow-sm hover:shadow shadow-blue-500/10 cursor-pointer"
                 >
                   Hinzufügen
-                </Button>
+                </button>
               </div>
 
               {formData.imgs && formData.imgs.length > 0 && (
                 <div className="flex gap-3 overflow-x-auto pb-2 hidden-scrollbar">
                   {formData.imgs.map((img, idx) => (
-                    <div key={idx} className="relative w-24 h-24 rounded-xl overflow-hidden shrink-0 border border-border-primary group">
+                    <div key={idx} className="relative w-24 h-24 rounded-xl overflow-hidden shrink-0 border border-slate-100 shadow-sm group">
                       <img src={img} alt={`Preview ${idx}`} className="w-full h-full object-cover" />
                       <button
                         onClick={() => removeImage(idx)}
                         type="button"
-                        className="absolute top-1 right-1 w-7 h-7 bg-heart rounded-full flex items-center justify-center text-white md:opacity-0 md:group-hover:opacity-100 opacity-100 transition-opacity shadow-lg active:scale-90 cursor-pointer z-10"
+                        className="absolute top-1 right-1 w-6 h-6 bg-red-500 rounded-full flex items-center justify-center text-white md:opacity-0 md:group-hover:opacity-100 opacity-100 transition-opacity shadow-lg active:scale-90 cursor-pointer z-10"
                       >
-                        <X size={14} />
+                        <X size={12} />
                       </button>
                     </div>
                   ))}
@@ -607,22 +703,33 @@ export const ProductModal: React.FC = () => {
 
           {/* Details */}
           <div>
-            <label className="text-xs font-bold text-text-secondary uppercase tracking-wider mb-2 block">Details / Notizen (Optional)</label>
+            <label className={labelClass}>Details / Notizen (Optional)</label>
             <textarea
               value={formData.details}
               onChange={e => setFormData({ ...formData, details: e.target.value })}
-              className="w-full bg-bg-card border border-border-primary rounded-xl px-4 py-3 outline-none hover:border-text-secondary focus:border-text-secondary hover:-translate-y-0.5 focus:-translate-y-0.5 hover:scale-[1.01] focus:scale-[1.01] hover:shadow-md focus:shadow-md min-h-[100px] focus:min-h-[160px] transition-all duration-500 ease-out transform-gpu origin-center"
+              className={textareaClass}
+              placeholder="Zusätzliche Informationen..."
             />
           </div>
 
         </div>
 
         {/* Footer */}
-        <div className="p-4 sm:p-6 border-t border-border-primary shrink-0 flex justify-end gap-3">
-          <Button variant="danger" onClick={handleCancel}>Abbrechen</Button>
-          <Button variant="primary" onClick={handleSave} className="flex items-center gap-2">
+        <div className={footerClass}>
+          <button 
+            type="button" 
+            onClick={handleCancel} 
+            className={cancelButtonClass}
+          >
+            Abbrechen
+          </button>
+          <button 
+            type="button" 
+            onClick={handleSave} 
+            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-full text-sm font-medium shadow-sm shadow-blue-500/10 hover:shadow-md hover:shadow-blue-500/20 transition-all duration-200 active:scale-95 flex items-center gap-2 cursor-pointer"
+          >
             <Save size={18} /> Speichern
-          </Button>
+          </button>
         </div>
 
       </div>

@@ -508,7 +508,7 @@ export const DashboardView: React.FC = () => {
       <div className="mt-4">
         <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
           <h2 className="text-xl md:text-2xl font-playfair font-bold">Deine Shops</h2>
-          <div className="flex items-center gap-1.5 p-1 rounded-full bg-white dark:bg-white/10 border border-accent shadow-md">
+          <div className="flex items-center gap-1.5 p-1 rounded-full bg-white dark:bg-white/10 border border-white/80 dark:border-white/10 shadow-sm">
             <button
               onClick={() => setShowAddShopModal(true)}
               className="flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium active:scale-95 transition-all duration-200 shadow-sm bg-accent text-bg-primary hover:bg-accent-hover"
@@ -518,7 +518,7 @@ export const DashboardView: React.FC = () => {
             </button>
             <button
               onClick={() => setIsEditing(!isEditing)}
-              className="w-9 h-9 flex items-center justify-center shrink-0 rounded-full active:scale-95 transition-all duration-300 text-text-primary hover:text-accent cursor-pointer"
+              className="w-9 h-9 flex items-center justify-center shrink-0 rounded-full bg-accent text-bg-primary hover:bg-accent-hover active:scale-95 transition-all duration-300 shadow-sm cursor-pointer"
               title="Kategorien verwalten"
             >
               <Settings

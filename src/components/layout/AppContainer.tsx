@@ -1,7 +1,8 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Plus } from 'lucide-react';
 import { TopNav } from './TopNav';
+import { cn } from '../../utils/cn';
 import { MainMenuSidebar } from './MainMenuSidebar';
 import { BottomNav } from './BottomNav';
 import { ThemeCreatorModal } from '../features/ThemeCreatorModal';
@@ -31,6 +32,19 @@ export const AppContainer: React.FC = () => {
   const carouselRef = useRef<HTMLDivElement>(null);
   const openProductModal = useUIStore(state => state.openProductModal);
   const showFab = location.pathname === '/' || location.pathname === '/katalog' || location.pathname === '/favoriten';
+
+  const [isScrollingDown, setIsScrollingDown] = useState(false);
+  const lastScrollY = useRef(0);
+
+  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const currentScrollY = e.currentTarget.scrollTop;
+    if (currentScrollY > lastScrollY.current + 10 && currentScrollY > 50) {
+      setIsScrollingDown(true);
+    } else if (currentScrollY < lastScrollY.current - 10 || currentScrollY <= 10) {
+      setIsScrollingDown(false);
+    }
+    lastScrollY.current = currentScrollY;
+  };
 
   // Apply theme on load and when settings change
   useEffect(() => {
@@ -73,6 +87,8 @@ export const AppContainer: React.FC = () => {
       carouselRef.current.style.transition = 'transform 0.4s cubic-bezier(0.16, 1, 0.3, 1)';
       carouselRef.current.style.transform = `translateX(-${currentIndex * (100 / 6)}%)`;
     }
+    setIsScrollingDown(false);
+    lastScrollY.current = 0;
   }, [currentIndex]);
 
   // Touch Gesture Variables for Mobile Swiping
@@ -342,7 +358,10 @@ export const AppContainer: React.FC = () => {
             triggerHaptic(15);
             openProductModal();
           }}
-          className="md:hidden fixed bottom-24 right-6 z-40 w-12 h-12 rounded-full bg-accent text-bg-primary shadow-xl shadow-accent/20 flex items-center justify-center hover:bg-accent-hover active:scale-90 transition-all duration-300 cursor-pointer border border-accent-hover/30"
+          className={cn(
+            "md:hidden fixed bottom-24 right-6 z-40 w-12 h-12 rounded-full bg-accent text-bg-primary shadow-xl shadow-accent/20 flex items-center justify-center hover:bg-accent-hover active:scale-90 cursor-pointer border border-accent-hover/30 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] transform-gpu origin-center",
+            isScrollingDown ? "translate-y-24 opacity-0 scale-75 pointer-events-none" : "translate-y-0 opacity-100 scale-100"
+          )}
           title="Produkt hinzufügen"
         >
           <Plus size={20} strokeWidth={2.5} />
@@ -375,6 +394,7 @@ export const AppContainer: React.FC = () => {
               <div 
                 key={route} 
                 className="w-[16.666667%] h-full shrink-0 overflow-y-auto pt-16 md:pt-24 pb-24 md:pb-8 px-4 md:px-8"
+                onScroll={handleScroll}
               >
                 {component}
               </div>

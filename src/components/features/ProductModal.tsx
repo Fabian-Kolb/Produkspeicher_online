@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { X, Save, Image as ImageIcon } from 'lucide-react';
 import { useUIStore } from '../../store/useUIStore';
 import { useAppStore } from '../../store/useAppStore';
@@ -6,10 +6,11 @@ import { Input } from '../common/Input';
 import { Button } from '../common/Button';
 import { cn } from '../../utils/cn';
 import type { Product } from '../../types';
+import { triggerHaptic } from '../../utils/haptics';
 
 export const ProductModal: React.FC = () => {
   const { isProductModalOpen, editingProductId, closeProductModal } = useUIStore();
-  const { products, updateProduct, addProduct, categories, subCats, settings } = useAppStore();
+  const { products, updateProduct, addProduct, addCategory, addSubCategory, categories, subCats, settings } = useAppStore();
 
   const [formData, setFormData] = useState<Partial<Product>>({
     name: '',
@@ -28,6 +29,33 @@ export const ProductModal: React.FC = () => {
   });
 
   const [imgInput, setImgInput] = useState('');
+
+  const [isCatDropdownOpen, setIsCatDropdownOpen] = useState(false);
+  const [catSearch, setCatSearch] = useState('');
+  const [subCatSearch, setSubCatSearch] = useState('');
+  const catDropdownRef = useRef<HTMLDivElement>(null);
+
+  // Filtered categories
+  const filteredCategories = useMemo(() => {
+    return categories.filter(c => c.toLowerCase().includes(catSearch.toLowerCase()));
+  }, [categories, catSearch]);
+
+  // Filtered subcategories
+  const filteredSubCategories = useMemo(() => {
+    const available = subCats[formData.mainCat || ''] || [];
+    return available.filter(s => s.toLowerCase().includes(subCatSearch.toLowerCase()));
+  }, [subCats, formData.mainCat, subCatSearch]);
+
+  // Click outside listener for category dropdown
+  useEffect(() => {
+    const handleOutsideClick = (e: MouseEvent) => {
+      if (catDropdownRef.current && !catDropdownRef.current.contains(e.target as Node)) {
+        setIsCatDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleOutsideClick);
+    return () => document.removeEventListener('mousedown', handleOutsideClick);
+  }, []);
 
   useEffect(() => {
     if (isProductModalOpen) {
@@ -173,15 +201,74 @@ export const ProductModal: React.FC = () => {
 
           {/* Category, Rating, and Status Row */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
+            <div className="relative" ref={catDropdownRef}>
               <label className="text-xs font-bold text-text-secondary uppercase tracking-wider mb-2 block">Haupt-Kategorie</label>
-              <select
-                value={formData.mainCat}
-                onChange={e => setFormData({ ...formData, mainCat: e.target.value, subCats: [] })}
-                className="w-full bg-bg-card border border-border-primary text-text-primary rounded-xl px-4 py-2.5 outline-none hover:border-text-secondary focus:border-text-secondary hover:-translate-y-0.5 focus:-translate-y-0.5 hover:scale-[1.015] focus:scale-[1.015] hover:shadow-md focus:shadow-md transition-all duration-500 ease-out transform-gpu origin-center cursor-pointer"
+              <button
+                type="button"
+                onClick={() => {
+                  triggerHaptic(10);
+                  setIsCatDropdownOpen(!isCatDropdownOpen);
+                }}
+                className="w-full flex items-center justify-between bg-bg-card border border-border-primary text-text-primary rounded-xl px-4 py-2.5 outline-none hover:border-text-secondary focus:border-text-secondary hover:-translate-y-0.5 focus:-translate-y-0.5 hover:scale-[1.015] focus:scale-[1.015] hover:shadow-md focus:shadow-md transition-all duration-500 ease-out transform-gpu origin-center cursor-pointer text-left text-sm"
               >
-                {categories.map(c => <option key={c} value={c}>{c}</option>)}
-              </select>
+                <span>{formData.mainCat || 'Kategorie wählen'}</span>
+                <span className="text-text-secondary text-[10px] transform transition-transform duration-300 select-none pointer-events-none">
+                  {isCatDropdownOpen ? '▲' : '▼'}
+                </span>
+              </button>
+
+              {isCatDropdownOpen && (
+                <div className="absolute left-0 right-0 mt-2 z-50 glass-panel bg-bg-card border border-border-primary rounded-xl shadow-2xl p-3 flex flex-col gap-2 max-h-60 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-300">
+                  <Input
+                    value={catSearch}
+                    onChange={e => setCatSearch(e.target.value)}
+                    placeholder="Suchen / Hinzufügen..."
+                    className="py-1 text-xs"
+                    autoFocus
+                  />
+                  <div className="flex flex-col gap-1 overflow-y-auto max-h-40 hidden-scrollbar">
+                    {filteredCategories.map(c => (
+                      <button
+                        key={c}
+                        type="button"
+                        onClick={() => {
+                          triggerHaptic(10);
+                          setFormData({ ...formData, mainCat: c, subCats: [] });
+                          setIsCatDropdownOpen(false);
+                          setCatSearch('');
+                        }}
+                        className={cn(
+                          "w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer",
+                          formData.mainCat === c
+                            ? "bg-accent text-bg-primary"
+                            : "text-text-primary hover:bg-text-primary/5"
+                        )}
+                      >
+                        {c}
+                      </button>
+                    ))}
+                    {catSearch.trim() && !categories.some(c => c.toLowerCase() === catSearch.trim().toLowerCase()) && (
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          triggerHaptic(15);
+                          const newCat = catSearch.trim();
+                          await addCategory(newCat);
+                          setFormData({ ...formData, mainCat: newCat, subCats: [] });
+                          setIsCatDropdownOpen(false);
+                          setCatSearch('');
+                        }}
+                        className="w-full text-left px-3 py-2 rounded-lg text-sm font-bold text-accent hover:bg-accent/10 cursor-pointer"
+                      >
+                        + "{catSearch.trim()}" neu erstellen
+                      </button>
+                    )}
+                    {filteredCategories.length === 0 && !catSearch.trim() && (
+                      <span className="text-xs text-text-secondary italic text-center py-2">Keine Kategorien vorhanden.</span>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
             <div>
               <label className="text-xs font-bold text-text-secondary uppercase tracking-wider mb-2 block">Bewertung (1-10)</label>
@@ -230,14 +317,25 @@ export const ProductModal: React.FC = () => {
           </div>
 
           {/* Sub-Categories */}
-          <div>
-            <label className="text-xs font-bold text-text-secondary uppercase tracking-wider mb-2 block">Sub-Kategorien</label>
-            <div className="flex flex-wrap gap-2">
-              {(subCats[formData.mainCat || ''] || []).map(sub => (
+          <div className="flex flex-col gap-2">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <label className="text-xs font-bold text-text-secondary uppercase tracking-wider block">Sub-Kategorien</label>
+              <div className="w-full sm:w-64">
+                <Input
+                  value={subCatSearch}
+                  onChange={e => setSubCatSearch(e.target.value)}
+                  placeholder="Unterkategorie suchen..."
+                  className="py-1 text-xs"
+                />
+              </div>
+            </div>
+            <div className="flex flex-wrap gap-2 mt-1">
+              {filteredSubCategories.map(sub => (
                 <button
                   key={sub}
                   type="button"
                   onClick={() => {
+                    triggerHaptic(10);
                     const current = formData.subCats || [];
                     const next = current.includes(sub) ? current.filter(s => s !== sub) : [...current, sub];
                     setFormData({ ...formData, subCats: next });
@@ -252,8 +350,24 @@ export const ProductModal: React.FC = () => {
                   {sub}
                 </button>
               ))}
-              {(subCats[formData.mainCat || ''] || []).length === 0 && (
-                <span className="text-xs text-text-secondary italic">Keine Unterkategorien für diese Hauptkategorie definiert.</span>
+              {subCatSearch.trim() && !(subCats[formData.mainCat || ''] || []).some(s => s.toLowerCase() === subCatSearch.trim().toLowerCase()) && (
+                <button
+                  type="button"
+                  onClick={async () => {
+                    triggerHaptic(15);
+                    const newSub = subCatSearch.trim();
+                    await addSubCategory(formData.mainCat || 'Setup', newSub);
+                    const current = formData.subCats || [];
+                    setFormData({ ...formData, subCats: [...current, newSub] });
+                    setSubCatSearch('');
+                  }}
+                  className="px-4 py-2 sm:px-3 sm:py-1 rounded-full text-xs font-bold border border-dashed border-accent text-accent hover:bg-accent/5 transition-all duration-200 cursor-pointer select-none active:scale-95"
+                >
+                  + "{subCatSearch.trim()}" hinzufügen
+                </button>
+              )}
+              {filteredSubCategories.length === 0 && !subCatSearch.trim() && (
+                <span className="text-xs text-text-secondary italic">Keine Unterkategorien definiert.</span>
               )}
             </div>
           </div>

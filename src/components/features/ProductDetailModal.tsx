@@ -96,7 +96,7 @@ export const ProductDetailModal: React.FC = () => {
           {/* Mobile Close Button – always visible on small screens */}
           <button 
             onClick={closeProductDetailModal}
-            className="absolute top-3 right-3 md:hidden w-10 h-10 flex items-center justify-center rounded-2xl bg-text-primary/10 hover:bg-text-primary/20 transition-all text-text-secondary hover:text-text-primary border border-border-primary/20 z-10"
+            className="absolute top-3 right-3 md:hidden w-10 h-10 flex items-center justify-center rounded-full bg-text-primary/10 hover:bg-text-primary/20 transition-all duration-300 hover:scale-105 active:scale-95 text-text-secondary hover:text-text-primary border border-border-primary/20 z-10 cursor-pointer"
           >
             <X size={20} />
           </button>
@@ -114,7 +114,7 @@ export const ProductDetailModal: React.FC = () => {
             {/* Desktop Close Button */}
             <button 
               onClick={closeProductDetailModal}
-              className="hidden md:flex w-14 h-14 items-center justify-center rounded-2xl bg-text-primary/5 hover:bg-text-primary/10 transition-all text-text-secondary hover:text-text-primary active:scale-90 border border-border-primary/20"
+              className="hidden md:flex w-14 h-14 items-center justify-center rounded-full bg-text-primary/5 hover:bg-text-primary/10 transition-all duration-300 hover:scale-105 active:scale-95 text-text-secondary hover:text-text-primary border border-border-primary/20 cursor-pointer"
             >
               <X size={32} />
             </button>
@@ -200,7 +200,7 @@ export const ProductDetailModal: React.FC = () => {
               <button 
                 onClick={handleToggleFavorite}
                 className={cn(
-                  "flex items-center gap-3 px-6 py-3 rounded-xl transition-all font-black text-[10px] uppercase tracking-widest leading-none",
+                  "flex items-center gap-3 px-6 py-3 rounded-full transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer font-black text-[10px] uppercase tracking-widest leading-none",
                   product.isFavorite ? "text-amber-500 bg-amber-500/10 shadow-sm shadow-amber-500/5" : "text-text-secondary hover:text-text-primary"
                 )}
               >
@@ -211,14 +211,14 @@ export const ProductDetailModal: React.FC = () => {
               <div className="flex gap-3">
                 <button 
                   onClick={handleEdit}
-                  className="w-12 h-12 flex items-center justify-center rounded-xl bg-bg-card text-text-secondary hover:text-accent hover:bg-accent/5 transition-all border border-border-primary/20 hover:border-accent/30"
+                  className="w-12 h-12 flex items-center justify-center rounded-full bg-bg-card text-text-secondary hover:text-accent hover:bg-accent/5 transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer border border-border-primary/20 hover:border-accent/30"
                   title="Bearbeiten"
                 >
                   <Edit3 size={20} />
                 </button>
                 <button 
                   onClick={handleDelete}
-                  className="w-12 h-12 flex items-center justify-center rounded-xl bg-bg-card text-heart/60 hover:text-heart hover:bg-heart/5 transition-all border border-border-primary/20 hover:border-heart/30"
+                  className="w-12 h-12 flex items-center justify-center rounded-full bg-bg-card text-heart/60 hover:text-heart hover:bg-heart/5 transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer border border-border-primary/20 hover:border-heart/30"
                   title="Löschen"
                 >
                   <Trash2 size={20} />

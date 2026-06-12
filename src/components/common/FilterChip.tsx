@@ -13,10 +13,10 @@ export const FilterChip = React.forwardRef<HTMLButtonElement, FilterChipProps>(
       <button
         ref={ref}
         className={cn(
-          'px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 border cursor-pointer select-none whitespace-nowrap',
+          'px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 border cursor-pointer select-none whitespace-nowrap hover:scale-105 active:scale-95 disabled:scale-100 disabled:opacity-50 disabled:cursor-not-allowed',
           active 
-            ? 'bg-accent text-bg-primary border-transparent shadow-md'
-            : 'bg-inactive-btn-bg text-inactive-btn-text border-border-primary hover:text-text-primary',
+            ? 'bg-accent text-bg-primary border-transparent shadow-md hover:shadow-lg'
+            : 'bg-inactive-btn-bg text-inactive-btn-text border-border-primary hover:text-text-primary hover:shadow-md',
           shaking && 'animate-[wiggle_0.3s_ease-in-out_infinite] border-heart text-heart',
           editable && 'border-dashed border-text-secondary hover:border-text-primary',
           className

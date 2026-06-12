@@ -1,6 +1,6 @@
 import React, { useRef, useState, useLayoutEffect, useEffect } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { Menu, Moon, Sun, User, Plus } from 'lucide-react';
+import { Menu, Plus } from 'lucide-react';
 import { useUIStore } from '../../store/useUIStore';
 import { useAppStore } from '../../store/useAppStore';
 import { cn } from '../../utils/cn';
@@ -10,8 +10,8 @@ import logoWhite from '../../assets/logo/logo_white.png';
 import { motion } from 'framer-motion';
 
 export const TopNav: React.FC = () => {
-  const { toggleMainMenu, toggleProfileModal, openProductModal } = useUIStore();
-  const { settings, updateSettings, avatarUrl, userName } = useAppStore();
+  const { toggleMainMenu, openProductModal } = useUIStore();
+  const { settings } = useAppStore();
   const location = useLocation();
 
   const tabsRef = useRef<{ [key: string]: HTMLAnchorElement | null }>({});

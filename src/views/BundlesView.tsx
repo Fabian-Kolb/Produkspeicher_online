@@ -4,6 +4,8 @@ import { useUIStore } from '../store/useUIStore';
 import { Layers, Plus, Trash2, Search, X, BookOpen, ShoppingBag } from 'lucide-react';
 import { cn } from '../utils/cn';
 import type { BundleItem } from '../types';
+import { Button } from '../components/common/Button';
+import { FilterChip } from '../components/common/FilterChip';
 
 /* ── Marquee wrapper: scrolls children horizontally when they overflow ── */
 const MarqueeOverflow: React.FC<{ children: React.ReactNode; className?: string }> = ({ children, className = '' }) => {
@@ -178,12 +180,12 @@ export const BundlesView: React.FC = () => {
         <h1 className="text-2xl md:text-3xl font-playfair font-bold">
           Bundles
         </h1>
-        <button
+        <Button
           onClick={() => setActiveBundleId('new')}
-          className="border border-transparent backdrop-blur-md px-3 md:px-5 py-2 md:py-2.5 rounded-full font-medium text-sm transition-all duration-200 shadow-md flex items-center gap-1.5 md:gap-2 bg-accent text-bg-primary hover:bg-accent-hover"
+          className="flex items-center gap-1.5 md:gap-2"
         >
           <Plus size={15} /> <span>Neues Bundle</span>
-        </button>
+        </Button>
       </div>
 
       {!activeBundleId ? (
@@ -196,12 +198,11 @@ export const BundlesView: React.FC = () => {
               </div>
               <h2 className="text-xl font-bold mb-2 text-text-primary">Noch keine Bundles erstellt</h2>
               <p className="text-text-secondary text-sm mb-8">Erstelle dein erstes Bundle um Produkte zu gruppieren.</p>
-              <button
+              <Button
                 onClick={() => setActiveBundleId('new')}
-                className="px-6 py-3 rounded-full text-sm font-semibold transition-all shadow-md bg-accent text-bg-primary hover:bg-accent-hover"
               >
                 Jetzt erstellen
-              </button>
+              </Button>
             </div>
           ) : (
             /* ── Bundle Cards ── */
@@ -228,15 +229,16 @@ export const BundlesView: React.FC = () => {
                       <div className="backdrop-blur-md rounded-2xl md:rounded-3xl p-3 md:p-4 flex flex-col items-end gap-2 md:gap-3 shrink-0 self-end md:self-start border border-text-primary/15 bg-text-primary/10 transition-all shadow-sm">
                         <span className="text-lg md:text-2xl font-bold text-text-primary">{totalPrice.toFixed(2)} €</span>
                         <div className="flex items-center gap-1.5 md:gap-2">
-                          <button
+                          <Button
                             onClick={() => setActiveBundleId(bundle.id)}
-                            className="backdrop-blur-md px-2.5 md:px-4 py-1.5 rounded-full text-xs font-medium transition-all shadow-sm bg-accent text-bg-primary hover:bg-accent-hover"
+                            size="sm"
+                            className="h-7 md:h-8"
                           >
                             Bearbeiten
-                          </button>
+                          </Button>
                           <button
                             onClick={() => deleteBundle(bundle.id)}
-                            className="w-7 h-7 md:w-8 md:h-8 rounded-full flex items-center justify-center transition-all shadow-sm group/trash border bg-accent text-bg-primary border-transparent hover:bg-heart hover:text-white"
+                            className="w-7 h-7 md:w-8 md:h-8 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer shadow-sm group/trash border bg-accent text-bg-primary border-transparent hover:bg-heart hover:text-white"
                           >
                             <Trash2 size={13} />
                           </button>
@@ -274,9 +276,9 @@ export const BundlesView: React.FC = () => {
 
                     {/* Bottom right: Kaufen button */}
                     <div className="flex justify-end">
-                      <button className="px-4 md:px-6 py-2 md:py-2.5 rounded-full text-sm font-semibold transition-all shadow-md bg-accent text-bg-primary hover:bg-accent-hover">
+                      <Button>
                         Kaufen
-                      </button>
+                      </Button>
                     </div>
                   </div>
                 );
@@ -289,11 +291,11 @@ export const BundlesView: React.FC = () => {
         <div className="flex flex-col flex-1 min-h-0 gap-4 md:gap-6">
 
           {/* Mobile Tab Switcher */}
-          <div className="flex md:hidden gap-0 glass-panel rounded-2xl p-1 mx-1">
+          <div className="flex md:hidden gap-0 glass-panel rounded-full p-1 mx-1">
             <button
               onClick={() => setMobileEditorTab('catalog')}
               className={cn(
-                'flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200',
+                'flex-1 flex items-center justify-center gap-2 py-2.5 rounded-full text-sm font-semibold transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer',
                 mobileEditorTab === 'catalog' ? 'bg-text-primary text-bg-primary shadow-sm' : 'text-text-secondary'
               )}
             >
@@ -303,7 +305,7 @@ export const BundlesView: React.FC = () => {
             <button
               onClick={() => setMobileEditorTab('bundle')}
               className={cn(
-                'flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200',
+                'flex-1 flex items-center justify-center gap-2 py-2.5 rounded-full text-sm font-semibold transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer',
                 mobileEditorTab === 'bundle' ? 'bg-text-primary text-bg-primary shadow-sm' : 'text-text-secondary'
               )}
             >
@@ -335,76 +337,56 @@ export const BundlesView: React.FC = () => {
 
                 {/* Category pills – scrollable */}
                 <div className="flex gap-1.5 overflow-x-auto pb-1 no-scrollbar">
-                  <button
+                  <FilterChip
+                    active={editorMainCat === 'Alle'}
                     onClick={() => setEditorMainCat('Alle')}
-                    className={cn(
-                      'px-3 py-1.5 rounded-full text-xs font-medium transition-all shadow-sm border whitespace-nowrap shrink-0',
-                      editorMainCat === 'Alle' 
-                        ? "bg-accent text-bg-primary border-transparent"
-                        : "bg-inactive-btn-bg text-inactive-btn-text border-border-primary hover:text-text-primary"
-                    )}
+                    className="shrink-0"
                   >
                     Alle
-                  </button>
+                  </FilterChip>
                   {categories.map(cat => (
-                    <button
+                    <FilterChip
                       key={cat}
+                      active={editorMainCat === cat}
                       onClick={() => setEditorMainCat(cat)}
-                      className={cn(
-                        'px-3 py-1.5 rounded-full text-xs font-medium transition-all shadow-sm border whitespace-nowrap shrink-0',
-                        editorMainCat === cat 
-                          ? "bg-accent text-bg-primary border-transparent"
-                          : "bg-inactive-btn-bg text-inactive-btn-text border-border-primary hover:text-text-primary"
-                      )}
+                      className="shrink-0"
                     >
                       {cat}
-                    </button>
+                    </FilterChip>
                   ))}
                 </div>
 
                 {/* Status filters */}
                 <div className="flex gap-2">
-                  <button
+                  <FilterChip
+                    active={editorStatusFilter === 'bought'}
                     onClick={() => setEditorStatusFilter(editorStatusFilter === 'bought' ? 'all' : 'bought')}
-                    className={cn(
-                      'flex-1 py-1.5 rounded-full text-xs font-medium transition-all shadow-sm border',
-                      editorStatusFilter === 'bought' 
-                        ? "bg-accent text-bg-primary border-transparent" 
-                        : "bg-inactive-btn-bg text-inactive-btn-text border-border-primary hover:text-text-primary"
-                    )}
+                    className="flex-1 text-center justify-center"
                   >
                     Gekauft
-                  </button>
-                  <button
+                  </FilterChip>
+                  <FilterChip
+                    active={editorStatusFilter === 'reduced'}
                     onClick={() => setEditorStatusFilter(editorStatusFilter === 'reduced' ? 'all' : 'reduced')}
-                    className={cn(
-                      'flex-1 py-1.5 rounded-full text-xs font-medium transition-all shadow-sm border',
-                      editorStatusFilter === 'reduced' 
-                        ? "bg-accent text-bg-primary border-transparent" 
-                        : "bg-inactive-btn-bg text-inactive-btn-text border-border-primary hover:text-text-primary"
-                    )}
+                    className="flex-1 text-center justify-center"
                   >
                     Reduziert
-                  </button>
+                  </FilterChip>
                 </div>
 
                 {/* Sub-category chips */}
                 {editorMainCat !== 'Alle' && subCats[editorMainCat] && (
                   <div className="flex flex-wrap gap-1.5 justify-center items-center">
-                    <button
+                    <FilterChip
+                      active={editorSelectedSubCats.length === 0}
                       onClick={() => setEditorSubCats([])}
-                      className={cn(
-                        'px-3 py-1.5 rounded-full text-xs font-medium transition-all shadow-sm border',
-                        editorSelectedSubCats.length === 0 
-                          ? "bg-accent text-bg-primary border-transparent" 
-                          : "bg-inactive-btn-bg text-inactive-btn-text border-border-primary hover:text-text-primary"
-                      )}
                     >
                       Alle
-                    </button>
+                    </FilterChip>
                     {subCats[editorMainCat].map(sub => (
-                      <button
+                      <FilterChip
                         key={sub}
+                        active={editorSelectedSubCats.includes(sub)}
                         onClick={() => {
                           setEditorSubCats(
                             editorSelectedSubCats.includes(sub)
@@ -412,15 +394,9 @@ export const BundlesView: React.FC = () => {
                               : [...editorSelectedSubCats, sub]
                           );
                         }}
-                        className={cn(
-                          'px-3 py-1.5 rounded-full text-xs font-medium transition-all shadow-sm border',
-                          editorSelectedSubCats.includes(sub) 
-                            ? "bg-accent text-bg-primary border-transparent" 
-                            : "bg-inactive-btn-bg text-inactive-btn-text border-border-primary hover:text-text-primary"
-                        )}
                       >
                         {sub}
-                      </button>
+                      </FilterChip>
                     ))}
                   </div>
                 )}
@@ -478,7 +454,7 @@ export const BundlesView: React.FC = () => {
                     placeholder="Name der Zusammenstellung..."
                     className="bg-transparent border-b border-transparent hover:border-text-secondary/30 focus:border-text-secondary outline-none font-bold text-base md:text-lg text-text-primary placeholder:text-text-secondary/70 w-full py-1 transition-all duration-500 ease-out"
                   />
-                  <button onClick={handleCancelBundle} className="text-text-secondary hover:text-text-primary transition-colors cursor-pointer shrink-0 ml-3 font-bold"><X size={18} /></button>
+                  <button onClick={handleCancelBundle} className="text-text-secondary hover:text-text-primary transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer shrink-0 ml-3 font-bold rounded-full"><X size={18} /></button>
                 </div>
 
                 <div className="flex-1 overflow-y-auto hidden-scrollbar pr-1 space-y-2.5 min-h-[200px]">
@@ -503,19 +479,19 @@ export const BundlesView: React.FC = () => {
                         <div className="flex items-center gap-1.5 shrink-0 ml-2">
                           <button
                             onClick={() => handleDecreaseItem(item.id)}
-                            className="w-7 h-7 md:w-9 md:h-9 rounded-full flex items-center justify-center transition-all text-sm font-bold shadow-sm bg-accent text-bg-primary hover:bg-accent-hover"
+                            className="w-7 h-7 md:w-9 md:h-9 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer text-sm font-bold shadow-sm bg-accent text-bg-primary hover:bg-accent-hover"
                           >
                             −
                           </button>
                           <button
                             onClick={() => handleAddItem(item.id)}
-                            className="w-7 h-7 md:w-9 md:h-9 rounded-full flex items-center justify-center transition-all text-sm font-bold shadow-sm bg-accent text-bg-primary hover:bg-accent-hover"
+                            className="w-7 h-7 md:w-9 md:h-9 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer text-sm font-bold shadow-sm bg-accent text-bg-primary hover:bg-accent-hover"
                           >
                             +
                           </button>
                           <button
                             onClick={() => handleRemoveItem(item.id)}
-                            className="w-7 h-7 md:w-9 md:h-9 rounded-full flex items-center justify-center transition-all text-sm font-bold shadow-sm bg-accent text-bg-primary hover:bg-heart hover:text-white"
+                            className="w-7 h-7 md:w-9 md:h-9 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer text-sm font-bold shadow-sm bg-accent text-bg-primary hover:bg-heart hover:text-white"
                           >
                             ×
                           </button>
@@ -531,12 +507,12 @@ export const BundlesView: React.FC = () => {
                   <span className="text-sm text-text-secondary">Gesamtpreis:</span>
                   <span className="font-bold text-lg md:text-xl">{draftTotal.toLocaleString('de-DE')} €</span>
                 </div>
-                <button
+                <Button
                   onClick={handleCreateOrUpdate}
-                  className="w-full py-2.5 md:py-3 rounded-xl text-sm font-medium transition-all shadow-sm bg-accent text-bg-primary hover:bg-accent-hover"
+                  className="w-full py-2.5 md:py-3 shadow-sm bg-accent text-bg-primary hover:bg-accent-hover"
                 >
                   Zusammenstellung speichern
-                </button>
+                </Button>
               </div>
             </div>
           </div>

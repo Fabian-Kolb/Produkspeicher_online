@@ -76,7 +76,7 @@ export const MainMenuSidebar: React.FC = () => {
               toggleMainMenu();
               toggleProfileModal();
             }}
-            className="w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-200 group text-left font-medium text-text-primary hover:bg-border-primary"
+            className="w-full flex items-center gap-4 px-4 py-3 rounded-full transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer group text-left font-medium text-text-primary hover:bg-border-primary"
           >
             <span className="w-6 h-6 rounded-full overflow-hidden flex items-center justify-center bg-bg-primary border border-border-primary/50 group-hover:scale-110 transition-transform duration-200">
               {avatarUrl ? (
@@ -183,7 +183,7 @@ const MenuButton: React.FC<MenuButtonProps> = ({ icon, children, onClick, isDest
     <button
       onClick={onClick}
       className={cn(
-        'w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-200 group text-left font-medium',
+        'w-full flex items-center gap-4 px-4 py-3 rounded-full transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer group text-left font-medium',
         isDestructive 
           ? 'text-heart hover:bg-heart/10' 
           : isActive 

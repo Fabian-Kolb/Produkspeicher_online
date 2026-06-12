@@ -5,7 +5,7 @@ import { useUIStore } from '../store/useUIStore';
 import { SubNavigation } from '../components/layout/SubNavigation';
 import { ProductCard } from '../components/features/ProductCard';
 import type { Product } from '../types';
-import { cn } from '../utils/cn';
+import { FilterChip } from '../components/common/FilterChip';
 
 
 export const FavoritenView: React.FC = () => {
@@ -88,35 +88,26 @@ export const FavoritenView: React.FC = () => {
             <option value="oldest">Älteste zuerst</option>
           </select>
 
-          <button
+          <FilterChip
+            active={statusFilter === 'bought'}
             onClick={() => setStatusFilter(statusFilter === 'bought' ? 'active' : 'bought')}
-            className={cn(
-              "px-5 py-2 rounded-full text-sm font-medium transition-all duration-300 shadow-sm border",
-              statusFilter === 'bought'
-                ? "bg-accent text-bg-primary border-transparent"
-                : "bg-inactive-btn-bg text-inactive-btn-text border-border-primary hover:text-text-primary hover:scale-105 hover:shadow-md"
-            )}
           >
             Gekauft
-          </button>
-          <button
+          </FilterChip>
+          <FilterChip
+            active={statusFilter === 'reduced'}
             onClick={() => setStatusFilter(statusFilter === 'reduced' ? 'active' : 'reduced')}
-            className={cn(
-              "px-5 py-2 rounded-full text-sm font-medium transition-all duration-300 shadow-sm border",
-              statusFilter === 'reduced'
-                ? "bg-accent text-bg-primary border-transparent"
-                : "bg-inactive-btn-bg text-inactive-btn-text border-border-primary hover:text-text-primary hover:scale-105 hover:shadow-md"
-            )}
           >
             Reduziert
-          </button>
+          </FilterChip>
         </div>
 
         {/* Bottom Row: Sub Filters */}
         <div className="min-h-[44px] flex flex-wrap gap-2 justify-center items-center">
           {mainCat !== 'Alle' && subCats[mainCat] && subCats[mainCat].map(sub => (
-            <button
+            <FilterChip
               key={sub}
+              active={selectedSubCats.includes(sub)}
               onClick={() => {
                 useUIStore.setState(state => {
                   const newSubCats = state.selectedSubCats.includes(sub)
@@ -125,15 +116,9 @@ export const FavoritenView: React.FC = () => {
                   return { selectedSubCats: newSubCats };
                 })
               }}
-              className={cn(
-                "px-5 py-2 rounded-full text-sm font-medium transition-colors border shadow-sm",
-                selectedSubCats.includes(sub)
-                  ? "bg-accent text-bg-primary border-transparent"
-                  : "bg-inactive-btn-bg text-inactive-btn-text border-border-primary hover:text-text-primary"
-              )}
             >
               {sub}
-            </button>
+            </FilterChip>
           ))}
         </div>
 

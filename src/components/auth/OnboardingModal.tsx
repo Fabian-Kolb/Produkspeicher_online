@@ -75,7 +75,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ onComplete }) 
             <button
               type="submit"
               disabled={!name.trim() || isSubmitting}
-              className="w-full relative group overflow-hidden rounded-2xl bg-white text-black font-bold py-4 px-6 flex items-center justify-center gap-2 transition-all hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white"
+              className="w-full relative group overflow-hidden rounded-full bg-white text-black font-bold py-4 px-6 flex items-center justify-center gap-2 transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer shadow-md hover:shadow-lg disabled:scale-100 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white"
             >
               {isSubmitting ? (
                 <>

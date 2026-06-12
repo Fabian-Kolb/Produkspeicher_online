@@ -5,6 +5,7 @@ import { useUIStore } from '../../store/useUIStore';
 import { useAppStore } from '../../store/useAppStore';
 import { cn } from '../../utils/cn';
 import { X, ImagePlus, User, Loader2, Save, Trash2, LogOut } from 'lucide-react';
+import { Button } from '../common/Button';
 
 export const ProfileSettingsModal: React.FC = () => {
   const { isProfileModalOpen, toggleProfileModal } = useUIStore();
@@ -154,7 +155,7 @@ export const ProfileSettingsModal: React.FC = () => {
           </h2>
           <button 
             onClick={toggleProfileModal}
-            className="w-10 h-10 flex items-center justify-center rounded-xl transition-all bg-black/5 dark:bg-white/5 text-text-secondary hover:text-text-primary"
+            className="w-10 h-10 flex items-center justify-center rounded-full transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer bg-black/5 dark:bg-white/5 text-text-secondary hover:text-text-primary"
           >
             <X size={18} />
           </button>
@@ -214,32 +215,34 @@ export const ProfileSettingsModal: React.FC = () => {
 
           {/* Actions */}
           <div className="flex flex-col gap-3 mt-4">
-            <button
+            <Button
               onClick={handleSave}
               disabled={isSubmitting || isUploading || !name.trim()}
-              className="w-full py-4 rounded-2xl font-black text-xs uppercase tracking-[0.2em] flex items-center justify-center gap-3 transition-all disabled:opacity-50 shadow-lg bg-accent text-bg-primary hover:bg-accent-hover hover:scale-[1.02] active:scale-[0.98]"
+              className="w-full py-4 font-black text-xs uppercase tracking-[0.2em] gap-3"
             >
               {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
               Speichern
-            </button>
+            </Button>
 
-            <button
+            <Button
+              variant="danger"
               onClick={handleLogout}
               disabled={isSubmitting}
-              className="w-full py-4 rounded-2xl font-black text-xs uppercase tracking-[0.2em] flex items-center justify-center gap-3 transition-all disabled:opacity-50 shadow-lg bg-heart text-white hover:bg-heart/90 hover:scale-[1.02] active:scale-[0.98]"
+              className="w-full py-4 font-black text-xs uppercase tracking-[0.2em] gap-3"
             >
               {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : <LogOut className="w-5 h-5" />}
               Abmelden / Logout
-            </button>
+            </Button>
             
-            <button
+            <Button
+              variant="ghost"
               onClick={handleClearName}
               disabled={isSubmitting}
-              className="w-full py-4 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] flex items-center justify-center gap-2 transition-all text-heart hover:bg-heart/10 hover:scale-[1.02] active:scale-[0.98]"
+              className="w-full py-4 font-black text-[10px] uppercase tracking-[0.2em] gap-2 text-heart hover:bg-heart/10 hover:text-heart shadow-none hover:shadow-none"
             >
               <Trash2 className="w-4 h-4" />
               Reset & Onboarding
-            </button>
+            </Button>
           </div>
 
         </div>

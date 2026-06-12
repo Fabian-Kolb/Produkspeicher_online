@@ -17,6 +17,57 @@ interface LogEntry {
 
 const CHANGELOG: LogEntry[] = [
   {
+    version: '0.8.20',
+    date: '12. Juni 2026',
+    changes: {
+      added: [
+        'Bilder Drag-and-Drop & Clipboard-Paste: Gestrichelte Drop-Zone für Bilder mit Dateityp-Validierung und intelligentem globalen Paste-Handler (Strg+V).',
+        'Suchbares Subkategorie-Dropdown: Vollständiges Dropdown mit Suche und dynamischer Subkategorie-Schnellerstellung.'
+      ],
+      improved: [
+        'Layout-Optimierung des Produkt-Modals: Hauptkategorie und Subkategorie befinden sich nun nebeneinander mit runden Triggern (rounded-full). Bewertung und Favoriten-Button teilen sich die nächste Zeile (46px Höhe).',
+        'Clean-Up & Speicher-Schonung: Der ungenutzte "Gekauft"-Status wurde aus dem Hinzufügen-Modal entfernt. Bild-Thumbnails verwenden Objektreferenzen (createObjectURL) anstelle von Base64, inklusive sauberem Revoke beim Modal-Close und Unmount.'
+      ]
+    }
+  },
+  {
+    version: '0.8.19',
+    date: '12. Juni 2026',
+    changes: {
+      improved: [
+        'Shop-Verwaltungs-Pille im Dashboard: Der "Shop hinzufügen"-Button und das Einstellungs-Zahnrad wurden in einer gemeinsamen, weißen Pille mit Schatten (bg-white dark:bg-white/10 shadow-md) und blauer Umrandung (border-accent) gebündelt.',
+        'Visual Styles verfeinert: Das Zahnrad leuchtet nicht mehr rund auf, sondern passt sich farblich flexibel an das Theme an (text-text-primary) und färbt sich bei Hover blau (hover:text-accent).',
+        'Kompaktere Filterleiste: Das Zahnrad wurde aus der Filterleiste entfernt, sodass diese nur noch reine Kategorie-Filter enthält. Zudem wurde die überflüssige Shop-Anzahl-Anzeige entfernt.'
+      ]
+    }
+  },
+  {
+    version: '0.8.18',
+    date: '12. Juni 2026',
+    changes: {
+      added: [
+        'Wischbares KPI-Widget-Karussell: Budget-Tracker, Favoriten und Preisalarme sind auf Mobilgeräten nun nebeneinander angeordnet und wischbar (Carousel) mit Snap-Effekt.',
+        'Widget-Seitennavigation: Punkte-Indikatoren (Dots) unter dem Karussell zeigen die aktive Seite an und erlauben schnelles Hinspringen per Klick.'
+      ],
+      improved: [
+        'Platzersparnis auf Mobilgeräten: Die Höhe des KPI-Bereichs wurde auf die Höhe einer einzelnen Karte reduziert, wodurch die Shop-Liste weiter nach oben rückt.',
+        'Responsive Karten-Höhen: Favorites- und Price-Alerts-Karten dehnen sich nun automatisch auf die Höhe des Budget-Trackers aus, um ein harmonisches Bild zu erzeugen.'
+      ]
+    }
+  },
+  {
+    version: '0.8.17',
+    date: '12. Juni 2026',
+    changes: {
+      improved: [
+        'Einheitliche Button-Rundung: Systemweit alle Aktions-Buttons, Filter-Chips und Sidebar-Elemente auf ein vollkommen rundes Design (rounded-full) umgestellt.',
+        'Taktile Interaktionen: Alle Filter-Chips, Haupt- und Aktionsbuttons nutzen die flüssige 300ms Skalierungs-Animation (hover:scale-105, active:scale-95) des Header-Neu-Buttons.',
+        'Modal-Farbschema vereinheitlicht: Aktive Zustände von Toggles (Favoriten, Gekauft, Subkategorien) und Bild-Hinzufügen-Buttons leuchten einheitlich im blauen Akzent-Design.',
+        'Action-Farbkodierung: Abbrechen-Schaltflächen in Modals sind rot (variant="danger") und Speichern-Buttons blau (variant="primary") eingefärbt.'
+      ]
+    }
+  },
+  {
     version: '0.8.16',
     date: '11. Juni 2026',
     changes: {
@@ -615,7 +666,7 @@ export const AppInfoModal: React.FC = () => {
           </div>
           <button 
             onClick={toggleAppInfoModal}
-            className="w-10 h-10 flex items-center justify-center rounded-xl transition-all bg-black/5 dark:bg-white/5 text-text-secondary hover:text-text-primary"
+            className="w-10 h-10 flex items-center justify-center rounded-full transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer bg-black/5 dark:bg-white/5 text-text-secondary hover:text-text-primary"
           >
             <X size={20} />
           </button>
@@ -667,7 +718,7 @@ export const AppInfoModal: React.FC = () => {
                     >
                       <div className="flex items-center gap-4">
                         <span className={cn(
-                          "text-xs font-black px-3 py-1 rounded-xl border transition-all",
+                          "text-xs font-black px-3 py-1 rounded-full border transition-all",
                           isExpanded 
                             ? "bg-accent/10 text-accent border-accent/20" 
                             : "bg-inactive-btn-bg text-inactive-btn-text border-border-primary/10 group-hover:border-border-primary/30"

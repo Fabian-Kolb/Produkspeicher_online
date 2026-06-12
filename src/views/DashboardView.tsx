@@ -232,6 +232,55 @@ export const DashboardView: React.FC = () => {
 
   const displayName = userName || (isDemoMode ? 'Gast' : 'User');
 
+  /* ── KPI Carousel Scroll State & Logic ─────────────────── */
+  const [activeCardIndex, setActiveCardIndex] = useState(0);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  const handleScroll = useCallback(() => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+
+    const scrollLeft = container.scrollLeft;
+    const containerWidth = container.clientWidth;
+    const children = Array.from(container.children) as HTMLElement[];
+
+    let closestIndex = 0;
+    let minDistance = Infinity;
+
+    children.forEach((child, idx) => {
+      const childCenter = child.offsetLeft - container.offsetLeft + child.clientWidth / 2;
+      const containerCenter = scrollLeft + containerWidth / 2;
+      const distance = Math.abs(childCenter - containerCenter);
+      if (distance < minDistance) {
+        minDistance = distance;
+        closestIndex = idx;
+      }
+    });
+
+    setActiveCardIndex((prevIndex) => {
+      if (prevIndex !== closestIndex) {
+        return closestIndex;
+      }
+      return prevIndex;
+    });
+  }, []);
+
+  const scrollToCard = (index: number) => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+
+    const children = Array.from(container.children) as HTMLElement[];
+    if (children[index]) {
+      const child = children[index];
+      const scrollTarget = child.offsetLeft - container.offsetLeft - 16;
+      container.scrollTo({
+        left: scrollTarget,
+        behavior: 'smooth'
+      });
+      setActiveCardIndex(index);
+    }
+  };
+
   /* ── Welcome ───────────────────────────────────────────── */
   const welcomeMessage = useMemo(() => {
     const messages = [
@@ -321,114 +370,137 @@ export const DashboardView: React.FC = () => {
       </div>
 
       {/* ── KPI Widgets ──────────────────────────────────── */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Budget Widget */}
+      <div className="relative flex flex-col gap-3">
         <div
-          onClick={() => navigate('/budget')}
-          className="glass-panel p-5 cursor-pointer hover:-translate-y-1.5 hover:scale-[1.02] hover:shadow-xl transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] transform-gpu relative overflow-hidden group"
+          ref={scrollContainerRef}
+          onScroll={handleScroll}
+          className="flex md:grid md:grid-cols-3 gap-4 md:gap-6 overflow-x-auto md:overflow-x-visible snap-x snap-mandatory md:snap-none scrollbar-none -mx-4 px-4 md:mx-0 md:px-0 pb-3 md:pb-0"
         >
-          {/* Background Blob */}
-          <div className={cn(
-            "absolute -top-12 -right-12 w-32 h-32 rounded-full blur-2xl transition-all duration-700",
-            isOverBudget
-              ? "bg-heart/10 group-hover:bg-heart/20"
-              : "bg-emerald-500/10 group-hover:bg-emerald-500/20"
-          )}></div>
+          {/* Budget Widget */}
+          <div
+            onClick={() => navigate('/budget')}
+            className="glass-panel p-5 cursor-pointer hover:-translate-y-1.5 hover:scale-[1.02] hover:shadow-xl transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] transform-gpu relative overflow-hidden group snap-start snap-always w-[88vw] sm:w-[45vw] md:w-auto flex-shrink-0 flex flex-col justify-between"
+          >
+            {/* Background Blob */}
+            <div className={cn(
+              "absolute -top-12 -right-12 w-32 h-32 rounded-full blur-2xl transition-all duration-700",
+              isOverBudget
+                ? "bg-heart/10 group-hover:bg-heart/20"
+                : "bg-emerald-500/10 group-hover:bg-emerald-500/20"
+            )}></div>
 
-          <div className="relative z-10 flex flex-col h-full">
-            <div className="flex justify-between items-start mb-6">
-              <h3 className="font-bold text-sm">Budget Tracker</h3>
-              <span className={cn(
-                "text-[10px] md:text-xs font-bold px-2.5 py-1 rounded-full border transition-colors",
-                isOverBudget
-                  ? "bg-heart/10 text-heart border-heart/20"
-                  : "bg-emerald-500/10 text-emerald-500 border-emerald-500/20"
-              )}>
-                {settings.monthlyBudget > 0 ? Math.round((spentThisMonth / settings.monthlyBudget) * 100) : 0}% genutzt
-              </span>
-            </div>
+            <div className="relative z-10 flex flex-col h-full justify-between">
+              <div className="flex justify-between items-start mb-6">
+                <h3 className="font-bold text-sm">Budget Tracker</h3>
+                <span className={cn(
+                  "text-[10px] md:text-xs font-bold px-2.5 py-1 rounded-full border transition-colors",
+                  isOverBudget
+                    ? "bg-heart/10 text-heart border-heart/20"
+                    : "bg-emerald-500/10 text-emerald-500 border-emerald-500/20"
+                )}>
+                  {settings.monthlyBudget > 0 ? Math.round((spentThisMonth / settings.monthlyBudget) * 100) : 0}% genutzt
+                </span>
+              </div>
 
-            <div className="flex flex-col flex-1 justify-center">
-              <div className="flex flex-col gap-1 mb-6">
-                <span className="text-xs text-text-secondary font-medium uppercase tracking-wider">Ausgegeben</span>
-                <div className="flex items-baseline gap-1.5">
-                  <p className="text-4xl font-bold">{spentThisMonth.toLocaleString('de-DE', {minimumFractionDigits: 0, maximumFractionDigits: 0})}</p>
-                  <span className="text-xl font-bold text-text-secondary">€</span>
+              <div className="flex flex-col flex-grow justify-center">
+                <div className="flex flex-col gap-1 mb-6">
+                  <span className="text-xs text-text-secondary font-medium uppercase tracking-wider">Ausgegeben</span>
+                  <div className="flex items-baseline gap-1.5">
+                    <p className="text-4xl font-bold">{spentThisMonth.toLocaleString('de-DE', {minimumFractionDigits: 0, maximumFractionDigits: 0})}</p>
+                    <span className="text-xl font-bold text-text-secondary">€</span>
+                  </div>
+                  {isOverBudget ? (
+                    <span className="text-xs md:text-sm font-bold text-heart mt-1 bg-heart/10 w-max px-2 py-1 rounded-md">
+                      {(spentThisMonth - settings.monthlyBudget).toLocaleString('de-DE', {minimumFractionDigits: 0, maximumFractionDigits: 0})} € über dem Budget
+                    </span>
+                  ) : (
+                    <span className="text-xs md:text-sm font-bold text-emerald-500 mt-1 bg-emerald-500/10 w-max px-2 py-1 rounded-md">
+                      Noch {(settings.monthlyBudget - spentThisMonth).toLocaleString('de-DE', {minimumFractionDigits: 0, maximumFractionDigits: 0})} € übrig
+                    </span>
+                  )}
                 </div>
-                {isOverBudget ? (
-                  <span className="text-xs md:text-sm font-bold text-heart mt-1 bg-heart/10 w-max px-2 py-1 rounded-md">
-                    {(spentThisMonth - settings.monthlyBudget).toLocaleString('de-DE', {minimumFractionDigits: 0, maximumFractionDigits: 0})} € über dem Budget
-                  </span>
-                ) : (
-                  <span className="text-xs md:text-sm font-bold text-emerald-500 mt-1 bg-emerald-500/10 w-max px-2 py-1 rounded-md">
-                    Noch {(settings.monthlyBudget - spentThisMonth).toLocaleString('de-DE', {minimumFractionDigits: 0, maximumFractionDigits: 0})} € übrig
-                  </span>
+
+                {/* Enhanced Progress Bar */}
+                <div className="w-full h-3 bg-black/10 dark:bg-white/10 rounded-full overflow-hidden shadow-inner relative mb-2">
+                  <div 
+                    className={cn(
+                      "absolute top-0 left-0 h-full rounded-full transition-all duration-1000 ease-out overflow-hidden bg-gradient-to-r",
+                      isOverBudget
+                        ? "from-heart/80 to-heart"
+                        : "from-emerald-400 to-emerald-500"
+                    )}
+                    style={{ width: `${budgetPct}%` }}
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full animate-[shimmer_2s_infinite]"></div>
+                  </div>
+                </div>
+
+                <div className="flex justify-between text-[10px] md:text-xs text-text-secondary font-bold mt-1">
+                  <span>0 €</span>
+                  <span>Gesamt: {settings.monthlyBudget.toLocaleString('de-DE')} €</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Favorites Widget */}
+          <div
+            onClick={() => navigate('/favoriten')}
+            className="glass-panel p-6 cursor-pointer hover:-translate-y-1.5 hover:scale-[1.02] hover:shadow-xl transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] transform-gpu snap-start snap-always w-[88vw] sm:w-[45vw] md:w-auto flex-shrink-0 flex flex-col justify-between"
+          >
+            <div className="flex justify-between items-center mb-6 text-text-secondary">
+              <span className="font-semibold uppercase text-xs tracking-wider">Favoriten</span>
+              <Heart size={16} />
+            </div>
+            <div className="flex-grow flex items-center justify-center pb-8">
+              <div className="text-6xl font-bold text-text-primary">
+                {savedCount}
+              </div>
+            </div>
+          </div>
+
+          {/* Price Alerts Widget */}
+          <div
+            onClick={() => navigate('/deals')}
+            className="glass-panel p-6 cursor-pointer hover:-translate-y-1.5 hover:scale-[1.02] hover:shadow-xl transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] transform-gpu relative overflow-hidden snap-start snap-always w-[88vw] sm:w-[45vw] md:w-auto flex-shrink-0 flex flex-col justify-between"
+          >
+            <div className="flex justify-between items-center mb-6 text-text-secondary relative z-10">
+              <span className="font-semibold uppercase text-xs tracking-wider">Preisalarme</span>
+              <div className="relative">
+                <Bell size={16} />
+                {alertCount > 0 && (
+                  <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-heart rounded-full animate-ping" />
                 )}
               </div>
-
-              {/* Enhanced Progress Bar */}
-              <div className="w-full h-3 bg-black/10 dark:bg-white/10 rounded-full overflow-hidden shadow-inner relative mb-2">
-                <div 
-                  className={cn(
-                    "absolute top-0 left-0 h-full rounded-full transition-all duration-1000 ease-out overflow-hidden bg-gradient-to-r",
-                    isOverBudget
-                      ? "from-heart/80 to-heart"
-                      : "from-emerald-400 to-emerald-500"
-                  )}
-                  style={{ width: `${budgetPct}%` }}
-                >
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full animate-[shimmer_2s_infinite]"></div>
-                </div>
-              </div>
-
-              <div className="flex justify-between text-[10px] md:text-xs text-text-secondary font-bold mt-1">
-                <span>0 €</span>
-                <span>Gesamt: {settings.monthlyBudget.toLocaleString('de-DE')} €</span>
-              </div>
             </div>
+            <div className="flex-grow flex flex-col items-center justify-center pb-8 relative z-10">
+              <div className="text-6xl font-bold text-heart mb-2">
+                {alertCount}
+              </div>
+              <div className="text-xs text-text-secondary">Artikel reduziert</div>
+            </div>
+
+            {alertCount > 0 && (
+              <div className="absolute inset-0 bg-heart/5 mix-blend-screen pointer-events-none" />
+            )}
           </div>
         </div>
 
-        {/* Favorites Widget */}
-        <div
-          onClick={() => navigate('/favoriten')}
-          className="glass-panel p-6 cursor-pointer hover:-translate-y-1.5 hover:scale-[1.02] hover:shadow-xl transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] transform-gpu"
-        >
-          <div className="flex justify-between items-center mb-6 text-text-secondary">
-            <span className="font-semibold uppercase text-xs tracking-wider">Favoriten</span>
-            <Heart size={16} />
-          </div>
-          <div className="flex h-full items-center justify-center pb-8">
-            <div className="text-6xl font-bold text-text-primary">
-              {savedCount}
-            </div>
-          </div>
-        </div>
-
-        {/* Price Alerts Widget */}
-        <div
-          onClick={() => navigate('/deals')}
-          className="glass-panel p-6 cursor-pointer hover:-translate-y-1.5 hover:scale-[1.02] hover:shadow-xl transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] transform-gpu relative overflow-hidden"
-        >
-          <div className="flex justify-between items-center mb-6 text-text-secondary relative z-10">
-            <span className="font-semibold uppercase text-xs tracking-wider">Preisalarme</span>
-            <div className="relative">
-              <Bell size={16} />
-              {alertCount > 0 && (
-                <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-heart rounded-full animate-ping" />
+        {/* Carousel Pagination Dots */}
+        <div className="flex justify-center gap-2 mt-1 md:hidden">
+          {[0, 1, 2].map((idx) => (
+            <button
+              key={idx}
+              onClick={() => scrollToCard(idx)}
+              className={cn(
+                "w-2 h-2 rounded-full transition-all duration-300",
+                activeCardIndex === idx
+                  ? "bg-accent w-5"
+                  : "bg-text-secondary/35 hover:bg-text-secondary/60"
               )}
-            </div>
-          </div>
-          <div className="flex flex-col h-full items-center justify-center pb-8 relative z-10">
-            <div className="text-6xl font-bold text-heart mb-2">
-              {alertCount}
-            </div>
-            <div className="text-xs text-text-secondary">Artikel reduziert</div>
-          </div>
-
-          {alertCount > 0 && (
-            <div className="absolute inset-0 bg-heart/5 mix-blend-screen pointer-events-none" />
-          )}
+              aria-label={`Gehe zu Karte ${idx + 1}`}
+            />
+          ))}
         </div>
       </div>
 
@@ -436,29 +508,32 @@ export const DashboardView: React.FC = () => {
       <div className="mt-4">
         <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
           <h2 className="text-xl md:text-2xl font-playfair font-bold">Deine Shops</h2>
-          <button
-            onClick={() => setShowAddShopModal(true)}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium active:scale-95 transition-all duration-200 shadow-md bg-accent text-bg-primary hover:bg-accent-hover"
-          >
-            <Plus size={14} />
-            Shop hinzufügen
-          </button>
+          <div className="flex items-center gap-1.5 p-1 rounded-full bg-white dark:bg-white/10 border border-accent shadow-md">
+            <button
+              onClick={() => setShowAddShopModal(true)}
+              className="flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium active:scale-95 transition-all duration-200 shadow-sm bg-accent text-bg-primary hover:bg-accent-hover"
+            >
+              <Plus size={14} />
+              Shop hinzufügen
+            </button>
+            <button
+              onClick={() => setIsEditing(!isEditing)}
+              className="w-9 h-9 flex items-center justify-center shrink-0 rounded-full active:scale-95 transition-all duration-300 text-text-primary hover:text-accent cursor-pointer"
+              title="Kategorien verwalten"
+            >
+              <Settings
+                size={16}
+                className={cn(
+                  "transition-transform duration-500",
+                  isEditing ? 'rotate-180' : 'rotate-0'
+                )}
+              />
+            </button>
+          </div>
         </div>
 
         {/* ── Filter Bar with FilterChips ──────────────────── */}
         <div className="flex flex-wrap items-center gap-2 mb-6">
-          {/* Gear FilterChip */}
-          <FilterChip
-            active={isEditing}
-            onClick={() => setIsEditing(!isEditing)}
-            className="!px-3"
-          >
-            <Settings
-              size={14}
-              className={`transition-transform duration-500 ${isEditing ? 'rotate-180' : 'rotate-0'}`}
-            />
-          </FilterChip>
-
           {/* Category FilterChips */}
           {displayCats.map((cat) => (
             <FilterChip
@@ -471,11 +546,6 @@ export const DashboardView: React.FC = () => {
               {cat}
             </FilterChip>
           ))}
-
-          {/* Shop count */}
-          <span className="ml-auto text-xs text-text-secondary tabular-nums">
-            {filteredShops.length} {filteredShops.length === 1 ? 'Shop' : 'Shops'}
-          </span>
         </div>
 
         {/* Slide-down Category Edit Menu */}

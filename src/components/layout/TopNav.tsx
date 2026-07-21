@@ -73,6 +73,43 @@ export const TopNav: React.FC = () => {
     setActiveBundleId('new');
   };
 
+  // Compute active header action button state based on route & store state
+  const getHeaderButtonConfig = () => {
+    if (location.pathname === '/katalog' || location.pathname === '/favoriten') {
+      return {
+        key: 'add-product',
+        label: 'Neu',
+        icon: <Plus size={16} strokeWidth={2.5} />,
+        onClick: () => {
+          triggerHaptic(15);
+          openProductModal();
+        },
+        className: 'hidden md:flex'
+      };
+    }
+    if (location.pathname === '/bundles') {
+      if (activeBundleId) {
+        return {
+          key: 'cancel-bundle',
+          label: 'Abbrechen',
+          icon: <X size={15} strokeWidth={2.5} />,
+          onClick: handleCancelBundle,
+          className: 'flex'
+        };
+      }
+      return {
+        key: 'new-bundle',
+        label: 'Neues Bundle',
+        icon: <Plus size={15} strokeWidth={2.5} />,
+        onClick: handleNewBundle,
+        className: 'flex'
+      };
+    }
+    return null;
+  };
+
+  const buttonConfig = getHeaderButtonConfig();
+
   return (
     <header className={cn(
       "fixed top-0 w-full z-50 px-4 md:px-6 py-2 md:py-3 grid grid-cols-[auto_1fr] md:grid-cols-[1fr_auto_1fr] items-center border-b transition-all duration-300",
@@ -135,71 +172,35 @@ export const TopNav: React.FC = () => {
 
       {/* Right Controls */}
       <div className="flex items-center gap-2 md:gap-4 justify-end">
-        {/* Global Add Product Button - Desktop Only (Only on Katalog & Favoriten) */}
-        <AnimatePresence mode="popLayout">
-          {(location.pathname === '/katalog' || location.pathname === '/favoriten') && (
+        {/* Option 1: Sequenced Wait AnimatePresence with instant hover & smooth entrance/exit */}
+        <AnimatePresence mode="wait">
+          {buttonConfig && (
             <motion.button
-              key="desktop-add-product-btn"
-              initial={{ opacity: 0, scale: 0.8, x: 8 }}
-              animate={{ opacity: 1, scale: 1, x: 0 }}
-              exit={{ opacity: 0, scale: 0.8, x: 8 }}
-              transition={{ type: "spring", stiffness: 450, damping: 32 }}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => {
-                triggerHaptic(15);
-                openProductModal();
+              key={buttonConfig.key}
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              transition={{
+                duration: 0.2,
+                ease: "easeOut"
               }}
-              className="hidden md:flex h-10 items-center justify-center gap-1.5 bg-accent hover:bg-accent-hover text-bg-primary font-bold px-5 rounded-full text-sm shadow-md cursor-pointer select-none whitespace-nowrap origin-center transition-all duration-300"
+              whileHover={{
+                scale: 1.05,
+                transition: { type: "spring", stiffness: 600, damping: 25 }
+              }}
+              whileTap={{
+                scale: 0.95,
+                transition: { type: "spring", stiffness: 600, damping: 25 }
+              }}
+              onClick={buttonConfig.onClick}
+              className={cn(
+                "h-9 md:h-10 items-center justify-center gap-1.5 bg-accent hover:bg-accent-hover text-bg-primary font-bold px-3.5 md:px-5 rounded-full text-xs md:text-sm shadow-md cursor-pointer select-none whitespace-nowrap origin-center transition-colors duration-200 transform-gpu",
+                buttonConfig.className
+              )}
             >
-              <Plus size={16} strokeWidth={2.5} />
-              <span>Neu</span>
+              {buttonConfig.icon}
+              <span>{buttonConfig.label}</span>
             </motion.button>
-          )}
-
-          {/* Bundles Header Action Button (Neues Bundle / Abbrechen) */}
-          {location.pathname === '/bundles' && (
-            <motion.div
-              key="bundles-header-btn-wrapper"
-              initial={{ opacity: 0, scale: 0.8, x: 8 }}
-              animate={{ opacity: 1, scale: 1, x: 0 }}
-              exit={{ opacity: 0, scale: 0.8, x: 8 }}
-              transition={{ type: "spring", stiffness: 450, damping: 32 }}
-            >
-              <AnimatePresence mode="wait" initial={false}>
-                {activeBundleId ? (
-                  <motion.button
-                    key="cancel-bundle-btn"
-                    initial={{ opacity: 0, scale: 0.85, x: 5 }}
-                    animate={{ opacity: 1, scale: 1, x: 0 }}
-                    exit={{ opacity: 0, scale: 0.85, x: -5 }}
-                    transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={handleCancelBundle}
-                    className="flex h-9 md:h-10 items-center justify-center gap-1.5 bg-accent hover:bg-accent-hover text-bg-primary font-bold px-3.5 md:px-5 rounded-full text-xs md:text-sm shadow-md cursor-pointer select-none whitespace-nowrap origin-center transition-all duration-300"
-                  >
-                    <X size={15} strokeWidth={2.5} />
-                    <span>Abbrechen</span>
-                  </motion.button>
-                ) : (
-                  <motion.button
-                    key="new-bundle-btn"
-                    initial={{ opacity: 0, scale: 0.85, x: 5 }}
-                    animate={{ opacity: 1, scale: 1, x: 0 }}
-                    exit={{ opacity: 0, scale: 0.85, x: -5 }}
-                    transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={handleNewBundle}
-                    className="flex h-9 md:h-10 items-center justify-center gap-1.5 bg-accent hover:bg-accent-hover text-bg-primary font-bold px-3.5 md:px-5 rounded-full text-xs md:text-sm shadow-md cursor-pointer select-none whitespace-nowrap origin-center transition-all duration-300"
-                  >
-                    <Plus size={15} strokeWidth={2.5} />
-                    <span>Neues Bundle</span>
-                  </motion.button>
-                )}
-              </AnimatePresence>
-            </motion.div>
           )}
         </AnimatePresence>
 
@@ -217,4 +218,5 @@ export const TopNav: React.FC = () => {
     </header>
   );
 };
+
 

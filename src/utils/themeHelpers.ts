@@ -12,8 +12,8 @@ export const THEME_PRESETS = [
       textGrey: '#a0a0a0',
       accent: '#3b82f6',
       accentHover: '#2563eb',
-      inactiveBtnBg: '#333333',
-      inactiveBtnText: '#888888',
+      inactiveBtnBg: '#2a2a2a',
+      inactiveBtnText: '#a0a0a0',
       heart: '#ef4444',
       glassBg: 'rgba(37, 37, 37, 0.7)',
       glassBorder: 'rgba(255, 255, 255, 0.08)'
@@ -32,8 +32,8 @@ export const THEME_PRESETS = [
       textGrey: '#a0a0a0',
       accent: '#3b82f6',
       accentHover: '#2563eb',
-      inactiveBtnBg: '#333333',
-      inactiveBtnText: '#888888',
+      inactiveBtnBg: '#2a2a2a',
+      inactiveBtnText: '#a0a0a0',
       heart: '#ef4444',
       glassBg: 'rgba(37, 37, 37, 0.7)',
       glassBorder: 'rgba(255, 255, 255, 0.08)'
@@ -52,8 +52,8 @@ export const THEME_PRESETS = [
       textGrey: '#4b5563',
       accent: '#3b82f6',
       accentHover: '#1d4ed8',
-      inactiveBtnBg: '#f1f5f9',
-      inactiveBtnText: '#94a3b8',
+      inactiveBtnBg: '#e2e8f0',
+      inactiveBtnText: '#4b5563',
       heart: '#ef4444',
       glassBg: 'rgba(255, 255, 255, 0.7)',
       glassBorder: 'rgba(0, 0, 0, 0.06)'
@@ -72,8 +72,8 @@ export const THEME_PRESETS = [
       textGrey: '#4b5563',
       accent: '#3b82f6',
       accentHover: '#1d4ed8',
-      inactiveBtnBg: '#f1f5f9',
-      inactiveBtnText: '#94a3b8',
+      inactiveBtnBg: '#e2e8f0',
+      inactiveBtnText: '#4b5563',
       heart: '#ef4444',
       glassBg: 'rgba(255, 255, 255, 0.7)',
       glassBorder: 'rgba(0, 0, 0, 0.06)'

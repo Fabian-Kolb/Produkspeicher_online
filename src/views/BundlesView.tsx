@@ -1,7 +1,7 @@
 import React, { useMemo, useState, useEffect, useRef } from 'react';
 import { useAppStore } from '../store/useAppStore';
 import { useUIStore } from '../store/useUIStore';
-import { Layers, Plus, Trash2, Search, X, BookOpen, ShoppingBag, Check } from 'lucide-react';
+import { Layers, Plus, Trash2, Search, X, BookOpen, ShoppingBag, Check, SlidersHorizontal } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '../utils/cn';
 import type { BundleItem } from '../types';
@@ -51,11 +51,14 @@ export const BundlesView: React.FC = () => {
   const [editorMainCat, setEditorMainCat] = useState('Alle');
   const [editorSelectedSubCats, setEditorSubCats] = useState<string[]>([]);
   const [editorStatusFilter, setEditorStatusFilter] = useState<'all' | 'bought' | 'reduced'>('all');
+  const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
 
   // Mobile editor tab state: 'catalog' or 'bundle'
   const [mobileEditorTab, setMobileEditorTab] = useState<'catalog' | 'bundle'>('catalog');
 
   const isEditing = Boolean(activeBundleId);
+
+  const activeFilterCount = (editorMainCat !== 'Alle' ? 1 : 0) + (editorSelectedSubCats.length > 0 ? 1 : 0) + (editorStatusFilter !== 'all' ? 1 : 0);
 
   // When active bundle changes, update draft in UIStore
   useEffect(() => {
@@ -72,6 +75,7 @@ export const BundlesView: React.FC = () => {
     setEditorMainCat('Alle');
     setEditorSubCats([]);
     setEditorStatusFilter('all');
+    setIsMobileFilterOpen(false);
     setMobileEditorTab('catalog');
   }, [activeBundleId, bundles, setBundleDraft, bundleDraft]);
 
@@ -307,261 +311,57 @@ export const BundlesView: React.FC = () => {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 25, scale: 0.97 }}
             transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-            className="flex flex-col flex-1 min-h-0 gap-4 md:gap-6"
+            className="flex flex-col flex-1 min-h-0 gap-4 lg:gap-6 relative pb-16 lg:pb-0"
           >
-            {/* Mobile Tab Switcher */}
-            <div className="flex md:hidden gap-0 glass-panel rounded-full p-1 mx-1">
-              <button
-                onClick={() => {
-                  triggerHaptic(15);
-                  setMobileEditorTab('catalog');
-                }}
-                className={cn(
-                  'flex-1 flex items-center justify-center gap-2 py-2.5 rounded-full text-sm font-semibold transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer',
-                  mobileEditorTab === 'catalog' ? 'bg-text-primary text-bg-primary shadow-sm' : 'text-text-secondary'
-                )}
-              >
-                <BookOpen size={16} />
-                Katalog
-              </button>
-              <button
-                onClick={() => {
-                  triggerHaptic(15);
-                  setMobileEditorTab('bundle');
-                }}
-                className={cn(
-                  'flex-1 flex items-center justify-center gap-2 py-2.5 rounded-full text-sm font-semibold transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer',
-                  mobileEditorTab === 'bundle' ? 'bg-text-primary text-bg-primary shadow-sm' : 'text-text-secondary'
-                )}
-              >
-                <ShoppingBag size={16} />
-                Bundle {draftItems.length > 0 && <span className="bg-heart text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center leading-none">{draftItems.length}</span>}
-              </button>
-            </div>
-
-            <div className="flex flex-col md:flex-row flex-1 min-h-0 gap-4 md:gap-6">
-              {/* Left panel: Full Catalog with Filters */}
-              <div className={cn(
-                'flex-[3] glass-panel rounded-2xl md:rounded-3xl p-4 md:p-6 flex flex-col overflow-hidden relative',
-                // On mobile, hide this panel when on 'bundle' tab
-                mobileEditorTab === 'bundle' ? 'hidden md:flex' : 'flex'
-              )}>
-                {/* Filter Bar */}
-                <div className="flex flex-col gap-3 mb-4 shrink-0">
-                  {/* Search */}
-                  <div className="relative">
-                    <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-text-secondary" />
-                    <input
-                      type="text"
-                      value={searchQuery}
-                      onChange={e => setSearchQuery(e.target.value)}
-                      placeholder="Suchen..."
-                      className="w-full bg-[var(--theme-glass-bg)] border border-[var(--theme-glass-border)] rounded-full pl-10 pr-4 py-2 text-sm outline-none hover:border-text-secondary focus:border-text-secondary hover:-translate-y-0.5 focus:-translate-y-0.5 hover:scale-[1.02] focus:scale-[1.02] hover:shadow-md focus:shadow-md transition-all duration-500 ease-out transform-gpu origin-center shadow-sm"
-                    />
-                  </div>
-
-                  {/* Category pills – scrollable */}
-                  <div className="flex gap-1.5 overflow-x-auto pb-1 no-scrollbar">
-                    <FilterChip
-                      active={editorMainCat === 'Alle'}
-                      onClick={() => setEditorMainCat('Alle')}
-                      className="shrink-0"
-                    >
-                      Alle
-                    </FilterChip>
-                    {categories.map(cat => (
-                      <FilterChip
-                        key={cat}
-                        active={editorMainCat === cat}
-                        onClick={() => setEditorMainCat(cat)}
-                        className="shrink-0"
-                      >
-                        {cat}
-                      </FilterChip>
-                    ))}
-                  </div>
-
-                  {/* Status filters */}
-                  <div className="flex gap-2">
-                    <FilterChip
-                      active={editorStatusFilter === 'bought'}
-                      onClick={() => setEditorStatusFilter(editorStatusFilter === 'bought' ? 'all' : 'bought')}
-                      className="flex-1 text-center justify-center"
-                    >
-                      Gekauft
-                    </FilterChip>
-                    <FilterChip
-                      active={editorStatusFilter === 'reduced'}
-                      onClick={() => setEditorStatusFilter(editorStatusFilter === 'reduced' ? 'all' : 'reduced')}
-                      className="flex-1 text-center justify-center"
-                    >
-                      Reduziert
-                    </FilterChip>
-                  </div>
-
-                  {/* Sub-category chips */}
-                  {editorMainCat !== 'Alle' && subCats[editorMainCat] && (
-                    <div className="flex flex-wrap gap-1.5 justify-center items-center">
-                      <FilterChip
-                        active={editorSelectedSubCats.length === 0}
-                        onClick={() => setEditorSubCats([])}
-                      >
-                        Alle
-                      </FilterChip>
-                      {subCats[editorMainCat].map(sub => (
-                        <FilterChip
-                          key={sub}
-                          active={editorSelectedSubCats.includes(sub)}
-                          onClick={() => {
-                            setEditorSubCats(
-                              editorSelectedSubCats.includes(sub)
-                                ? editorSelectedSubCats.filter(s => s !== sub)
-                                : [...editorSelectedSubCats, sub]
-                            );
-                          }}
-                        >
-                          {sub}
-                        </FilterChip>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                {/* Product Grid */}
-                <div className="flex-1 relative overflow-hidden">
-                  <div className="absolute inset-0 overflow-y-auto hidden-scrollbar" style={{ maskImage: 'linear-gradient(to bottom, transparent 0%, black 40px, black calc(100% - 60px), transparent 100%)', WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 40px, black calc(100% - 60px), transparent 100%)' }}>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 pt-8 pb-16">
-                      {editorFilteredProducts.map(product => {
-                        const draftItem = draftItems.find(i => i.id === product.id);
-                        const isSelected = Boolean(draftItem);
-                        const selectedQty = draftItem?.qty || 0;
-
-                        return (
-                          <div
-                            key={product.id}
-                            onClick={() => {
-                              handleAddItem(product.id);
-                            }}
-                            className={cn(
-                              "glass-panel group relative flex flex-col overflow-hidden transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] transform-gpu rounded-2xl p-2 md:p-3 cursor-pointer select-none",
-                              isSelected
-                                ? "ring-2 ring-accent border-accent bg-accent/15 dark:bg-accent/20 shadow-lg shadow-accent/15 scale-[1.01]"
-                                : "hover:-translate-y-1.5 hover:scale-[1.02] hover:shadow-xl"
-                            )}
-                          >
-                            <div className="relative w-full aspect-square rounded-xl overflow-hidden bg-text-primary/10 mb-2">
-                              <img
-                                src={product.imgs[0] || 'https://via.placeholder.com/400'}
-                                alt={product.name}
-                                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                                loading="lazy"
-                              />
-                              {product.discount > 0 && (
-                                <div className="absolute top-1.5 left-1.5 bg-heart text-white text-[9px] font-bold px-1.5 py-0.5 rounded-md shadow-md z-10">
-                                  -{product.discount}%
-                                </div>
-                              )}
-
-                              {/* Selection Highlight Badge */}
-                              <AnimatePresence>
-                                {isSelected && (
-                                  <motion.div
-                                    initial={{ scale: 0, opacity: 0 }}
-                                    animate={{ scale: 1, opacity: 1 }}
-                                    exit={{ scale: 0, opacity: 0 }}
-                                    transition={{ type: "spring", stiffness: 500, damping: 25 }}
-                                    className="absolute top-1.5 right-1.5 bg-accent text-bg-primary text-[10px] font-extrabold px-2 py-0.5 rounded-full shadow-lg flex items-center gap-1 z-10"
-                                  >
-                                    <Check size={11} className="stroke-[3]" />
-                                    <span>{selectedQty}x</span>
-                                  </motion.div>
-                                )}
-                              </AnimatePresence>
-                            </div>
-
-                            <span className="text-[9px] md:text-[10px] font-bold uppercase tracking-wider text-text-secondary mb-0.5 line-clamp-1 px-0.5">
-                              {product.shop}
-                            </span>
-                            <h3 className={cn(
-                              "font-bold text-xs md:text-sm leading-snug mb-0.5 line-clamp-1 px-0.5 transition-colors",
-                              isSelected ? "text-accent font-extrabold" : "text-text-primary"
-                            )}>
-                              {product.name}
-                            </h3>
-                            <div className="flex items-center justify-between px-0.5 mt-auto pt-0.5">
-                              <span className="font-bold text-xs md:text-sm">
-                                {product.finalPrice.toFixed(2)} €
-                              </span>
-                              {isSelected && (
-                                <span className="text-[10px] font-extrabold text-accent bg-accent/20 px-1.5 py-0.5 rounded-md">
-                                  Ausgewählt
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                        );
-                      })}
-                      {editorFilteredProducts.length === 0 && (
-                        <div className="col-span-full py-16 flex flex-col items-center justify-center text-text-secondary">
-                          <p className="text-sm">Keine Produkte gefunden.</p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Right panel: Bundle Editor */}
-              <div className={cn(
-                'md:flex-1 glass-panel rounded-2xl md:rounded-3xl p-4 md:p-6 flex flex-col justify-between overflow-hidden md:min-w-[280px]',
-                mobileEditorTab === 'catalog' ? 'hidden md:flex' : 'flex'
-              )}>
+            <div className="flex flex-col lg:flex-row flex-1 min-h-0 gap-4 lg:gap-6 items-start">
+              {/* Top Box on Mobile / Perfectly Top-Aligned Decoupled Viewport Sidebar on Desktop */}
+              <div className="w-full lg:w-[340px] xl:w-[380px] glass-panel rounded-2xl lg:rounded-3xl p-4 lg:p-5 flex flex-col justify-between shrink-0 order-1 lg:order-2 lg:self-start lg:sticky lg:top-4 lg:h-[calc(100vh-150px)]">
                 <div className="flex-1 flex flex-col min-h-0">
-                  <div className="flex justify-between items-center mb-4 shrink-0">
+                  <div className="flex justify-between items-center mb-3 shrink-0">
                     <input
                       type="text"
                       value={draftName}
                       onChange={e => setDraftName(e.target.value)}
                       placeholder="Name der Zusammenstellung..."
-                      className="bg-transparent border-b border-transparent hover:border-text-secondary/30 focus:border-text-secondary outline-none font-bold text-base md:text-lg text-text-primary placeholder:text-text-secondary/70 w-full py-1 transition-all duration-500 ease-out"
+                      className="bg-transparent border-b border-transparent hover:border-text-secondary/30 focus:border-text-secondary outline-none font-bold text-base lg:text-lg text-text-primary placeholder:text-text-secondary/70 w-full py-1 transition-all duration-500 ease-out"
                     />
                   </div>
 
-                  <div className="flex-1 overflow-y-auto hidden-scrollbar pr-1 space-y-2.5 min-h-[200px]">
+                  <div className="flex-1 overflow-y-auto hidden-scrollbar pr-1 space-y-2 max-h-[240px] lg:max-h-none min-h-[90px]">
                     {draftItems.length === 0 && (
-                      <div className="h-full min-h-[150px] flex flex-col items-center justify-center text-text-secondary opacity-50">
-                        <Layers size={28} className="mb-2" />
-                        <p className="text-sm text-center">Füge Produkte aus dem Katalog hinzu.</p>
+                      <div className="py-6 lg:py-12 flex flex-col items-center justify-center text-text-secondary opacity-50">
+                        <Layers size={24} className="mb-1.5" />
+                        <p className="text-xs lg:text-sm text-center">Füge Produkte aus dem Katalog hinzu.</p>
                       </div>
                     )}
                     {draftItems.map(item => {
                       const product = products.find(p => p.id === item.id);
                       if (!product) return null;
                       return (
-                        <div key={item.id} className="flex items-center justify-between p-3 glass-panel rounded-xl md:rounded-2xl border border-accent/20 bg-accent/5">
-                          <div className="flex items-center gap-2.5 flex-1 min-w-0">
-                            <img src={product.imgs[0] || 'https://via.placeholder.com/100'} className="w-10 h-10 md:w-12 md:h-12 object-cover rounded-lg md:rounded-xl shrink-0" alt="" />
+                        <div key={item.id} className="flex items-center justify-between p-2 lg:p-2.5 glass-panel rounded-xl lg:rounded-2xl border border-accent/20 bg-accent/5">
+                          <div className="flex items-center gap-2 flex-1 min-w-0">
+                            <img src={product.imgs[0] || 'https://via.placeholder.com/100'} className="w-8 h-8 lg:w-10 lg:h-10 object-cover rounded-lg lg:rounded-xl shrink-0" alt="" />
                             <div className="min-w-0">
-                              <p className="font-bold text-xs md:text-sm leading-tight line-clamp-1">{product.name}</p>
+                              <p className="font-bold text-xs leading-tight truncate">{product.name}</p>
                               <p className="text-[10px] text-text-secondary">{product.finalPrice.toLocaleString('de-DE')} € ({item.qty}x)</p>
                             </div>
                           </div>
-                          <div className="flex items-center gap-1.5 shrink-0 ml-2">
+                          <div className="flex items-center gap-1 shrink-0 ml-1.5">
                             <button
                               onClick={() => handleDecreaseItem(item.id)}
-                              className="w-7 h-7 md:w-9 md:h-9 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer text-sm font-bold shadow-sm bg-accent text-bg-primary hover:bg-accent-hover"
+                              className="w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer text-xs font-bold shadow-sm bg-accent text-bg-primary hover:bg-accent-hover shrink-0"
                             >
                               −
                             </button>
                             <button
                               onClick={() => handleAddItem(item.id)}
-                              className="w-7 h-7 md:w-9 md:h-9 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer text-sm font-bold shadow-sm bg-accent text-bg-primary hover:bg-accent-hover"
+                              className="w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer text-xs font-bold shadow-sm bg-accent text-bg-primary hover:bg-accent-hover shrink-0"
                             >
                               +
                             </button>
                             <button
                               onClick={() => handleRemoveItem(item.id)}
-                              className="w-7 h-7 md:w-9 md:h-9 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer text-sm font-bold shadow-sm bg-accent text-bg-primary hover:bg-heart hover:text-white"
+                              className="w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer text-xs font-bold shadow-sm bg-accent text-bg-primary hover:bg-heart hover:text-white shrink-0"
                             >
                               ×
                             </button>
@@ -572,17 +372,234 @@ export const BundlesView: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="mt-4 pt-4 border-t border-[var(--theme-glass-border)] shrink-0">
-                  <div className="flex justify-between items-center mb-3">
-                    <span className="text-sm text-text-secondary">Gesamtpreis:</span>
-                    <span className="font-bold text-lg md:text-xl">{draftTotal.toLocaleString('de-DE')} €</span>
+                <div className="mt-3 pt-3 border-t border-[var(--theme-glass-border)] shrink-0">
+                  <div className="flex justify-between items-center mb-2.5">
+                    <span className="text-xs lg:text-sm text-text-secondary">Gesamtpreis:</span>
+                    <span className="font-bold text-base lg:text-xl">{draftTotal.toLocaleString('de-DE')} €</span>
                   </div>
                   <Button
                     onClick={handleCreateOrUpdate}
-                    className="w-full py-2.5 md:py-3 shadow-sm bg-accent text-bg-primary hover:bg-accent-hover"
+                    className="w-full py-2.5 lg:py-3 shadow-sm bg-accent text-bg-primary hover:bg-accent-hover text-xs sm:text-sm font-bold whitespace-nowrap overflow-hidden text-ellipsis"
                   >
                     Zusammenstellung speichern
                   </Button>
+                </div>
+              </div>
+
+              {/* Bottom Box on Mobile / Left Panel on Desktop: Full Catalog with Filters */}
+              <div className="flex-1 glass-panel rounded-2xl lg:rounded-3xl p-3 sm:p-4 lg:p-6 flex flex-col relative order-2 lg:order-1 w-full">
+                {/* Filter Bar */}
+                <div className="flex flex-col gap-3 mb-4 shrink-0">
+                  {/* Search + Mobile Filter Toggle Button */}
+                  <div className="flex items-center gap-2">
+                    <div className="relative flex-1">
+                      <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-text-secondary pointer-events-none" />
+                      <input
+                        type="text"
+                        value={searchQuery}
+                        onChange={e => setSearchQuery(e.target.value)}
+                        placeholder="Suchen..."
+                        className="w-full bg-[var(--theme-glass-bg)] border border-[var(--theme-glass-border)] rounded-full pl-10 pr-4 py-2 text-sm outline-none hover:border-text-secondary focus:border-text-secondary hover:-translate-y-0.5 focus:-translate-y-0.5 hover:scale-[1.01] focus:scale-[1.01] hover:shadow-md focus:shadow-md transition-all duration-300 ease-out transform-gpu shadow-sm"
+                      />
+                    </div>
+
+                    {/* Mobile Filter Toggle Button (Visible on mobile lg:hidden) */}
+                    <button
+                      onClick={() => {
+                        triggerHaptic(15);
+                        setIsMobileFilterOpen(prev => !prev);
+                      }}
+                      className={cn(
+                        "lg:hidden h-9 px-3.5 rounded-full text-xs font-bold flex items-center gap-1.5 border transition-all duration-300 shrink-0 cursor-pointer select-none",
+                        isMobileFilterOpen || activeFilterCount > 0
+                          ? "bg-accent text-bg-primary border-accent shadow-sm"
+                          : "bg-[var(--theme-glass-bg)] border-[var(--theme-glass-border)] text-text-secondary hover:text-text-primary"
+                      )}
+                    >
+                      <SlidersHorizontal size={14} />
+                      <span>Filter</span>
+                      {activeFilterCount > 0 && (
+                        <span className="bg-bg-primary text-accent text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-extrabold ml-0.5 shadow-sm">
+                          {activeFilterCount}
+                        </span>
+                      )}
+                    </button>
+                  </div>
+
+                  {/* Filter Content (Always visible on Desktop lg:flex, collapsible on Mobile) */}
+                  <div className={cn(
+                    "flex flex-col gap-3 transition-all",
+                    !isMobileFilterOpen && "hidden lg:flex"
+                  )}>
+                    {/* Main Category pills – flex wrap layout */}
+                    <div className="flex flex-wrap gap-1.5 items-center py-1">
+                      <FilterChip
+                        active={editorMainCat === 'Alle'}
+                        onClick={() => {
+                          triggerHaptic(15);
+                          setEditorMainCat('Alle');
+                          setEditorSubCats([]);
+                        }}
+                        className="shrink-0"
+                      >
+                        Alle
+                      </FilterChip>
+                      {categories.map(cat => (
+                        <FilterChip
+                          key={cat}
+                          active={editorMainCat === cat}
+                          onClick={() => {
+                            triggerHaptic(15);
+                            setEditorMainCat(cat);
+                            setEditorSubCats([]);
+                          }}
+                          className="shrink-0"
+                        >
+                          {cat}
+                        </FilterChip>
+                      ))}
+                    </div>
+
+                    {/* Sub-category chips (if main category selected) */}
+                    {editorMainCat !== 'Alle' && subCats[editorMainCat] && subCats[editorMainCat].length > 0 && (
+                      <div className="flex flex-wrap gap-1.5 items-center pt-2 pb-1 border-t border-[var(--theme-glass-border)]">
+                        <span className="text-[10px] uppercase font-bold text-text-secondary mr-1">Unterkategorien:</span>
+                        <FilterChip
+                          active={editorSelectedSubCats.length === 0}
+                          onClick={() => {
+                            triggerHaptic(15);
+                            setEditorSubCats([]);
+                          }}
+                          className="shrink-0"
+                        >
+                          Alle
+                        </FilterChip>
+                        {subCats[editorMainCat].map(sub => (
+                          <FilterChip
+                            key={sub}
+                            active={editorSelectedSubCats.includes(sub)}
+                            onClick={() => {
+                              triggerHaptic(15);
+                              setEditorSubCats(
+                                editorSelectedSubCats.includes(sub)
+                                  ? editorSelectedSubCats.filter(s => s !== sub)
+                                  : [...editorSelectedSubCats, sub]
+                              );
+                            }}
+                            className="shrink-0"
+                          >
+                            {sub}
+                          </FilterChip>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Status filter pills (Gekauft / Reduziert as sleek mini-chips) */}
+                    <div className="flex items-center gap-1.5 pt-2 pb-1 border-t border-[var(--theme-glass-border)]">
+                      <span className="text-[10px] uppercase font-bold text-text-secondary mr-1">Status:</span>
+                      <FilterChip
+                        active={editorStatusFilter === 'bought'}
+                        onClick={() => {
+                          triggerHaptic(15);
+                          setEditorStatusFilter(editorStatusFilter === 'bought' ? 'all' : 'bought');
+                        }}
+                        className="shrink-0"
+                      >
+                        ✓ Gekauft
+                      </FilterChip>
+                      <FilterChip
+                        active={editorStatusFilter === 'reduced'}
+                        onClick={() => {
+                          triggerHaptic(15);
+                          setEditorStatusFilter(editorStatusFilter === 'reduced' ? 'all' : 'reduced');
+                        }}
+                        className="shrink-0"
+                      >
+                        % Reduziert
+                      </FilterChip>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Product Grid – Natural page flow without constrained inner scroll box */}
+                <div className="w-full">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-2 sm:gap-3 pt-2 pb-8">
+                    {editorFilteredProducts.map(product => {
+                      const draftItem = draftItems.find(i => i.id === product.id);
+                      const isSelected = Boolean(draftItem);
+                      const selectedQty = draftItem?.qty || 0;
+
+                      return (
+                        <div
+                          key={product.id}
+                          onClick={() => {
+                            handleAddItem(product.id);
+                          }}
+                          className={cn(
+                            "glass-panel group relative flex flex-col overflow-hidden transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] transform-gpu rounded-xl sm:rounded-2xl p-1.5 sm:p-2.5 cursor-pointer select-none",
+                            isSelected
+                              ? "ring-2 ring-accent border-accent bg-accent/15 dark:bg-accent/20 shadow-lg shadow-accent/15 scale-[1.01]"
+                              : "hover:-translate-y-1.5 hover:scale-[1.02] hover:shadow-xl"
+                          )}
+                        >
+                          <div className="relative w-full aspect-square rounded-lg sm:rounded-xl overflow-hidden bg-text-primary/10 mb-1.5">
+                            <img
+                              src={product.imgs[0] || 'https://via.placeholder.com/400'}
+                              alt={product.name}
+                              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                              loading="lazy"
+                            />
+                            {product.discount > 0 && (
+                              <div className="absolute top-1 left-1 bg-heart text-white text-[8px] sm:text-[9px] font-bold px-1.5 py-0.5 rounded-md shadow-md z-10">
+                                -{product.discount}%
+                              </div>
+                            )}
+
+                            {/* Selection Highlight Badge */}
+                            <AnimatePresence>
+                              {isSelected && (
+                                <motion.div
+                                  initial={{ scale: 0, opacity: 0 }}
+                                  animate={{ scale: 1, opacity: 1 }}
+                                  exit={{ scale: 0, opacity: 0 }}
+                                  transition={{ type: "spring", stiffness: 500, damping: 25 }}
+                                  className="absolute top-1 right-1 bg-accent text-bg-primary text-[9px] sm:text-[10px] font-extrabold px-1.5 sm:px-2 py-0.5 rounded-full shadow-lg flex items-center gap-0.5 z-10"
+                                >
+                                  <Check size={10} className="stroke-[3]" />
+                                  <span>{selectedQty}x</span>
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
+                          </div>
+
+                          <span className="text-[8px] sm:text-[9px] font-bold uppercase tracking-wider text-text-secondary mb-0.5 line-clamp-1 px-0.5">
+                            {product.shop}
+                          </span>
+                          <h3 className={cn(
+                            "font-bold text-xs sm:text-sm leading-snug mb-0.5 line-clamp-1 px-0.5 transition-colors",
+                            isSelected ? "text-accent font-extrabold" : "text-text-primary"
+                          )}>
+                            {product.name}
+                          </h3>
+                          <div className="flex items-center justify-between px-0.5 mt-auto pt-0.5">
+                            <span className="font-bold text-xs sm:text-sm">
+                              {product.finalPrice.toFixed(2)} €
+                            </span>
+                            {isSelected && (
+                              <span className="text-[9px] font-extrabold text-accent bg-accent/20 px-1 py-0.5 rounded-md">
+                                Ausgewählt
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                    {editorFilteredProducts.length === 0 && (
+                      <div className="col-span-full py-16 flex flex-col items-center justify-center text-text-secondary">
+                        <p className="text-sm">Keine Produkte gefunden.</p>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>

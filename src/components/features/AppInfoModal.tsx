@@ -21,12 +21,20 @@ const CHANGELOG: LogEntry[] = [
     date: '21. Juli 2026',
     changes: {
       added: [
+        'Nahtloses Seiten-Scrolling im Katalog: Katalog-Grid ist nicht mehr in einer künstlichen Scrollbox gefangen, sondern nutzt die volle natürliche Seitenhöhe.',
+        'Gestapelter Mobiler Bundle-Editor Flow: Oben Bundle-Details & Live-Liste, darunter der befüllbare Produkt-Katalog.',
         'Sanfter Übergang für Bundle-Editor: Elegante Spring- & Fade-Animationen beim Erstellen und Bearbeiten von Bundles.',
         'Visuelle Hervorhebung im Katalog: Ausgewählte Produkte erhalten eine Akzent-Farbe, Rand-Highlighting und Mengen-Badge (✓ 1x).'
       ],
       improved: [
-        'Header Button Integration: "+ Neues Bundle" & "Abbrechen" Buttons direkt im Top-Header integriert (mit Akzentblau, sanfter Hover-Skalierung & Haptik).',
-        'Aufgeräumtes Bundle-Layout: Doppelte Überschriften & Schließen-Kreuz am Eingabefeld entfernt.'
+        'Mehrzeilige Umbruch-Kategorien im Bundle-Editor: Hauptkategorie-Chips scrollen nicht mehr horizontal, sondern brechen auf schmalen Bildschirmen automatisch sauber in die nächste Zeile um (`flex-wrap`).',
+        'Einheitliche Filterchip-Größen & Hover-Schutz im Bundle-Editor: Alle Haupt-, Unter- und Statuskategorie-Chips nutzen nun exakt dieselben Abmessungen. Vertikaler Freiraum verhindert das Abschneiden der Ränder beim Hovern.',
+        'Präsentere Filter-Chips bei Beibehaltung der Typografie: Unausgewählte Filter besitzen nun einen deckenden Karten-Hintergrund (`bg-bg-card`), einen klaren Rand und feinen Schatten (`shadow-sm`), während die Typografie (`font-medium`) 100% konsistent zu den Nav-Pills bleibt.',
+        'Perfekte Kanten-Bündigkeit & Abstand auf Desktop: Rechtes Editor-Panel schließt oben exakt bündig auf gleicher Linie wie der linke Katalog an (`top-4`) und behält mit `lg:h-[calc(100vh-150px)]` einen komfortablen Abstand zum unteren Bildschirmrand.',
+        'Kompaktere Produkt-Karten & Grid-Dichte: Fein abgestimmte Bild- & Schriftgrößen verhindern zu große Kacheln auf kleinen Bildschirmen.',
+        'Button-Skalierung & Zeilenumbruch-Schutz: "Zusammenstellung speichern"-Button mit whitespace-nowrap & robuster Schriftgröße gegen ungewollten Höhenumbruch geschützt.',
+        'Fixierte Item-Controls (+ / - / x): Feste Button-Größen mit shrink-0 verhindern Verformen in der Produkt-Liste.',
+        'Responsive Klapp-Filterleiste im Bundle-Editor: Auf Mobilgeräten klappbares Filter-Menü per Toggle-Button (⚙ Filter), auf Desktop aufgefächert.'
       ]
     }
   },

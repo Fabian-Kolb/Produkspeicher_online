@@ -497,7 +497,7 @@ export const BundlesView: React.FC = () => {
                         }}
                         className="shrink-0"
                       >
-                        ✓ Gekauft
+                        Gekauft
                       </FilterChip>
                       <FilterChip
                         active={editorStatusFilter === 'reduced'}
@@ -507,7 +507,7 @@ export const BundlesView: React.FC = () => {
                         }}
                         className="shrink-0"
                       >
-                        % Reduziert
+                        Reduziert
                       </FilterChip>
                     </div>
                   </div>

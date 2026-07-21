@@ -17,6 +17,40 @@ interface LogEntry {
 
 const CHANGELOG: LogEntry[] = [
   {
+    version: '0.8.28',
+    date: '21. Juli 2026',
+    changes: {
+      improved: [
+        'Einzeiliges "Deine Shops" Header-Layout für Mobilgeräte: "Deine Shops", "Shop hinzufügen" Button und Zahnrad-Icon bleiben auch bei schmalen Displaybreiten (z. B. 375px) garantiert in einer Zeile ohne Umbruch.',
+        'Proportionale Button-Skalierung: Auf Mobilgeräten werden Button-Padding, Schriftgröße (`text-xs`) und Icons responsiv angepasst, sodass der Button nicht mehr zu klobig wirkt und sich perfekt einfügt.'
+      ]
+    }
+  },
+  {
+    version: '0.8.27',
+    date: '21. Juli 2026',
+    changes: {
+      improved: [
+        'Mobile KPI-Karussell Zentrierung: Budget-Tracker, Favoriten und Preisalarme werden auf Mobilgeräten nun exakt als 1 Karte pro View in der Bildschirmmitte zentriert (`snap-center`).',
+        'Stabile Desktop-Navigation (xl Breakpoint & Grid-Fix): Die Main Navbar wechselt erst ab 1280px (`xl`) und nutzt exakte CSS Grid `minmax()` Spalten. Dadurch bleibt die mittige Navigation beim Wechsel zwischen Views absolut fixiert, selbst wenn sich die Breite des Action-Buttons ändert.',
+        'Präzise Pagination-Dots-Steuerung: Die 3 Indikator-Punkte synchronisieren sich dank `getBoundingClientRect()` Exaktheit fehlerfrei mit der aktuell sichtbaren Karte.',
+        'Flüssige Dot-Interaktion: Antippen der Punkte steuert sanft per Smooth-Scroll zur Zielkarte inkl. Haptik-Feedback.',
+        'Schattenkante entfernt: Ausreichendes vertikales Padding (`pt-2 pb-5`) verhindert das Abschneiden der Box-Schatten an der Overflow-Kante des Karussell-Containers.'
+      ]
+    }
+  },
+  {
+    version: '0.8.26',
+    date: '21. Juli 2026',
+    changes: {
+      improved: [
+        'Redesign des Shop-Hinzufügen-Modals: Ausrichtung an das Produkt-Modal mit z-[200] Layering, fixiertem Container gegen Layout-Sprüngen und Glassmorphism-Standard.',
+        'Custom Pillen-Dropdown für Shop-Kategorien: Ersatz des klobigen Browser-Native Selects durch ein elegantes Pillen-Dropdown.',
+        'Modal-Design-System Skill erweitert: Umfassende Dokumentation für Akkordeon-Formulare, Feld-Zähler-Badges, "Alle zuklappen"-Controls und Pillen-Dropdowns.'
+      ]
+    }
+  },
+  {
     version: '0.8.25',
     date: '21. Juli 2026',
     changes: {

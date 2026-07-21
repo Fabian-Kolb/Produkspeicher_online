@@ -84,7 +84,7 @@ export const TopNav: React.FC = () => {
           triggerHaptic(15);
           openProductModal();
         },
-        className: 'hidden md:flex'
+        className: 'hidden xl:flex'
       };
     }
     if (location.pathname === '/bundles') {
@@ -94,7 +94,7 @@ export const TopNav: React.FC = () => {
           label: 'Abbrechen',
           icon: <X size={15} strokeWidth={2.5} />,
           onClick: handleCancelBundle,
-          className: 'hidden md:flex'
+          className: 'hidden xl:flex'
         };
       }
       return {
@@ -102,7 +102,7 @@ export const TopNav: React.FC = () => {
         label: 'Neues Bundle',
         icon: <Plus size={15} strokeWidth={2.5} />,
         onClick: handleNewBundle,
-        className: 'hidden md:flex'
+        className: 'hidden xl:flex'
       };
     }
     return null;
@@ -112,7 +112,7 @@ export const TopNav: React.FC = () => {
 
   return (
     <header className={cn(
-      "fixed top-0 w-full z-50 px-4 md:px-6 py-2 md:py-3 grid grid-cols-[auto_1fr] md:grid-cols-[1fr_auto_1fr] items-center border-b transition-all duration-300",
+      "fixed top-0 w-full z-50 px-4 md:px-6 py-2 md:py-3 grid grid-cols-[auto_1fr] xl:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center border-b transition-all duration-300",
       settings.isGlassEnabled
         ? "backdrop-blur-xl bg-[var(--theme-glass-bg)] border-[var(--theme-glass-border)]"
         : "bg-bg-card border-border-primary"
@@ -130,7 +130,7 @@ export const TopNav: React.FC = () => {
       </div>
 
       {/* Desktop Nav Pills – hidden on mobile (BottomNav takes over) */}
-      <div className="hidden md:flex justify-center">
+      <div className="hidden xl:flex justify-center">
         <nav 
           className="relative flex items-center gap-1 bg-text-primary/[0.07] border border-text-primary/5 p-1 rounded-full shadow-inner overflow-hidden"
         >

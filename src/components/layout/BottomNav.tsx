@@ -21,7 +21,7 @@ export const BottomNav: React.FC = () => {
   return (
     <nav
       className={cn(
-        'fixed bottom-0 left-0 right-0 z-40 md:hidden flex items-stretch border-t transition-all duration-300',
+        'fixed bottom-0 left-0 right-0 z-40 xl:hidden flex items-stretch border-t transition-all duration-300',
         isGlassEnabled
           ? 'bg-[var(--theme-glass-bg)] backdrop-blur-xl border-[var(--theme-glass-border)]'
           : 'bg-bg-card border-border-primary'

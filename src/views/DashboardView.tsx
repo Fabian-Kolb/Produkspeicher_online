@@ -1,12 +1,15 @@
 import React, { useMemo, useState, useRef, useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { useAppStore } from '../store/useAppStore';
 import { FilterChip } from '../components/common/FilterChip';
-import { Bell, Heart, Settings, Plus, X, ExternalLink, Globe, Tag, Link2, Store } from 'lucide-react';
+import { Bell, Heart, Settings, Plus, X, ExternalLink, Globe, Link2, Check, Save } from 'lucide-react';
 import type { Product, Website } from '../types';
 import { CategoryEditMenu } from '../components/features/CategoryEditMenu';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '../utils/cn';
+import { Input } from '../components/common/Input';
+import { triggerHaptic } from '../utils/haptics';
 
 /* ── Default/Standard Shops ────────────────────────────────── */
 const DEFAULT_SHOPS: Website[] = [
@@ -53,7 +56,7 @@ function getFavicon(url: string) {
 
 
 /* ═══════════════════════════════════════════════════════════════
-   AddShopModal – Inline-Modal zum Hinzufügen neuer Shops
+   AddShopModal – Redesigned for Ergonomic Glassmorphism & UX
    ═══════════════════════════════════════════════════════════════ */
 interface AddShopModalProps {
   open: boolean;
@@ -63,10 +66,12 @@ interface AddShopModalProps {
 }
 
 const AddShopModal: React.FC<AddShopModalProps> = ({ open, onClose, onAdd, categories }) => {
+  const settings = useAppStore(state => state.settings);
   const [name, setName] = useState('');
   const [url, setUrl] = useState('');
   const [category, setCategory] = useState(categories[1] || 'Allgemein');
-  const [closing, setClosing] = useState(false);
+  const [isCatDropdownOpen, setIsCatDropdownOpen] = useState(false);
+  const catDropdownRef = useRef<HTMLDivElement>(null);
   const nameRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -75,19 +80,41 @@ const AddShopModal: React.FC<AddShopModalProps> = ({ open, onClose, onAdd, categ
     }
   }, [open]);
 
+  // Click outside listener for category dropdown
+  useEffect(() => {
+    const handleOutsideClick = (e: MouseEvent) => {
+      const target = e.target as Node;
+      if (catDropdownRef.current && !catDropdownRef.current.contains(target)) {
+        setIsCatDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleOutsideClick);
+    return () => document.removeEventListener('mousedown', handleOutsideClick);
+  }, []);
+
+  // Keyboard support: Close on Escape
+  useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && open) {
+        triggerHaptic(15);
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleEsc);
+    return () => window.removeEventListener('keydown', handleEsc);
+  }, [open, onClose]);
+
   const handleClose = useCallback(() => {
-    setClosing(true);
-    setTimeout(() => {
-      setClosing(false);
-      onClose();
-    }, 250);
+    triggerHaptic(15);
+    onClose();
   }, [onClose]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim() || !url.trim()) return;
 
-    // Auto-prefix https if needed
+    triggerHaptic(15);
+
     let finalUrl = url.trim();
     if (!finalUrl.startsWith('http://') && !finalUrl.startsWith('https://')) {
       finalUrl = 'https://' + finalUrl;
@@ -103,120 +130,184 @@ const AddShopModal: React.FC<AddShopModalProps> = ({ open, onClose, onAdd, categ
     setName('');
     setUrl('');
     setCategory(categories[1] || 'Allgemein');
-    handleClose();
+    onClose();
   };
 
-  if (!open && !closing) return null;
+  if (!open) return null;
 
-  // Filter out "Alle" from the category selector
   const selectableCats = categories.filter(c => c !== 'Alle');
+  const isGlass = settings.isGlassEnabled;
 
-  return (
-    <div
-      className={`fixed inset-0 z-50 flex items-center justify-center p-4 transition-all duration-300 ${closing ? 'opacity-0' : 'opacity-100'
-        }`}
-      onClick={handleClose}
-    >
-      {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+  const labelClass = "text-[11px] font-semibold text-text-secondary uppercase tracking-wider mb-1.5 block";
 
-      {/* Modal Card */}
-      <div
-        onClick={(e) => e.stopPropagation()}
-        className={`relative w-full max-w-md glass-panel p-6 transition-all duration-300 ${closing
-          ? 'scale-95 opacity-0 translate-y-4'
-          : 'scale-100 opacity-100 translate-y-0 animate-in fade-in zoom-in-95 slide-in-from-bottom-4 duration-300'
-          }`}
-      >
+  const inputClass = cn(
+    "!rounded-2xl !transition-all !duration-200 text-text-primary placeholder:text-text-secondary/50",
+    isGlass
+      ? "!bg-white/40 dark:!bg-white/5 !border-white/20 dark:!border-white/10 hover:!bg-white/50"
+      : "!bg-black/5 dark:!bg-white/5 !border-border-primary/20",
+    "focus:!border-accent/50 focus:outline-none"
+  );
+
+  const dropdownTriggerClass = cn(
+    "w-full flex items-center justify-between outline-none transition-all duration-200 cursor-pointer text-left text-sm border",
+    "rounded-full px-5 py-2.5 text-text-primary",
+    isGlass
+      ? "bg-white/40 dark:bg-white/5 border-white/20 dark:border-white/10 hover:bg-white/50"
+      : "bg-black/5 dark:bg-white/5 border-border-primary/20 hover:bg-black/10 dark:hover:bg-white/10",
+    "focus:border-accent/50 focus:outline-none"
+  );
+
+  return createPortal(
+    <div className={cn(
+      "fixed inset-0 z-[200] flex items-center justify-center p-2 sm:p-6 transition-all duration-300 animate-in fade-in",
+      isGlass ? "bg-black/40 backdrop-blur-sm" : "bg-black/60"
+    )}>
+      <div className={cn(
+        "w-full max-w-md max-h-[98vh] sm:max-h-[95vh] overflow-hidden flex flex-col transition-all duration-300 animate-in zoom-in-95 rounded-[1.5rem]",
+        isGlass ? "glass-panel text-text-primary shadow-2xl" : "bg-bg-card border border-border-primary text-text-primary shadow-xl"
+      )}>
         {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-400 flex items-center justify-center">
-              <Store size={18} className="text-white" />
-            </div>
-            <div>
-              <h3 className="text-lg font-bold text-text-primary">Neuen Shop hinzufügen</h3>
-              <p className="text-xs text-text-secondary">URL und Kategorie angeben</p>
-            </div>
-          </div>
-          <button
-            onClick={handleClose}
-            className="p-2 rounded-full text-text-secondary hover:text-text-primary hover:bg-white/10 transition-all"
+        <div className={cn(
+          "flex items-center justify-between p-4 sm:p-6 border-b shrink-0",
+          isGlass ? "border-white/20 dark:border-white/10" : "border-border-primary/20"
+        )}>
+          <h2 className="text-xl font-semibold text-text-primary tracking-tight">
+            Neuen Shop hinzufügen
+          </h2>
+          <button 
+            type="button"
+            onClick={handleClose} 
+            className="w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center rounded-full bg-black/5 dark:bg-white/5 text-text-secondary hover:text-text-primary transition-colors cursor-pointer"
           >
-            <X size={18} />
+            <X size={22} />
           </button>
         </div>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          {/* Shop Name */}
-          <div className="relative">
-            <Globe size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-text-secondary" />
-            <input
+        {/* Form Body */}
+        <form onSubmit={handleSubmit} className="p-4 sm:p-6 overflow-y-auto hidden-scrollbar flex flex-col gap-4">
+          <div>
+            <label className={labelClass}>Shop-Name</label>
+            <Input
               ref={nameRef}
-              type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="Shop-Name (z.B. MediaMarkt)"
-              className="w-full bg-white/5 border border-[var(--theme-glass-border)] rounded-2xl pl-10 pr-4 py-3 text-sm text-text-primary outline-none focus:border-text-secondary transition-all placeholder:text-text-secondary/40"
+              placeholder="z.B. MediaMarkt, Thomann..."
+              className={inputClass}
+              icon={<Globe size={16} />}
               required
             />
           </div>
 
-          {/* URL */}
-          <div className="relative">
-            <Link2 size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-text-secondary" />
-            <input
-              type="text"
+          <div>
+            <label className={labelClass}>Shop-URL</label>
+            <Input
               value={url}
               onChange={(e) => setUrl(e.target.value)}
-              placeholder="URL (z.B. mediamarkt.de)"
-              className="w-full bg-white/5 border border-[var(--theme-glass-border)] rounded-2xl pl-10 pr-4 py-3 text-sm text-text-primary outline-none focus:border-text-secondary transition-all placeholder:text-text-secondary/40"
+              placeholder="z.B. mediamarkt.de"
+              className={inputClass}
+              icon={<Link2 size={16} />}
               required
             />
           </div>
 
-          {/* Category */}
-          <div className="relative">
-            <Tag size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-text-secondary" />
-            <select
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              className="w-full bg-white/5 border border-[var(--theme-glass-border)] rounded-2xl pl-10 pr-4 py-3 text-sm text-text-primary outline-none focus:border-text-secondary transition-all appearance-none cursor-pointer"
+          {/* Custom Pill Dropdown with Option 1 Dynamic Auto-Height Expansion */}
+          <div className="relative" ref={catDropdownRef}>
+            <label className={labelClass}>Kategorie</label>
+            <button
+              type="button"
+              onClick={() => {
+                triggerHaptic(10);
+                setIsCatDropdownOpen(!isCatDropdownOpen);
+              }}
+              className={dropdownTriggerClass}
             >
-              {selectableCats.map(c => (
-                <option key={c} value={c} className="bg-[var(--card-bg)] text-text-primary">{c}</option>
-              ))}
-            </select>
+              <span className="truncate">{category || 'Kategorie wählen'}</span>
+              <span className="text-text-secondary text-[10px] transform transition-transform duration-300 select-none pointer-events-none ml-2">
+                {isCatDropdownOpen ? '▲' : '▼'}
+              </span>
+            </button>
+
+            <AnimatePresence initial={false}>
+              {isCatDropdownOpen && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+                  className="overflow-hidden mt-2"
+                >
+                  <div className={cn(
+                    "rounded-2xl p-2 flex flex-col gap-1 border",
+                    isGlass
+                      ? "bg-bg-card/60 backdrop-blur-md border-white/20 text-text-primary"
+                      : "bg-black/5 dark:bg-white/5 border-border-primary/20 text-text-primary"
+                  )}>
+                    {selectableCats.map(c => (
+                      <button
+                        key={c}
+                        type="button"
+                        onClick={() => {
+                          triggerHaptic(10);
+                          setCategory(c);
+                          setIsCatDropdownOpen(false);
+                        }}
+                        className={cn(
+                          "w-full text-left px-4 py-2 rounded-full text-sm font-medium transition-colors cursor-pointer flex items-center justify-between",
+                          category === c
+                            ? "bg-accent text-bg-primary font-semibold"
+                            : "text-text-primary hover:bg-text-primary/10"
+                        )}
+                      >
+                        <span>{c}</span>
+                        {category === c && <Check size={14} />}
+                      </button>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
 
-          {/* Preview */}
+          {/* Live Preview Card */}
           {name.trim() && (
-            <div className="flex items-center gap-3 p-3 bg-white/5 rounded-2xl border border-[var(--theme-glass-border)] animate-in fade-in slide-in-from-bottom-2 duration-200">
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-400 flex items-center justify-center text-white font-bold text-sm">
+            <div className="flex items-center gap-3 p-3.5 rounded-2xl border border-border-primary/20 bg-black/5 dark:bg-white/5 animate-in fade-in zoom-in-95 duration-200 mt-1">
+              <div className="w-10 h-10 rounded-xl bg-accent text-bg-primary font-bold flex items-center justify-center text-base shadow-sm">
                 {name.trim()[0]?.toUpperCase()}
               </div>
               <div className="flex-1 min-w-0">
-                <div className="text-sm font-medium text-text-primary truncate">{name.trim()}</div>
-                <div className="text-xs text-text-secondary truncate">{url.trim() || '—'}</div>
+                <div className="text-sm font-semibold text-text-primary truncate">{name.trim()}</div>
+                <div className="text-xs text-text-secondary truncate">{url.trim() || 'URL ausstehend'}</div>
               </div>
-              <span className="text-[10px] text-text-secondary/70 bg-white/5 px-2 py-0.5 rounded-full flex-shrink-0">
+              <span className="text-[10px] font-semibold px-2.5 py-0.5 rounded-full bg-accent/15 text-accent shrink-0">
                 {category}
               </span>
             </div>
           )}
 
-          {/* Submit */}
-          <button
-            type="submit"
-            disabled={!name.trim() || !url.trim()}
-            className="mt-2 w-full py-3 rounded-2xl bg-accent text-bg-primary font-semibold text-sm transition-all duration-300 hover:bg-accent-hover hover:shadow-lg active:scale-[0.98] disabled:opacity-30 disabled:cursor-not-allowed"
-          >
-            Shop hinzufügen
-          </button>
+          {/* Modal Footer */}
+          <div className={cn(
+            "pt-4 mt-2 flex justify-end gap-3 border-t shrink-0",
+            isGlass ? "border-white/20 dark:border-white/10" : "border-border-primary/20"
+          )}>
+            <button
+              type="button"
+              onClick={handleClose}
+              className="bg-inactive-btn-bg text-inactive-btn-text hover:opacity-90 px-5 py-2.5 rounded-full text-sm font-medium transition-colors cursor-pointer select-none active:scale-95"
+            >
+              Abbrechen
+            </button>
+            <button
+              type="submit"
+              disabled={!name.trim() || !url.trim()}
+              className="bg-accent text-bg-primary hover:bg-accent-hover px-6 py-2.5 rounded-full text-sm font-semibold shadow-sm transition-all duration-200 active:scale-95 flex items-center gap-2 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              <Save size={18} /> Shop hinzufügen
+            </button>
+          </div>
         </form>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 
@@ -240,16 +331,16 @@ export const DashboardView: React.FC = () => {
     const container = scrollContainerRef.current;
     if (!container) return;
 
-    const scrollLeft = container.scrollLeft;
-    const containerWidth = container.clientWidth;
+    const containerRect = container.getBoundingClientRect();
+    const containerCenter = containerRect.left + containerRect.width / 2;
     const children = Array.from(container.children) as HTMLElement[];
 
     let closestIndex = 0;
     let minDistance = Infinity;
 
     children.forEach((child, idx) => {
-      const childCenter = child.offsetLeft - container.offsetLeft + child.clientWidth / 2;
-      const containerCenter = scrollLeft + containerWidth / 2;
+      const childRect = child.getBoundingClientRect();
+      const childCenter = childRect.left + childRect.width / 2;
       const distance = Math.abs(childCenter - containerCenter);
       if (distance < minDistance) {
         minDistance = distance;
@@ -266,15 +357,19 @@ export const DashboardView: React.FC = () => {
   }, []);
 
   const scrollToCard = (index: number) => {
+    triggerHaptic(10);
     const container = scrollContainerRef.current;
     if (!container) return;
 
     const children = Array.from(container.children) as HTMLElement[];
     if (children[index]) {
       const child = children[index];
-      const scrollTarget = child.offsetLeft - container.offsetLeft - 16;
-      container.scrollTo({
-        left: scrollTarget,
+      const containerRect = container.getBoundingClientRect();
+      const childRect = child.getBoundingClientRect();
+      const scrollDelta = (childRect.left + childRect.width / 2) - (containerRect.left + containerRect.width / 2);
+
+      container.scrollBy({
+        left: scrollDelta,
         behavior: 'smooth'
       });
       setActiveCardIndex(index);
@@ -370,16 +465,16 @@ export const DashboardView: React.FC = () => {
       </div>
 
       {/* ── KPI Widgets ──────────────────────────────────── */}
-      <div className="relative flex flex-col gap-3">
+      <div className="relative flex flex-col gap-1">
         <div
           ref={scrollContainerRef}
           onScroll={handleScroll}
-          className="flex md:grid md:grid-cols-3 gap-4 md:gap-6 overflow-x-auto md:overflow-x-visible snap-x snap-mandatory md:snap-none scrollbar-none -mx-4 px-4 md:mx-0 md:px-0 pb-3 md:pb-0"
+          className="flex md:grid md:grid-cols-3 gap-4 md:gap-6 overflow-x-auto md:overflow-x-visible snap-x snap-mandatory md:snap-none scrollbar-none -mx-4 px-4 md:mx-0 md:px-0 pt-2 pb-5 md:py-0"
         >
           {/* Budget Widget */}
           <div
             onClick={() => navigate('/budget')}
-            className="glass-panel p-5 cursor-pointer hover:-translate-y-1.5 hover:scale-[1.02] hover:shadow-xl transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] transform-gpu relative overflow-hidden group snap-start snap-always w-[88vw] sm:w-[45vw] md:w-auto flex-shrink-0 flex flex-col justify-between"
+            className="glass-panel p-5 cursor-pointer hover:-translate-y-1.5 hover:scale-[1.02] hover:shadow-xl transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] transform-gpu relative overflow-hidden group snap-center snap-always w-full md:w-auto flex-shrink-0 flex flex-col justify-between"
           >
             {/* Background Blob */}
             <div className={cn(
@@ -446,7 +541,7 @@ export const DashboardView: React.FC = () => {
           {/* Favorites Widget */}
           <div
             onClick={() => navigate('/favoriten')}
-            className="glass-panel p-6 cursor-pointer hover:-translate-y-1.5 hover:scale-[1.02] hover:shadow-xl transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] transform-gpu snap-start snap-always w-[88vw] sm:w-[45vw] md:w-auto flex-shrink-0 flex flex-col justify-between"
+            className="glass-panel p-6 cursor-pointer hover:-translate-y-1.5 hover:scale-[1.02] hover:shadow-xl transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] transform-gpu snap-center snap-always w-full md:w-auto flex-shrink-0 flex flex-col justify-between"
           >
             <div className="flex justify-between items-center mb-6 text-text-secondary">
               <span className="font-semibold uppercase text-xs tracking-wider">Favoriten</span>
@@ -462,7 +557,7 @@ export const DashboardView: React.FC = () => {
           {/* Price Alerts Widget */}
           <div
             onClick={() => navigate('/deals')}
-            className="glass-panel p-6 cursor-pointer hover:-translate-y-1.5 hover:scale-[1.02] hover:shadow-xl transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] transform-gpu relative overflow-hidden snap-start snap-always w-[88vw] sm:w-[45vw] md:w-auto flex-shrink-0 flex flex-col justify-between"
+            className="glass-panel p-6 cursor-pointer hover:-translate-y-1.5 hover:scale-[1.02] hover:shadow-xl transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] transform-gpu relative overflow-hidden snap-center snap-always w-full md:w-auto flex-shrink-0 flex flex-col justify-between"
           >
             <div className="flex justify-between items-center mb-6 text-text-secondary relative z-10">
               <span className="font-semibold uppercase text-xs tracking-wider">Preisalarme</span>
@@ -487,44 +582,48 @@ export const DashboardView: React.FC = () => {
         </div>
 
         {/* Carousel Pagination Dots */}
-        <div className="flex justify-center gap-2 mt-1 md:hidden">
+        <div className="flex justify-center items-center gap-2 mt-1 md:hidden">
           {[0, 1, 2].map((idx) => (
             <button
               key={idx}
+              type="button"
               onClick={() => scrollToCard(idx)}
-              className={cn(
-                "w-2 h-2 rounded-full transition-all duration-300",
-                activeCardIndex === idx
-                  ? "bg-accent w-5"
-                  : "bg-text-secondary/35 hover:bg-text-secondary/60"
-              )}
+              className="p-1.5 -m-1.5 focus:outline-none cursor-pointer"
               aria-label={`Gehe zu Karte ${idx + 1}`}
-            />
+            >
+              <div
+                className={cn(
+                  "h-2 rounded-full transition-all duration-300",
+                  activeCardIndex === idx
+                    ? "bg-accent w-6"
+                    : "bg-text-secondary/35 w-2 hover:bg-text-secondary/60"
+                )}
+              />
+            </button>
           ))}
         </div>
       </div>
 
       {/* ── Shops Section ────────────────────────────────── */}
       <div className="mt-4">
-        <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
-          <h2 className="text-xl md:text-2xl font-playfair font-bold">Deine Shops</h2>
-          <div className="flex items-center gap-1.5 p-1 rounded-full bg-white dark:bg-white/10 border border-white/80 dark:border-white/10 shadow-sm">
+        <div className="flex items-center justify-between gap-2 sm:gap-3 mb-5">
+          <h2 className="text-lg sm:text-xl md:text-2xl font-playfair font-bold whitespace-nowrap shrink-0">Deine Shops</h2>
+          <div className="flex items-center gap-1 sm:gap-1.5 p-0.5 sm:p-1 rounded-full bg-white dark:bg-white/10 border border-white/80 dark:border-white/10 shadow-sm shrink-0">
             <button
               onClick={() => setShowAddShopModal(true)}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium active:scale-95 transition-all duration-200 shadow-sm bg-accent text-bg-primary hover:bg-accent-hover"
+              className="flex items-center gap-1 sm:gap-1.5 px-2.5 py-1 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm font-medium active:scale-95 transition-all duration-200 shadow-sm bg-accent text-bg-primary hover:bg-accent-hover whitespace-nowrap"
             >
-              <Plus size={14} />
-              Shop hinzufügen
+              <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
+              <span>Shop hinzufügen</span>
             </button>
             <button
               onClick={() => setIsEditing(!isEditing)}
-              className="w-9 h-9 flex items-center justify-center shrink-0 rounded-full bg-accent text-bg-primary hover:bg-accent-hover active:scale-95 transition-all duration-300 shadow-sm cursor-pointer"
+              className="w-7 h-7 sm:w-9 sm:h-9 flex items-center justify-center shrink-0 rounded-full bg-accent text-bg-primary hover:bg-accent-hover active:scale-95 transition-all duration-300 shadow-sm cursor-pointer"
               title="Kategorien verwalten"
             >
               <Settings
-                size={16}
                 className={cn(
-                  "transition-transform duration-500",
+                  "w-3.5 h-3.5 sm:w-4 sm:h-4 transition-transform duration-500",
                   isEditing ? 'rotate-180' : 'rotate-0'
                 )}
               />

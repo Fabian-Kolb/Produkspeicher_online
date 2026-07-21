@@ -491,7 +491,7 @@ export const AppContainer: React.FC = () => {
             return (
               <div 
                 key={route} 
-                className="w-[16.666667%] h-full shrink-0 overflow-y-auto pt-16 md:pt-24 pb-24 md:pb-8 px-4 md:px-8"
+                className="w-[16.666667%] h-full shrink-0 overflow-y-auto pt-16 xl:pt-24 pb-24 xl:pb-8 px-4 md:px-8"
                 onScroll={handleScroll}
               >
                 {component}

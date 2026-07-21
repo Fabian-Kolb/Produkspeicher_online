@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Plus } from 'lucide-react';
+import { Plus, X } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { TopNav } from './TopNav';
 import { cn } from '../../utils/cn';
 import { MainMenuSidebar } from './MainMenuSidebar';
@@ -26,12 +27,57 @@ import { DealsView } from '../../views/DealsView';
 const ROUTES = ['/', '/katalog', '/favoriten', '/bundles', '/budget', '/deals'];
 
 export const AppContainer: React.FC = () => {
-  const settings = useAppStore(state => state.settings);
   const location = useLocation();
   const navigate = useNavigate();
+  const { settings } = useAppStore();
   const carouselRef = useRef<HTMLDivElement>(null);
-  const openProductModal = useUIStore(state => state.openProductModal);
-  const showFab = location.pathname === '/katalog' || location.pathname === '/favoriten';
+  const { openProductModal, activeBundleId, setActiveBundleId, setBundleDraft } = useUIStore();
+
+  const getFabConfig = () => {
+    if (location.pathname === '/katalog' || location.pathname === '/favoriten') {
+      return {
+        key: 'add-product',
+        title: 'Produkt hinzufügen',
+        icon: <Plus size={22} strokeWidth={2.5} />,
+        label: null,
+        onClick: () => {
+          triggerHaptic(15);
+          openProductModal();
+        },
+        className: 'w-12 h-12 rounded-full justify-center px-0'
+      };
+    }
+    if (location.pathname === '/bundles') {
+      if (activeBundleId) {
+        return {
+          key: 'cancel-bundle',
+          title: 'Bundle-Editor schließen',
+          icon: <X size={22} strokeWidth={2.5} />,
+          label: null,
+          onClick: () => {
+            triggerHaptic(15);
+            setBundleDraft(null);
+            setActiveBundleId(null);
+          },
+          className: 'w-12 h-12 rounded-full justify-center px-0'
+        };
+      }
+      return {
+        key: 'new-bundle',
+        title: 'Neues Bundle erstellen',
+        icon: <Plus size={18} strokeWidth={2.5} />,
+        label: 'Neues Bundle',
+        onClick: () => {
+          triggerHaptic(15);
+          setActiveBundleId('new');
+        },
+        className: 'h-12 px-4 rounded-full justify-center gap-2 font-bold text-xs sm:text-sm'
+      };
+    }
+    return null;
+  };
+
+  const fabConfig = getFabConfig();
 
   const [isScrollingDown, setIsScrollingDown] = useState(false);
   const lastScrollY = useRef(0);
@@ -397,21 +443,28 @@ export const AppContainer: React.FC = () => {
       <ProfileSettingsModal />
 
       {/* Mobile Floating Action Button (FAB) */}
-      {showFab && (
-        <button
-          onClick={() => {
-            triggerHaptic(15);
-            openProductModal();
-          }}
-          className={cn(
-            "md:hidden fixed bottom-24 right-6 z-40 w-12 h-12 rounded-full bg-accent text-bg-primary shadow-xl shadow-accent/20 flex items-center justify-center hover:bg-accent-hover active:scale-90 cursor-pointer border border-accent-hover/30 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] transform-gpu origin-center",
-            isScrollingDown ? "translate-y-24 opacity-0 scale-75 pointer-events-none" : "translate-y-0 opacity-100 scale-100"
-          )}
-          title="Produkt hinzufügen"
-        >
-          <Plus size={20} strokeWidth={2.5} />
-        </button>
-      )}
+      <AnimatePresence mode="wait">
+        {fabConfig && !isScrollingDown && (
+          <motion.button
+            key={fabConfig.key}
+            initial={{ opacity: 0, scale: 0.85, y: 12 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.85, y: 12 }}
+            transition={{ duration: 0.2, ease: "easeOut" }}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.92 }}
+            onClick={fabConfig.onClick}
+            className={cn(
+              "md:hidden fixed bottom-24 right-5 z-40 bg-accent text-bg-primary shadow-xl shadow-accent/25 flex items-center hover:bg-accent-hover cursor-pointer border border-accent-hover/30 transform-gpu origin-center select-none",
+              fabConfig.className
+            )}
+            title={fabConfig.title}
+          >
+            {fabConfig.icon}
+            {fabConfig.label && <span>{fabConfig.label}</span>}
+          </motion.button>
+        )}
+      </AnimatePresence>
       
       {/* Main Content Area */}
       <main className="flex-1 w-full overflow-hidden relative bg-transparent z-10">

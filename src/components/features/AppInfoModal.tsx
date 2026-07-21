@@ -17,6 +17,20 @@ interface LogEntry {
 
 const CHANGELOG: LogEntry[] = [
   {
+    version: '0.8.25',
+    date: '21. Juli 2026',
+    changes: {
+      added: [
+        'Animierter Mobiler Action-Button (FAB) für Bundles: Auf Mobilgeräten wird unten rechts auf der Bundles-Seite ein "+ Neues Bundle" Button eingeblendet.',
+        'Mobiler Abbrechen-FAB (X) für den Bundle-Editor: Beim Erstellen oder Bearbeiten eines Bundles verwandelt sich der FAB-Button unten rechts in ein rundes X (analog zum Plus-Button in Favoriten/Katalog), um den Editor wieder zu schließen.',
+        'Sanfte Sequenz-Animation & Scroll-Ausblendung: Beim Scrollen blendet sich der FAB automatisch aus. Beim Seitenwechsel animiert der FAB per AnimatePresence (mode="wait") fließend.'
+      ],
+      fixed: [
+        'Laufzeit-Behebung für weiße Seite: Fehlende Navigation- & Store-Hooks in AppContainer korrigiert.'
+      ]
+    }
+  },
+  {
     version: '0.8.24',
     date: '21. Juli 2026',
     changes: {

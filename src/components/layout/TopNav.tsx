@@ -94,7 +94,7 @@ export const TopNav: React.FC = () => {
           label: 'Abbrechen',
           icon: <X size={15} strokeWidth={2.5} />,
           onClick: handleCancelBundle,
-          className: 'flex'
+          className: 'hidden md:flex'
         };
       }
       return {
@@ -102,7 +102,7 @@ export const TopNav: React.FC = () => {
         label: 'Neues Bundle',
         icon: <Plus size={15} strokeWidth={2.5} />,
         onClick: handleNewBundle,
-        className: 'flex'
+        className: 'hidden md:flex'
       };
     }
     return null;

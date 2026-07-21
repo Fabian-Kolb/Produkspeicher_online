@@ -1,7 +1,7 @@
 import React, { useMemo, useState, useEffect, useRef } from 'react';
 import { useAppStore } from '../store/useAppStore';
 import { useUIStore } from '../store/useUIStore';
-import { Layers, Plus, Trash2, Search, X, BookOpen, ShoppingBag, Check, SlidersHorizontal } from 'lucide-react';
+import { Layers, Trash2, Search, Check, SlidersHorizontal } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '../utils/cn';
 import type { BundleItem } from '../types';
@@ -54,9 +54,7 @@ export const BundlesView: React.FC = () => {
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
 
   // Mobile editor tab state: 'catalog' or 'bundle'
-  const [mobileEditorTab, setMobileEditorTab] = useState<'catalog' | 'bundle'>('catalog');
-
-  const isEditing = Boolean(activeBundleId);
+  const [, setMobileEditorTab] = useState<'catalog' | 'bundle'>('catalog');
 
   const activeFilterCount = (editorMainCat !== 'Alle' ? 1 : 0) + (editorSelectedSubCats.length > 0 ? 1 : 0) + (editorStatusFilter !== 'all' ? 1 : 0);
 
@@ -150,12 +148,6 @@ export const BundlesView: React.FC = () => {
     }).filter(i => i.qty > 0);
     setDraftItems(next);
     triggerHaptic(15);
-  };
-
-  const handleCancelBundle = () => {
-    triggerHaptic(15);
-    setBundleDraft(null);
-    setActiveBundleId(null);
   };
 
   const draftTotal = useMemo(() => {

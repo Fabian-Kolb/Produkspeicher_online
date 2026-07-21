@@ -1,5 +1,18 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { X, Save, Image as ImageIcon } from 'lucide-react';
+import { 
+  X, 
+  Save, 
+  Image as ImageIcon, 
+  ChevronDown, 
+  ChevronUp, 
+  Info, 
+  Tag, 
+  Euro, 
+  Heart, 
+  ChevronsUpDown,
+  Check
+} from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useUIStore } from '../../store/useUIStore';
 import { useAppStore } from '../../store/useAppStore';
 import { Input } from '../common/Input';
@@ -37,6 +50,14 @@ export const ProductModal: React.FC = () => {
   const [imageError, setImageError] = useState<string | null>(null);
   const [imageFiles, setImageFiles] = useState<{ objectUrl: string; file: File }[]>([]);
 
+  // Akkordeon-Sektionen State
+  const [openSections, setOpenSections] = useState<{ [key: string]: boolean }>({
+    basic: true,
+    categories: false,
+    pricing: false,
+    media: false,
+  });
+
   const catDropdownRef = useRef<HTMLDivElement>(null);
   const subCatDropdownRef = useRef<HTMLDivElement>(null);
   const createdObjectUrlsRef = useRef<string[]>([]);
@@ -54,7 +75,59 @@ export const ProductModal: React.FC = () => {
     return available.filter(s => s.toLowerCase().includes(subCatSearch.toLowerCase()));
   }, [subCats, formData.mainCat, subCatSearch]);
 
-  // Click outside listener for category and subcategory dropdowns
+  // Ausgefüllte Felder Pro Sektion zählen
+  const basicFilledCount = useMemo(() => {
+    let count = 0;
+    if (formData.name?.trim()) count++;
+    if (formData.shop?.trim()) count++;
+    if (formData.url?.trim()) count++;
+    return count;
+  }, [formData.name, formData.shop, formData.url]);
+
+  const categoriesFilledCount = useMemo(() => {
+    let count = 0;
+    if (formData.mainCat) count++;
+    if (formData.subCats && formData.subCats.length > 0) count++;
+    if (formData.rating && Number(formData.rating) > 0) count++;
+    if (formData.isFavorite) count++;
+    return count;
+  }, [formData.mainCat, formData.subCats, formData.rating, formData.isFavorite]);
+
+  const pricingFilledCount = useMemo(() => {
+    let count = 0;
+    if (formData.price && Number(formData.price) > 0) count++;
+    if (formData.discount && Number(formData.discount) > 0) count++;
+    return count;
+  }, [formData.price, formData.discount]);
+
+  const mediaFilledCount = useMemo(() => {
+    let count = 0;
+    if (formData.imgs && formData.imgs.length > 0) count++;
+    if (formData.details?.trim()) count++;
+    return count;
+  }, [formData.imgs, formData.details]);
+
+  // Section toggle helper mit Haptik
+  const toggleSection = (key: string) => {
+    triggerHaptic(12);
+    setOpenSections(prev => ({ ...prev, [key]: !prev[key] }));
+  };
+
+  const anyOpen = useMemo(() => {
+    return Object.values(openSections).some(Boolean);
+  }, [openSections]);
+
+  const closeAllSections = () => {
+    triggerHaptic(15);
+    setOpenSections({
+      basic: false,
+      categories: false,
+      pricing: false,
+      media: false,
+    });
+  };
+
+  // Click outside listener für Dropdowns
   useEffect(() => {
     const handleOutsideClick = (e: MouseEvent) => {
       const target = e.target as Node;
@@ -84,6 +157,13 @@ export const ProductModal: React.FC = () => {
       setImageError(null);
       setImageFiles([]);
       createdObjectUrlsRef.current = [];
+      setOpenSections({
+        basic: true,
+        categories: false,
+        pricing: false,
+        media: false,
+      });
+
       if (editingProductId) {
         const p = products.find(prod => prod.id === editingProductId);
         if (p) setFormData(p);
@@ -137,7 +217,7 @@ export const ProductModal: React.FC = () => {
     return () => window.removeEventListener('keydown', handleEsc);
   }, [isProductModalOpen, closeProductModal]);
 
-  // Image files handler (validates files, generates object URLs, handles errors)
+  // Image files handler
   const handleImageFiles = (files: File[]) => {
     setImageError(null);
     const newImgs: string[] = [];
@@ -199,6 +279,7 @@ export const ProductModal: React.FC = () => {
   if (!isProductModalOpen) return null;
 
   const handleSave = () => {
+    triggerHaptic(15);
     const isNowBought = (formData.status || 'active') === 'bought';
     
     const p: Omit<Product, 'id'> = {
@@ -219,7 +300,6 @@ export const ProductModal: React.FC = () => {
       dateBought: isNowBought ? (formData.dateBought || new Date().toISOString()) : null
     };
 
-    // Echte Bilddateien loggen, um TS6133 zu vermeiden und API-Übertragung vorzubereiten
     if (imageFiles.length > 0) {
       console.log('API-Upload bereit für Bilddateien:', imageFiles.map(f => f.file.name));
     }
@@ -233,17 +313,20 @@ export const ProductModal: React.FC = () => {
   };
 
   const handleCancel = () => {
+    triggerHaptic(15);
     closeProductModal();
   };
 
   const addImage = () => {
     if (imgInput.trim()) {
+      triggerHaptic(10);
       setFormData(prev => ({ ...prev, imgs: [...(prev.imgs || []), imgInput.trim()] }));
       setImgInput('');
     }
   };
 
   const removeImage = (idx: number) => {
+    triggerHaptic(10);
     const imgUrlToRemove = formData.imgs?.[idx];
     if (imgUrlToRemove) {
       if (imgUrlToRemove.startsWith('blob:')) {
@@ -257,76 +340,81 @@ export const ProductModal: React.FC = () => {
 
   const isGlass = settings.isGlassEnabled;
 
-  const labelClass = "text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1.5 block";
+  const labelClass = "text-[11px] font-semibold text-text-secondary uppercase tracking-wider mb-1.5 block";
 
   const inputClass = cn(
-    "!rounded-2xl !transition-all !duration-200 text-slate-800 placeholder-slate-400 !translate-y-0 !hover:translate-y-0 !focus:translate-y-0 !scale-100 !hover:scale-100 !focus:scale-100 !shadow-none !hover:shadow-none !focus:shadow-none",
+    "!rounded-2xl !transition-all !duration-200 text-text-primary placeholder:text-text-secondary/50",
     isGlass
-      ? "!bg-white/40 !border-white/20 hover:!bg-white/50"
-      : "!bg-slate-50 !border-slate-200 hover:!bg-slate-100/30",
-    "focus:!bg-white focus:!border-blue-500 focus:ring-4 focus:ring-blue-500/10 focus:outline-none"
+      ? "!bg-white/40 dark:!bg-white/5 !border-white/20 dark:!border-white/10 hover:!bg-white/50"
+      : "!bg-black/5 dark:!bg-white/5 !border-border-primary/20",
+    "focus:!border-accent/50 focus:outline-none"
   );
 
   const textareaClass = cn(
-    "w-full rounded-2xl transition-all duration-200 text-slate-800 placeholder-slate-400 min-h-[100px] focus:min-h-[160px] p-4 outline-none border",
-    "!translate-y-0 !hover:translate-y-0 !focus:translate-y-0 !scale-100 !hover:scale-100 !focus:scale-100 !shadow-none !hover:shadow-none !focus:shadow-none",
+    "w-full rounded-2xl transition-all duration-200 text-text-primary placeholder:text-text-secondary/50 p-4 outline-none border",
+    "min-h-[90px] focus:min-h-[140px]",
     isGlass
-      ? "!bg-white/40 !border-white/20 hover:!bg-white/50"
-      : "!bg-slate-50 !border-slate-200 hover:!bg-slate-100/30",
-    "focus:!bg-white focus:!border-blue-500 focus:ring-4 focus:ring-blue-500/10 focus:outline-none"
+      ? "bg-white/40 dark:bg-white/5 border-white/20 dark:border-white/10 hover:bg-white/50"
+      : "bg-black/5 dark:bg-white/5 border-border-primary/20 hover:bg-black/10 dark:hover:bg-white/10",
+    "focus:border-accent/50 focus:outline-none"
   );
 
   const dropdownTriggerClass = cn(
     "w-full flex items-center justify-between outline-none transition-all duration-200 cursor-pointer text-left text-sm border",
-    "!rounded-full px-5 py-2.5 !translate-y-0 !hover:translate-y-0 !focus:translate-y-0 !scale-100 !hover:scale-100 !focus:scale-100 !shadow-none !hover:shadow-none !focus:shadow-none",
+    "rounded-full px-5 py-2.5 text-text-primary",
     isGlass
-      ? "!bg-white/40 !border-white/20 hover:!bg-white/50 text-slate-800"
-      : "!bg-slate-50 !border-slate-200 hover:!bg-slate-100/30 text-slate-800",
-    "focus:!bg-white focus:!border-blue-500 focus:ring-4 focus:ring-blue-500/10 focus:outline-none"
+      ? "bg-white/40 dark:bg-white/5 border-white/20 dark:border-white/10 hover:bg-white/50"
+      : "bg-black/5 dark:bg-white/5 border-border-primary/20 hover:bg-black/10 dark:hover:bg-white/10",
+    "focus:border-accent/50 focus:outline-none"
   );
 
   const dropdownPanelClass = cn(
     "absolute left-0 right-0 mt-2 z-50 rounded-2xl shadow-2xl p-3 flex flex-col gap-2 max-h-60 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-300 border",
     isGlass
-      ? "bg-white/80 backdrop-blur-xl border-white/40 text-slate-800"
-      : "bg-white border-slate-200 text-slate-800"
+      ? "bg-bg-card/95 backdrop-blur-xl border-white/30 text-text-primary"
+      : "bg-bg-card border-border-primary text-text-primary"
   );
 
   const favoriteButtonClass = cn(
-    "w-full h-[46px] rounded-full border flex items-center justify-center gap-1.5 text-sm font-semibold transition-all duration-200 cursor-pointer select-none active:scale-95",
+    "w-full h-[46px] rounded-full border flex items-center justify-center gap-2 text-sm font-semibold transition-all duration-200 cursor-pointer select-none active:scale-95",
     formData.isFavorite
-      ? "bg-blue-600 border-transparent text-white shadow-sm shadow-blue-500/10 hover:bg-blue-700"
+      ? "bg-heart border-transparent text-white shadow-sm hover:opacity-90"
       : isGlass
-        ? "bg-white/40 border-white/20 text-slate-600 hover:bg-white/50"
-        : "bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100/70"
+        ? "bg-white/40 dark:bg-white/5 border-white/20 dark:border-white/10 text-text-secondary hover:bg-white/50 hover:text-text-primary"
+        : "bg-black/5 dark:bg-white/5 border-border-primary/20 text-text-secondary hover:bg-black/10 dark:hover:bg-white/10 hover:text-text-primary"
   );
 
   const sensorContainerClass = cn(
-    "border-2 border-dashed rounded-2xl p-6 text-center transition-all duration-200 cursor-pointer flex flex-col gap-4",
+    "border-2 border-dashed rounded-2xl p-4 sm:p-6 text-center transition-all duration-200 cursor-pointer flex flex-col gap-3 sm:gap-4",
     isDragging
-      ? isGlass
-        ? "border-white/60 bg-black/30 scale-[0.99]"
-        : "border-slate-400 bg-black/10 scale-[0.99]"
+      ? "border-accent bg-accent/10 scale-[0.99]"
       : isGlass
-        ? "border-white/40 bg-white/20 hover:bg-white/30 hover:border-white/60"
-        : "border-slate-200 bg-slate-50 hover:bg-slate-100/70 hover:border-slate-300"
+        ? "border-white/30 dark:border-white/10 bg-white/20 dark:bg-white/5 hover:bg-white/30 hover:border-white/50"
+        : "border-border-primary/30 bg-black/[0.02] dark:bg-white/[0.02] hover:bg-black/[0.05] hover:border-border-primary"
   );
 
-  const footerClass = cn(
-    "p-6 flex justify-end gap-3 rounded-b-[1.5rem] border-t",
+  const sectionCardClass = cn(
+    "rounded-2xl border transition-all duration-300",
     isGlass
-      ? "bg-white/30 border-white/20"
-      : "bg-slate-50 border-slate-100"
+      ? "bg-white/40 dark:bg-white/5 border-white/20 dark:border-white/10"
+      : "bg-black/[0.02] dark:bg-white/[0.02] border-border-primary/20"
   );
 
-  const cancelButtonClass = cn(
-    "px-5 py-2.5 rounded-full text-sm font-medium text-slate-600 transition-colors cursor-pointer select-none active:scale-95",
-    isGlass ? "hover:bg-white/20 text-slate-700" : "hover:bg-slate-100"
+  const sectionHeaderClass = cn(
+    "w-full flex items-center justify-between p-3.5 sm:p-4 text-left transition-colors cursor-pointer select-none active:scale-[0.995]",
+    "hover:bg-text-primary/5 rounded-2xl"
   );
 
   const headerClass = cn(
     "flex items-center justify-between p-4 sm:p-6 border-b shrink-0",
-    isGlass ? "border-white/20" : "border-slate-200"
+    isGlass ? "border-white/20 dark:border-white/10" : "border-border-primary/20"
+  );
+
+  const footerClass = cn(
+    "p-4 sm:p-6 flex justify-end gap-3 rounded-b-[1.5rem] border-t shrink-0",
+    isGlass
+      ? "bg-white/30 dark:bg-white/5 border-white/20 dark:border-white/10"
+      : "bg-black/[0.02] dark:bg-white/[0.02] border-border-primary/20"
   );
 
   return (
@@ -336,380 +424,587 @@ export const ProductModal: React.FC = () => {
     )}>
       <div className={cn(
         "w-full max-w-2xl max-h-[98vh] sm:max-h-[95vh] overflow-hidden flex flex-col animate-in zoom-in-95 duration-300 rounded-[1.5rem]",
-        isGlass ? "bg-white/70 backdrop-blur-xl border border-white/40 shadow-2xl" : "bg-white border border-slate-200 shadow-xl"
+        isGlass ? "glass-panel text-text-primary shadow-2xl" : "bg-bg-card border border-border-primary text-text-primary shadow-xl"
       )}>
 
         {/* Header */}
         <div className={headerClass}>
-          <h2 className="text-xl font-semibold text-slate-800 tracking-tight">
+          <h2 className="text-xl font-semibold text-text-primary tracking-tight">
             {editingProductId ? 'Produkt bearbeiten' : 'Produkt hinzufügen'}
           </h2>
-          <button onClick={handleCancel} className="w-10 h-10 flex items-center justify-center rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100/50 transition-colors">
-            <X size={24} />
-          </button>
+          
+          <div className="flex items-center gap-2">
+            {anyOpen && (
+              <button
+                type="button"
+                onClick={closeAllSections}
+                className="flex items-center gap-1.5 text-xs font-semibold text-text-secondary hover:text-text-primary transition-colors py-1.5 px-3 rounded-full bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 cursor-pointer active:scale-95"
+              >
+                <ChevronsUpDown size={14} />
+                <span>Alle zuklappen</span>
+              </button>
+            )}
+            <button 
+              onClick={handleCancel} 
+              className="w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center rounded-full bg-black/5 dark:bg-white/5 text-text-secondary hover:text-text-primary transition-colors cursor-pointer"
+            >
+              <X size={22} />
+            </button>
+          </div>
         </div>
 
         {/* Content */}
-        <div className="p-4 sm:p-6 overflow-y-auto hidden-scrollbar flex flex-col gap-5 sm:gap-6">
+        <div className="p-3.5 sm:p-6 overflow-y-auto hidden-scrollbar flex flex-col gap-3 sm:gap-4">
 
-          {/* Name & Shop */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className={labelClass}>Name</label>
-              <Input 
-                value={formData.name} 
-                onChange={e => setFormData({ ...formData, name: e.target.value })} 
-                placeholder="Produktname"
-                className={inputClass} 
-              />
-            </div>
-            <div>
-              <label className={labelClass}>Shop / Marke</label>
-              <Input 
-                value={formData.shop} 
-                onChange={e => setFormData({ ...formData, shop: e.target.value })} 
-                placeholder="Amazon, Thomann..."
-                className={inputClass} 
-              />
-            </div>
-          </div>
-
-          {/* URL */}
-          <div>
-            <label className={labelClass}>URL</label>
-            <Input 
-              value={formData.url} 
-              onChange={e => setFormData({ ...formData, url: e.target.value })} 
-              placeholder="https://..."
-              className={inputClass} 
-            />
-          </div>
-
-          {/* Price & Discount */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div>
-              <label className={labelClass}>Preis (€)</label>
-              <Input 
-                type="number" 
-                value={formData.price || ''} 
-                onChange={e => {
-                  const p = Number(e.target.value);
-                  const d = Number(formData.discount) || 0;
-                  setFormData({ ...formData, price: p, finalPrice: p - (p * (d / 100)) });
-                }}
-                className={inputClass} 
-              />
-            </div>
-            <div>
-              <label className={labelClass}>Rabatt (%)</label>
-              <Input 
-                type="number" 
-                value={formData.discount || ''} 
-                onChange={e => {
-                  const d = Number(e.target.value);
-                  const p = Number(formData.price) || 0;
-                  setFormData({ ...formData, discount: d, finalPrice: p - (p * (d / 100)) });
-                }}
-                className={inputClass} 
-              />
-            </div>
-            <div>
-              <label className={labelClass}>Endpreis (€)</label>
-              <Input 
-                type="number" 
-                value={formData.finalPrice?.toFixed(2)} 
-                readOnly 
-                className={cn(inputClass, "opacity-60")} 
-              />
-            </div>
-          </div>
-
-          {/* Zeile 3: Hauptkategorie & Subkategorie */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="relative" ref={catDropdownRef}>
-              <label className={labelClass}>Haupt-Kategorie</label>
-              <button
-                type="button"
-                onClick={() => {
-                  triggerHaptic(10);
-                  setIsCatDropdownOpen(!isCatDropdownOpen);
-                }}
-                className={dropdownTriggerClass}
-              >
-                <span className="truncate">{formData.mainCat || 'Kategorie wählen'}</span>
-                <span className="text-slate-400 text-[10px] transform transition-transform duration-300 select-none pointer-events-none ml-2">
-                  {isCatDropdownOpen ? '▲' : '▼'}
-                </span>
-              </button>
-
-              {isCatDropdownOpen && (
-                <div className={dropdownPanelClass}>
-                  <Input
-                    value={catSearch}
-                    onChange={e => setCatSearch(e.target.value)}
-                    placeholder="Suchen / Hinzufügen..."
-                    className={inputClass}
-                    autoFocus
-                  />
-                  <div className="flex flex-col gap-1 overflow-y-auto max-h-40 hidden-scrollbar mt-1">
-                    {filteredCategories.map(c => (
-                      <button
-                        key={c}
-                        type="button"
-                        onClick={() => {
-                          triggerHaptic(10);
-                          setFormData({ ...formData, mainCat: c });
-                          setIsCatDropdownOpen(false);
-                          setCatSearch('');
-                        }}
-                        className={cn(
-                          "w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer",
-                          formData.mainCat === c
-                            ? "bg-blue-600 text-white"
-                            : "text-slate-700 hover:bg-slate-100/50"
-                        )}
-                      >
-                        {c}
-                      </button>
-                    ))}
-                    {catSearch.trim() && !categories.some(c => c.toLowerCase() === catSearch.trim().toLowerCase()) && (
-                      <button
-                        type="button"
-                        onClick={async () => {
-                          triggerHaptic(15);
-                          const newCat = catSearch.trim();
-                          await addCategory(newCat);
-                          setFormData({ ...formData, mainCat: newCat });
-                          setIsCatDropdownOpen(false);
-                          setCatSearch('');
-                        }}
-                        className="w-full text-left px-3 py-2 rounded-lg text-sm font-semibold text-blue-600 hover:bg-blue-50 cursor-pointer"
-                      >
-                        + "{catSearch.trim()}" neu erstellen
-                      </button>
-                    )}
-                    {filteredCategories.length === 0 && !catSearch.trim() && (
-                      <span className="text-xs text-slate-400 italic text-center py-2">Keine Kategorien vorhanden.</span>
-                    )}
-                  </div>
+          {/* ABSCHNITT 1: Basis-Informationen */}
+          <div className={sectionCardClass}>
+            <button
+              type="button"
+              onClick={() => toggleSection('basic')}
+              className={sectionHeaderClass}
+            >
+              <div className="flex items-center gap-3 min-w-0 pr-2">
+                <div className="w-8 h-8 rounded-xl bg-accent/10 flex items-center justify-center text-accent shrink-0">
+                  <Info size={18} />
                 </div>
+                <div className="truncate text-left">
+                  <h3 className="text-sm font-bold text-text-primary">Basis-Informationen</h3>
+                  {!openSections.basic && (
+                    <p className="text-xs text-text-secondary truncate mt-0.5">
+                      {formData.name ? `${formData.name}${formData.shop ? ' • ' + formData.shop : ''}` : 'Name, Shop & URL'}
+                    </p>
+                  )}
+                </div>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <span className="text-[11px] font-medium px-2.5 py-0.5 rounded-full bg-accent/10 text-accent">
+                  {basicFilledCount}/3 Felder
+                </span>
+                <span className="text-text-secondary">
+                  {openSections.basic ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+                </span>
+              </div>
+            </button>
+
+            <AnimatePresence initial={false}>
+              {openSections.basic && (
+                <motion.div
+                  key="basic-content"
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+                  className="overflow-hidden"
+                >
+                  <div className="p-3.5 sm:p-4 pt-1 sm:pt-1 border-t border-border-primary/10 flex flex-col gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className={labelClass}>Name</label>
+                        <Input 
+                          value={formData.name} 
+                          onChange={e => setFormData({ ...formData, name: e.target.value })} 
+                          placeholder="Produktname"
+                          className={inputClass} 
+                        />
+                      </div>
+                      <div>
+                        <label className={labelClass}>Shop / Marke</label>
+                        <Input 
+                          value={formData.shop} 
+                          onChange={e => setFormData({ ...formData, shop: e.target.value })} 
+                          placeholder="Amazon, Thomann..."
+                          className={inputClass} 
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className={labelClass}>URL</label>
+                      <Input 
+                        value={formData.url} 
+                        onChange={e => setFormData({ ...formData, url: e.target.value })} 
+                        placeholder="https://..."
+                        className={inputClass} 
+                      />
+                    </div>
+                  </div>
+                </motion.div>
               )}
-            </div>
+            </AnimatePresence>
+          </div>
 
-            <div className="relative" ref={subCatDropdownRef}>
-              <label className={labelClass}>Sub-Kategorie</label>
-              <button
-                type="button"
-                onClick={() => {
-                  triggerHaptic(10);
-                  setIsSubCatDropdownOpen(!isSubCatDropdownOpen);
-                }}
-                className={dropdownTriggerClass}
-              >
-                <span className="truncate">
-                  {formData.subCats && formData.subCats.length > 0
-                    ? formData.subCats.join(', ')
-                    : 'Subkategorie wählen'}
+          {/* ABSCHNITT 2: Kategorisierung & Bewertung */}
+          <div className={sectionCardClass}>
+            <button
+              type="button"
+              onClick={() => toggleSection('categories')}
+              className={sectionHeaderClass}
+            >
+              <div className="flex items-center gap-3 min-w-0 pr-2">
+                <div className="w-8 h-8 rounded-xl bg-accent/10 flex items-center justify-center text-accent shrink-0">
+                  <Tag size={18} />
+                </div>
+                <div className="truncate text-left">
+                  <h3 className="text-sm font-bold text-text-primary">Kategorie & Bewertung</h3>
+                  {!openSections.categories && (
+                    <p className="text-xs text-text-secondary truncate mt-0.5">
+                      {formData.mainCat || 'Setup'}
+                      {formData.subCats && formData.subCats.length > 0 ? ` (${formData.subCats.join(', ')})` : ''}
+                      {formData.rating ? ` • ⭐ ${formData.rating}` : ''}
+                      {formData.isFavorite ? ' • ❤️ Favorit' : ''}
+                    </p>
+                  )}
+                </div>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <span className="text-[11px] font-medium px-2.5 py-0.5 rounded-full bg-accent/10 text-accent">
+                  {categoriesFilledCount}/4 Felder
                 </span>
-                <span className="text-slate-400 text-[10px] transform transition-transform duration-300 select-none pointer-events-none ml-2">
-                  {isSubCatDropdownOpen ? '▲' : '▼'}
+                <span className="text-text-secondary">
+                  {openSections.categories ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
                 </span>
-              </button>
+              </div>
+            </button>
 
-              {isSubCatDropdownOpen && (
-                <div className={dropdownPanelClass}>
-                  <Input
-                    value={subCatSearch}
-                    onChange={e => setSubCatSearch(e.target.value)}
-                    placeholder="Suchen / Hinzufügen..."
-                    className={inputClass}
-                    autoFocus
-                  />
-                  <div className="flex flex-col gap-1 overflow-y-auto max-h-40 hidden-scrollbar mt-1">
-                    {filteredSubCategories.map(s => {
-                      const isSelected = formData.subCats?.includes(s);
-                      return (
+            <AnimatePresence initial={false}>
+              {openSections.categories && (
+                <motion.div
+                  key="categories-content"
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+                  className="overflow-visible"
+                >
+                  <div className="p-3.5 sm:p-4 pt-1 sm:pt-1 border-t border-border-primary/10 flex flex-col gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {/* Hauptkategorie Dropdown */}
+                      <div className="relative" ref={catDropdownRef}>
+                        <label className={labelClass}>Haupt-Kategorie</label>
                         <button
-                          key={s}
                           type="button"
                           onClick={() => {
                             triggerHaptic(10);
-                            const current = formData.subCats || [];
-                            const next = current.includes(s)
-                              ? current.filter(item => item !== s)
-                              : [...current, s];
-                            setFormData({ ...formData, subCats: next });
+                            setIsCatDropdownOpen(!isCatDropdownOpen);
                           }}
-                          className={cn(
-                            "w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer flex items-center justify-between",
-                            isSelected
-                              ? "bg-blue-600 text-white"
-                              : "text-slate-700 hover:bg-slate-100/50"
-                          )}
+                          className={dropdownTriggerClass}
                         >
-                          <span>{s}</span>
-                          {isSelected && <span className="text-xs">✓</span>}
+                          <span className="truncate">{formData.mainCat || 'Kategorie wählen'}</span>
+                          <span className="text-text-secondary text-[10px] transform transition-transform duration-300 select-none pointer-events-none ml-2">
+                            {isCatDropdownOpen ? '▲' : '▼'}
+                          </span>
                         </button>
-                      );
-                    })}
-                    {subCatSearch.trim() && !(subCats[formData.mainCat || ''] || []).some(s => s.toLowerCase() === subCatSearch.trim().toLowerCase()) && (
-                      <button
-                        type="button"
-                        onClick={async () => {
-                          triggerHaptic(15);
-                          const newSub = subCatSearch.trim();
-                          await addSubCategory(formData.mainCat || 'Setup', newSub);
-                          const current = formData.subCats || [];
-                          setFormData({ ...formData, subCats: [...current, newSub] });
-                          setSubCatSearch('');
-                        }}
-                        className="w-full text-left px-3 py-2 rounded-lg text-sm font-semibold text-blue-600 hover:bg-blue-50 cursor-pointer"
-                      >
-                        + "{subCatSearch.trim()}" neu erstellen
-                      </button>
-                    )}
-                    {filteredSubCategories.length === 0 && !subCatSearch.trim() && (
-                      <span className="text-xs text-slate-400 italic text-center py-2">Keine Unterkategorien vorhanden.</span>
-                    )}
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
 
-          {/* Zeile 4: Bewertung & Favorit */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className={labelClass}>Bewertung (1-10)</label>
-              <Input
-                type="number"
-                min="0"
-                max="10"
-                step="0.1"
-                value={formData.rating || ''}
-                onChange={e => {
-                  const val = Math.max(0, Math.min(10, Number(e.target.value)));
-                  setFormData({ ...formData, rating: val });
-                }}
-                placeholder="z. B. 8.5"
-                className={inputClass}
-              />
-            </div>
-            <div>
-              <label className={labelClass}>Als Favorit markieren</label>
-              <button
-                type="button"
-                onClick={() => setFormData({ ...formData, isFavorite: !formData.isFavorite })}
-                className={favoriteButtonClass}
-              >
-                ❤️ Favorit
-              </button>
-            </div>
-          </div>
+                        {isCatDropdownOpen && (
+                          <div className={dropdownPanelClass}>
+                            <Input
+                              value={catSearch}
+                              onChange={e => setCatSearch(e.target.value)}
+                              placeholder="Suchen / Hinzufügen..."
+                              className={inputClass}
+                              autoFocus
+                            />
+                            <div className="flex flex-col gap-1 overflow-y-auto max-h-40 hidden-scrollbar mt-1">
+                              {filteredCategories.map(c => (
+                                <button
+                                  key={c}
+                                  type="button"
+                                  onClick={() => {
+                                    triggerHaptic(10);
+                                    setFormData({ ...formData, mainCat: c });
+                                    setIsCatDropdownOpen(false);
+                                    setCatSearch('');
+                                  }}
+                                  className={cn(
+                                    "w-full text-left px-4 py-2 rounded-full text-sm font-medium transition-colors cursor-pointer",
+                                    formData.mainCat === c
+                                      ? "bg-accent text-bg-primary"
+                                      : "text-text-primary hover:bg-text-primary/10"
+                                  )}
+                                >
+                                  {c}
+                                </button>
+                              ))}
+                              {catSearch.trim() && !categories.some(c => c.toLowerCase() === catSearch.trim().toLowerCase()) && (
+                                <button
+                                  type="button"
+                                  onClick={async () => {
+                                    triggerHaptic(15);
+                                    const newCat = catSearch.trim();
+                                    await addCategory(newCat);
+                                    setFormData({ ...formData, mainCat: newCat });
+                                    setIsCatDropdownOpen(false);
+                                    setCatSearch('');
+                                  }}
+                                  className="w-full text-left px-4 py-2 rounded-full text-sm font-semibold text-accent hover:bg-accent/10 cursor-pointer"
+                                >
+                                  + "{catSearch.trim()}" neu erstellen
+                                </button>
+                              )}
+                              {filteredCategories.length === 0 && !catSearch.trim() && (
+                                <span className="text-xs text-text-secondary italic text-center py-2">Keine Kategorien vorhanden.</span>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                      </div>
 
-          {/* Bilder Drag & Drop Zone */}
-          <div>
-            <label className={labelClass}>Bilder (URLs / Upload)</label>
-            <div
-              onDragOver={e => {
-                e.preventDefault();
-                setIsDragging(true);
-              }}
-              onDragLeave={() => setIsDragging(false)}
-              onDrop={e => {
-                e.preventDefault();
-                setIsDragging(false);
-                if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-                  const imgFiles = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'));
-                  if (imgFiles.length > 0) {
-                    handleImageFiles(imgFiles);
-                  }
-                }
-              }}
-              className={sensorContainerClass}
-            >
-              <div 
-                onClick={() => fileInputRef.current?.click()}
-                className="flex flex-col gap-1 text-center justify-center items-center py-3 cursor-pointer group"
-              >
-                <ImageIcon size={28} className={cn("transition-colors duration-300", isDragging ? "text-slate-600 dark:text-slate-300" : "text-slate-400 group-hover:text-slate-600")} />
-                <span className="text-xs font-semibold text-slate-700 mt-1">
-                  Bilder hierher ziehen oder <span className="underline group-hover:text-slate-900 transition-colors">durchsuchen</span>
-                </span>
-                <span className="text-[10px] text-slate-400 mt-0.5">
-                  Unterstützt Drag & Drop, Klicken zum Auswählen oder Clipboard-Paste (Strg+V)
-                </span>
-                <input
-                  type="file"
-                  ref={fileInputRef}
-                  onChange={e => {
-                    if (e.target.files && e.target.files.length > 0) {
-                      const imgFiles = Array.from(e.target.files).filter(f => f.type.startsWith('image/'));
-                      if (imgFiles.length > 0) {
-                        handleImageFiles(imgFiles);
-                      }
-                    }
-                  }}
-                  accept="image/*"
-                  multiple
-                  className="hidden"
-                />
-              </div>
+                      {/* Subkategorie Dropdown */}
+                      <div className="relative" ref={subCatDropdownRef}>
+                        <label className={labelClass}>Sub-Kategorie</label>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            triggerHaptic(10);
+                            setIsSubCatDropdownOpen(!isSubCatDropdownOpen);
+                          }}
+                          className={dropdownTriggerClass}
+                        >
+                          <span className="truncate">
+                            {formData.subCats && formData.subCats.length > 0
+                              ? formData.subCats.join(', ')
+                              : 'Subkategorie wählen'}
+                          </span>
+                          <span className="text-text-secondary text-[10px] transform transition-transform duration-300 select-none pointer-events-none ml-2">
+                            {isSubCatDropdownOpen ? '▲' : '▼'}
+                          </span>
+                        </button>
 
-              {imageError && (
-                <div className="bg-red-500/10 border border-red-500/30 text-red-500 rounded-xl p-3 text-xs flex justify-between items-center animate-in fade-in slide-in-from-top-2 duration-300">
-                  <span>{imageError}</span>
-                  <button type="button" onClick={() => setImageError(null)} className="text-red-500 hover:text-red-400 font-bold ml-2">
-                    <X size={14} />
-                  </button>
-                </div>
-              )}
-
-              <div className="flex gap-2">
-                <Input
-                  value={imgInput}
-                  onChange={e => setImgInput(e.target.value)}
-                  placeholder="Bild-URL einfügen..."
-                  className={inputClass}
-                  icon={<ImageIcon size={16} />}
-                />
-                <button
-                  type="button"
-                  onClick={addImage}
-                  className="shrink-0 h-[46px] flex items-center justify-center px-6 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm transition-all duration-200 active:scale-95 shadow-sm hover:shadow shadow-blue-500/10 cursor-pointer"
-                >
-                  Hinzufügen
-                </button>
-              </div>
-
-              {formData.imgs && formData.imgs.length > 0 && (
-                <div className="flex gap-3 overflow-x-auto pb-2 hidden-scrollbar">
-                  {formData.imgs.map((img, idx) => (
-                    <div key={idx} className="relative w-24 h-24 rounded-xl overflow-hidden shrink-0 border border-slate-100 shadow-sm group">
-                      <img src={img} alt={`Preview ${idx}`} className="w-full h-full object-cover" />
-                      <button
-                        onClick={() => removeImage(idx)}
-                        type="button"
-                        className="absolute top-1 right-1 w-6 h-6 bg-red-500 rounded-full flex items-center justify-center text-white md:opacity-0 md:group-hover:opacity-100 opacity-100 transition-opacity shadow-lg active:scale-90 cursor-pointer z-10"
-                      >
-                        <X size={12} />
-                      </button>
+                        {isSubCatDropdownOpen && (
+                          <div className={dropdownPanelClass}>
+                            <Input
+                              value={subCatSearch}
+                              onChange={e => setSubCatSearch(e.target.value)}
+                              placeholder="Suchen / Hinzufügen..."
+                              className={inputClass}
+                              autoFocus
+                            />
+                            <div className="flex flex-col gap-1 overflow-y-auto max-h-40 hidden-scrollbar mt-1">
+                              {filteredSubCategories.map(s => {
+                                const isSelected = formData.subCats?.includes(s);
+                                return (
+                                  <button
+                                    key={s}
+                                    type="button"
+                                    onClick={() => {
+                                      triggerHaptic(10);
+                                      const current = formData.subCats || [];
+                                      const next = current.includes(s)
+                                        ? current.filter(item => item !== s)
+                                        : [...current, s];
+                                      setFormData({ ...formData, subCats: next });
+                                    }}
+                                    className={cn(
+                                      "w-full text-left px-4 py-2 rounded-full text-sm font-medium transition-colors cursor-pointer flex items-center justify-between",
+                                      isSelected
+                                        ? "bg-accent text-bg-primary"
+                                        : "text-text-primary hover:bg-text-primary/10"
+                                    )}
+                                  >
+                                    <span>{s}</span>
+                                    {isSelected && <Check size={14} />}
+                                  </button>
+                                );
+                              })}
+                              {subCatSearch.trim() && !(subCats[formData.mainCat || ''] || []).some(s => s.toLowerCase() === subCatSearch.trim().toLowerCase()) && (
+                                <button
+                                  type="button"
+                                  onClick={async () => {
+                                    triggerHaptic(15);
+                                    const newSub = subCatSearch.trim();
+                                    await addSubCategory(formData.mainCat || 'Setup', newSub);
+                                    const current = formData.subCats || [];
+                                    setFormData({ ...formData, subCats: [...current, newSub] });
+                                    setSubCatSearch('');
+                                  }}
+                                  className="w-full text-left px-4 py-2 rounded-full text-sm font-semibold text-accent hover:bg-accent/10 cursor-pointer"
+                                >
+                                  + "{subCatSearch.trim()}" neu erstellen
+                                </button>
+                              )}
+                              {filteredSubCategories.length === 0 && !subCatSearch.trim() && (
+                                <span className="text-xs text-text-secondary italic text-center py-2">Keine Unterkategorien vorhanden.</span>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  ))}
-                </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className={labelClass}>Bewertung (1-10)</label>
+                        <Input
+                          type="number"
+                          min="0"
+                          max="10"
+                          step="0.1"
+                          value={formData.rating || ''}
+                          onChange={e => {
+                            const val = Math.max(0, Math.min(10, Number(e.target.value)));
+                            setFormData({ ...formData, rating: val });
+                          }}
+                          placeholder="z. B. 8.5"
+                          className={inputClass}
+                        />
+                      </div>
+                      <div>
+                        <label className={labelClass}>Als Favorit markieren</label>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            triggerHaptic(15);
+                            setFormData({ ...formData, isFavorite: !formData.isFavorite });
+                          }}
+                          className={favoriteButtonClass}
+                        >
+                          <Heart size={16} className={formData.isFavorite ? "fill-current" : ""} />
+                          <span>{formData.isFavorite ? 'Als Favorit gespeichert' : 'Als Favorit markieren'}</span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
               )}
-            </div>
+            </AnimatePresence>
           </div>
 
-          {/* Details */}
-          <div>
-            <label className={labelClass}>Details / Notizen (Optional)</label>
-            <textarea
-              value={formData.details}
-              onChange={e => setFormData({ ...formData, details: e.target.value })}
-              className={textareaClass}
-              placeholder="Zusätzliche Informationen..."
-            />
+          {/* ABSCHNITT 3: Preise & Konditionen */}
+          <div className={sectionCardClass}>
+            <button
+              type="button"
+              onClick={() => toggleSection('pricing')}
+              className={sectionHeaderClass}
+            >
+              <div className="flex items-center gap-3 min-w-0 pr-2">
+                <div className="w-8 h-8 rounded-xl bg-accent/10 flex items-center justify-center text-accent shrink-0">
+                  <Euro size={18} />
+                </div>
+                <div className="truncate text-left">
+                  <h3 className="text-sm font-bold text-text-primary">Preise & Rabatt</h3>
+                  {!openSections.pricing && (
+                    <p className="text-xs text-text-secondary truncate mt-0.5">
+                      {formData.price ? `${formData.price.toFixed(2)} €${formData.discount ? ` (-${formData.discount}%)` : ''}` : 'Kein Preis eingegeben'}
+                    </p>
+                  )}
+                </div>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <span className="text-[11px] font-medium px-2.5 py-0.5 rounded-full bg-accent/10 text-accent">
+                  {pricingFilledCount}/2 Felder
+                </span>
+                <span className="text-text-secondary">
+                  {openSections.pricing ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+                </span>
+              </div>
+            </button>
+
+            <AnimatePresence initial={false}>
+              {openSections.pricing && (
+                <motion.div
+                  key="pricing-content"
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+                  className="overflow-hidden"
+                >
+                  <div className="p-3.5 sm:p-4 pt-1 sm:pt-1 border-t border-border-primary/10 flex flex-col gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                      <div>
+                        <label className={labelClass}>Preis (€)</label>
+                        <Input 
+                          type="number" 
+                          value={formData.price || ''} 
+                          onChange={e => {
+                            const p = Number(e.target.value);
+                            const d = Number(formData.discount) || 0;
+                            setFormData({ ...formData, price: p, finalPrice: p - (p * (d / 100)) });
+                          }}
+                          placeholder="0.00"
+                          className={inputClass} 
+                        />
+                      </div>
+                      <div>
+                        <label className={labelClass}>Rabatt (%)</label>
+                        <Input 
+                          type="number" 
+                          value={formData.discount || ''} 
+                          onChange={e => {
+                            const d = Number(e.target.value);
+                            const p = Number(formData.price) || 0;
+                            setFormData({ ...formData, discount: d, finalPrice: p - (p * (d / 100)) });
+                          }}
+                          placeholder="0"
+                          className={inputClass} 
+                        />
+                      </div>
+                      <div>
+                        <label className={labelClass}>Endpreis (€)</label>
+                        <Input 
+                          type="number" 
+                          value={formData.finalPrice?.toFixed(2)} 
+                          readOnly 
+                          className={cn(inputClass, "opacity-60 cursor-not-allowed")} 
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
+          {/* ABSCHNITT 4: Bilder & Details */}
+          <div className={sectionCardClass}>
+            <button
+              type="button"
+              onClick={() => toggleSection('media')}
+              className={sectionHeaderClass}
+            >
+              <div className="flex items-center gap-3 min-w-0 pr-2">
+                <div className="w-8 h-8 rounded-xl bg-accent/10 flex items-center justify-center text-accent shrink-0">
+                  <ImageIcon size={18} />
+                </div>
+                <div className="truncate text-left">
+                  <h3 className="text-sm font-bold text-text-primary">Bilder & Details</h3>
+                  {!openSections.media && (
+                    <p className="text-xs text-text-secondary truncate mt-0.5">
+                      {(formData.imgs || []).length} Bild(er)
+                      {formData.details ? ' • Details vorhanden' : ''}
+                    </p>
+                  )}
+                </div>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <span className="text-[11px] font-medium px-2.5 py-0.5 rounded-full bg-accent/10 text-accent">
+                  {mediaFilledCount}/2 Felder
+                </span>
+                <span className="text-text-secondary">
+                  {openSections.media ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+                </span>
+              </div>
+            </button>
+
+            <AnimatePresence initial={false}>
+              {openSections.media && (
+                <motion.div
+                  key="media-content"
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+                  className="overflow-hidden"
+                >
+                  <div className="p-3.5 sm:p-4 pt-1 sm:pt-1 border-t border-border-primary/10 flex flex-col gap-4">
+                    {/* Bilder Drag & Drop Zone */}
+                    <div>
+                      <label className={labelClass}>Bilder (Upload / Drag & Drop / URL)</label>
+                      <div
+                        onDragOver={e => {
+                          e.preventDefault();
+                          setIsDragging(true);
+                        }}
+                        onDragLeave={() => setIsDragging(false)}
+                        onDrop={e => {
+                          e.preventDefault();
+                          setIsDragging(false);
+                          if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                            const imgFiles = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'));
+                            if (imgFiles.length > 0) {
+                              handleImageFiles(imgFiles);
+                            }
+                          }
+                        }}
+                        className={sensorContainerClass}
+                      >
+                        <div 
+                          onClick={() => fileInputRef.current?.click()}
+                          className="flex flex-col gap-1 text-center justify-center items-center py-2 cursor-pointer group"
+                        >
+                          <ImageIcon size={26} className={cn("transition-colors duration-300", isDragging ? "text-accent" : "text-text-secondary group-hover:text-text-primary")} />
+                          <span className="text-xs font-semibold text-text-primary mt-1">
+                            Bilder hierher ziehen oder <span className="underline group-hover:text-accent transition-colors">durchsuchen</span>
+                          </span>
+                          <span className="text-[10px] text-text-secondary mt-0.5">
+                            Drag & Drop, Klick zum Auswählen oder Clipboard (Strg+V)
+                          </span>
+                          <input
+                            type="file"
+                            ref={fileInputRef}
+                            onChange={e => {
+                              if (e.target.files && e.target.files.length > 0) {
+                                const imgFiles = Array.from(e.target.files).filter(f => f.type.startsWith('image/'));
+                                if (imgFiles.length > 0) {
+                                  handleImageFiles(imgFiles);
+                                }
+                              }
+                            }}
+                            accept="image/*"
+                            multiple
+                            className="hidden"
+                          />
+                        </div>
+
+                        {imageError && (
+                          <div className="bg-heart/10 border border-heart/30 text-heart rounded-xl p-3 text-xs flex justify-between items-center animate-in fade-in slide-in-from-top-2 duration-300">
+                            <span>{imageError}</span>
+                            <button type="button" onClick={() => setImageError(null)} className="text-heart hover:opacity-80 font-bold ml-2">
+                              <X size={14} />
+                            </button>
+                          </div>
+                        )}
+
+                        <div className="flex gap-2">
+                          <Input
+                            value={imgInput}
+                            onChange={e => setImgInput(e.target.value)}
+                            placeholder="Bild-URL einfügen..."
+                            className={inputClass}
+                            icon={<ImageIcon size={16} />}
+                          />
+                          <button
+                            type="button"
+                            onClick={addImage}
+                            className="shrink-0 h-[42px] flex items-center justify-center px-5 rounded-full bg-accent text-bg-primary font-semibold text-xs transition-all duration-200 active:scale-95 shadow-sm hover:bg-accent-hover cursor-pointer"
+                          >
+                            Hinzufügen
+                          </button>
+                        </div>
+
+                        {formData.imgs && formData.imgs.length > 0 && (
+                          <div className="flex gap-3 overflow-x-auto pb-2 hidden-scrollbar">
+                            {formData.imgs.map((img, idx) => (
+                              <div key={idx} className="relative w-20 h-20 rounded-xl overflow-hidden shrink-0 border border-border-primary/20 shadow-sm group">
+                                <img src={img} alt={`Preview ${idx}`} className="w-full h-full object-cover" />
+                                <button
+                                  onClick={() => removeImage(idx)}
+                                  type="button"
+                                  className="absolute top-1 right-1 w-6 h-6 bg-heart rounded-full flex items-center justify-center text-white md:opacity-0 md:group-hover:opacity-100 opacity-100 transition-opacity shadow-lg active:scale-90 cursor-pointer z-10"
+                                >
+                                  <X size={12} />
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Details */}
+                    <div>
+                      <label className={labelClass}>Details / Notizen (Optional)</label>
+                      <textarea
+                        value={formData.details}
+                        onChange={e => setFormData({ ...formData, details: e.target.value })}
+                        className={textareaClass}
+                        placeholder="Zusätzliche Informationen..."
+                      />
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
 
         </div>
@@ -719,14 +1014,14 @@ export const ProductModal: React.FC = () => {
           <button 
             type="button" 
             onClick={handleCancel} 
-            className={cancelButtonClass}
+            className="bg-inactive-btn-bg text-inactive-btn-text hover:opacity-90 px-5 py-2.5 rounded-full text-sm font-medium transition-colors cursor-pointer select-none active:scale-95"
           >
             Abbrechen
           </button>
           <button 
             type="button" 
             onClick={handleSave} 
-            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-full text-sm font-medium shadow-sm shadow-blue-500/10 hover:shadow-md hover:shadow-blue-500/20 transition-all duration-200 active:scale-95 flex items-center gap-2 cursor-pointer"
+            className="bg-accent text-bg-primary hover:bg-accent-hover px-6 py-2.5 rounded-full text-sm font-semibold shadow-sm transition-all duration-200 active:scale-95 flex items-center gap-2 cursor-pointer"
           >
             <Save size={18} /> Speichern
           </button>

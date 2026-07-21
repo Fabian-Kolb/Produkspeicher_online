@@ -61,74 +61,81 @@ export const KatalogView: React.FC = () => {
 
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <SubNavigation categories={categories} />
+      <div 
+        style={{ 
+          transform: 'translateX(var(--katalog-header-x, 0px))', 
+          transition: 'var(--header-transition, transform 0.4s cubic-bezier(0.16, 1, 0.3, 1))' 
+        }}
+      >
+        <SubNavigation categories={categories} />
 
-      {/* Control Bar (Search, Sort, Filters) */}
-      <div className="flex flex-col gap-6 mb-12">
-        {/* Top Row: Search & Main Actions */}
-        <div className="flex flex-wrap items-center justify-center gap-3">
-          <div className="relative w-full sm:w-auto">
-            <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-text-secondary" />
-            <input
-              type="text"
-              placeholder="Suchen..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full sm:w-64 hover:sm:w-80 focus:sm:w-80 bg-[var(--theme-glass-bg)] border border-[var(--theme-glass-border)] backdrop-blur-md rounded-full pl-10 pr-4 py-2 text-sm outline-none hover:border-text-secondary focus:border-text-secondary hover:-translate-y-0.5 focus:-translate-y-0.5 hover:scale-[1.02] focus:scale-[1.02] hover:shadow-md focus:shadow-md transition-all duration-500 ease-out transform-gpu origin-center shadow-sm"
-            />
+        {/* Control Bar (Search, Sort, Filters) */}
+        <div className="flex flex-col gap-6 mb-12">
+          {/* Top Row: Search & Main Actions */}
+          <div className="flex flex-wrap items-center justify-center gap-3">
+            <div className="relative w-full sm:w-auto">
+              <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-text-secondary" />
+              <input
+                type="text"
+                placeholder="Suchen..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full sm:w-64 hover:sm:w-80 focus:sm:w-80 bg-[var(--theme-glass-bg)] border border-[var(--theme-glass-border)] backdrop-blur-md rounded-full pl-10 pr-4 py-2 text-sm outline-none hover:border-text-secondary focus:border-text-secondary hover:-translate-y-0.5 focus:-translate-y-0.5 hover:scale-[1.02] focus:scale-[1.02] hover:shadow-md focus:shadow-md transition-all duration-500 ease-out transform-gpu origin-center shadow-sm"
+              />
+            </div>
+
+            <select
+              value={sortMode}
+              onChange={(e) => setSortMode(e.target.value as any)}
+              className={cn(
+                "rounded-full px-4 py-2 text-sm outline-none focus:border-text-secondary shadow-sm appearance-none pr-8 relative cursor-pointer border transition-all duration-300",
+                settings.isGlassEnabled
+                  ? "bg-[var(--theme-glass-bg)] border-[var(--theme-glass-border)] backdrop-blur-md"
+                  : "bg-bg-card border-border-primary"
+              )}
+            >
+              <option value="default">Sort: Favoriten</option>
+              <option value="priceAsc">Preis aufsteigend</option>
+              <option value="priceDesc">Preis absteigend</option>
+              <option value="newest">Neueste zuerst</option>
+              <option value="oldest">Älteste zuerst</option>
+            </select>
+
+            <FilterChip
+              active={statusFilter === 'bought'}
+              onClick={() => setStatusFilter(statusFilter === 'bought' ? 'active' : 'bought')}
+            >
+              Gekauft
+            </FilterChip>
+            <FilterChip
+              active={statusFilter === 'reduced'}
+              onClick={() => setStatusFilter(statusFilter === 'reduced' ? 'active' : 'reduced')}
+            >
+              Reduziert
+            </FilterChip>
           </div>
 
-          <select
-            value={sortMode}
-            onChange={(e) => setSortMode(e.target.value as any)}
-            className={cn(
-              "rounded-full px-4 py-2 text-sm outline-none focus:border-text-secondary shadow-sm appearance-none pr-8 relative cursor-pointer border transition-all duration-300",
-              settings.isGlassEnabled
-                ? "bg-[var(--theme-glass-bg)] border-[var(--theme-glass-border)] backdrop-blur-md"
-                : "bg-bg-card border-border-primary"
-            )}
-          >
-            <option value="default">Sort: Favoriten</option>
-            <option value="priceAsc">Preis aufsteigend</option>
-            <option value="priceDesc">Preis absteigend</option>
-            <option value="newest">Neueste zuerst</option>
-            <option value="oldest">Älteste zuerst</option>
-          </select>
+          {/* Bottom Row: Sub Filters */}
+          <div className="min-h-[44px] flex flex-wrap gap-2 justify-center items-center">
+            {mainCat !== 'Alle' && subCats[mainCat] && subCats[mainCat].map(sub => (
+              <FilterChip
+                key={sub}
+                active={selectedSubCats.includes(sub)}
+                onClick={() => {
+                  useUIStore.setState(state => {
+                    const newSubCats = state.selectedSubCats.includes(sub)
+                      ? state.selectedSubCats.filter(s => s !== sub)
+                      : [...state.selectedSubCats, sub];
+                    return { selectedSubCats: newSubCats };
+                  })
+                }}
+              >
+                {sub}
+              </FilterChip>
+            ))}
+          </div>
 
-          <FilterChip
-            active={statusFilter === 'bought'}
-            onClick={() => setStatusFilter(statusFilter === 'bought' ? 'active' : 'bought')}
-          >
-            Gekauft
-          </FilterChip>
-          <FilterChip
-            active={statusFilter === 'reduced'}
-            onClick={() => setStatusFilter(statusFilter === 'reduced' ? 'active' : 'reduced')}
-          >
-            Reduziert
-          </FilterChip>
         </div>
-
-        {/* Bottom Row: Sub Filters */}
-        <div className="min-h-[44px] flex flex-wrap gap-2 justify-center items-center">
-          {mainCat !== 'Alle' && subCats[mainCat] && subCats[mainCat].map(sub => (
-            <FilterChip
-              key={sub}
-              active={selectedSubCats.includes(sub)}
-              onClick={() => {
-                useUIStore.setState(state => {
-                  const newSubCats = state.selectedSubCats.includes(sub)
-                    ? state.selectedSubCats.filter(s => s !== sub)
-                    : [...state.selectedSubCats, sub];
-                  return { selectedSubCats: newSubCats };
-                })
-              }}
-            >
-              {sub}
-            </FilterChip>
-          ))}
-        </div>
-
       </div>
 
       {/* Grid */}

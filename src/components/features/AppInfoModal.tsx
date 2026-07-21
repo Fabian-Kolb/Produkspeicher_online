@@ -17,6 +17,42 @@ interface LogEntry {
 
 const CHANGELOG: LogEntry[] = [
   {
+    version: '0.8.24',
+    date: '21. Juli 2026',
+    changes: {
+      added: [
+        'Sanfter Übergang für Bundle-Editor: Elegante Spring- & Fade-Animationen beim Erstellen und Bearbeiten von Bundles.',
+        'Visuelle Hervorhebung im Katalog: Ausgewählte Produkte erhalten eine Akzent-Farbe, Rand-Highlighting und Mengen-Badge (✓ 1x).'
+      ],
+      improved: [
+        'Header Button Integration: "+ Neues Bundle" & "Abbrechen" Buttons direkt im Top-Header integriert (mit Akzentblau, sanfter Hover-Skalierung & Haptik).',
+        'Aufgeräumtes Bundle-Layout: Doppelte Überschriften & Schließen-Kreuz am Eingabefeld entfernt.'
+      ]
+    }
+  },
+  {
+    version: '0.8.23',
+    date: '21. Juli 2026',
+    changes: {
+      improved: [
+        'Fixierter Secondary-Nav- & Filter-bereich bei Wechsel zwischen Katalog & Favoriten: Die obere Pille (Alle, Hardware, Software...) und die Filterleiste bleiben beim Hin- und Herwechseln fest stehen – nur das Produkt-Grid animiert.',
+        'Nahtlose Übergangs-Animationen: Für Dashboard ↔ Katalog und Favoriten ↔ Bundles bleibt die bewährte Seiteneinflieg-Animation in vollem Umfang erhalten.'
+      ]
+    }
+  },
+  {
+    version: '0.8.22',
+    date: '21. Juli 2026',
+    changes: {
+      improved: [
+        'Mobile Akkordeon-Struktur für Produkt-Modal: Das Formular wurde in 4 strukturierte, klappbare Themenblöcke unterteilt (Basis-Infos, Kategorie & Bewertung, Preise & Rabatt, Bilder & Details).',
+        'Kompakt-Ansicht mit Live-Badges: Zugeklappte Abschnitte zeigen im Header eine prägnante Zusammenfassung der eingetragenen Daten.',
+        'Sektions-Steuerung & Haptik: Ein "Alle aufklappen / einklappen"-Button inkl. tactilem Vibration-Feedback ermöglicht blitzschnellen Wechsel.',
+        'Gezielte Sichtbarkeit des Hinzufügen-Buttons: Der "+ Neu" Button (sowohl mobil unten rechts als auch im Desktop-Header) ist nun ausschließlich auf den Seiten "Katalog" und "Favoriten" sichtbar und wurde von der Startseite entfernt.'
+      ]
+    }
+  },
+  {
     version: '0.8.21',
     date: '12. Juni 2026',
     changes: {

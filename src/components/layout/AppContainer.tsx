@@ -31,7 +31,7 @@ export const AppContainer: React.FC = () => {
   const navigate = useNavigate();
   const carouselRef = useRef<HTMLDivElement>(null);
   const openProductModal = useUIStore(state => state.openProductModal);
-  const showFab = location.pathname === '/' || location.pathname === '/katalog' || location.pathname === '/favoriten';
+  const showFab = location.pathname === '/katalog' || location.pathname === '/favoriten';
 
   const [isScrollingDown, setIsScrollingDown] = useState(false);
   const lastScrollY = useRef(0);
@@ -81,14 +81,56 @@ export const AppContainer: React.FC = () => {
   const routeIndex = ROUTES.indexOf(location.pathname);
   const currentIndex = routeIndex !== -1 ? routeIndex : 0;
 
+  const updateHeaderTransforms = (carouselOffsetPx: number, isDrag: boolean = false) => {
+    if (!carouselRef.current) return;
+    const pageWidth = window.innerWidth;
+    if (!pageWidth) return;
+
+    const currentUnit = -carouselOffsetPx / pageWidth;
+
+    let katalogX = 0;
+    let favoritenX = 0;
+
+    if (currentUnit <= 1.0) {
+      katalogX = 0;
+      favoritenX = -pageWidth;
+    } else if (currentUnit >= 2.0) {
+      katalogX = pageWidth;
+      favoritenX = 0;
+    } else {
+      const t = currentUnit - 1.0;
+      katalogX = t * pageWidth;
+      favoritenX = (t - 1.0) * pageWidth;
+    }
+
+    if (isDrag) {
+      carouselRef.current.style.setProperty('--header-transition', 'none');
+    } else {
+      carouselRef.current.style.setProperty('--header-transition', 'transform 0.4s cubic-bezier(0.16, 1, 0.3, 1)');
+    }
+
+    carouselRef.current.style.setProperty('--katalog-header-x', `${katalogX}px`);
+    carouselRef.current.style.setProperty('--favoriten-header-x', `${favoritenX}px`);
+  };
+
   // Sync carousel translation with active index on location change (only if not actively dragging)
   useEffect(() => {
     if (carouselRef.current && !isDragging.current) {
       carouselRef.current.style.transition = 'transform 0.4s cubic-bezier(0.16, 1, 0.3, 1)';
       carouselRef.current.style.transform = `translateX(-${currentIndex * (100 / 6)}%)`;
+      updateHeaderTransforms(-currentIndex * window.innerWidth, false);
     }
     setIsScrollingDown(false);
     lastScrollY.current = 0;
+  }, [currentIndex]);
+
+  // Recalculate header transforms on window resize
+  useEffect(() => {
+    const handleResize = () => {
+      updateHeaderTransforms(-currentIndex * window.innerWidth, false);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
   }, [currentIndex]);
 
   // Touch Gesture Variables for Mobile Swiping
@@ -242,7 +284,9 @@ export const AppContainer: React.FC = () => {
       }
 
       carouselRef.current.style.transition = 'none';
+      const actualOffsetPx = currentOffset + finalDx;
       carouselRef.current.style.transform = `translateX(calc(-${startIndex.current * (100 / 6)}% + ${finalDx}px))`;
+      updateHeaderTransforms(actualOffsetPx, true);
     }
   };
 
@@ -288,6 +332,7 @@ export const AppContainer: React.FC = () => {
       carouselRef.current.style.transition = 'transform 0.4s cubic-bezier(0.16, 1, 0.3, 1)';
       carouselRef.current.offsetHeight; // Force reflow
       carouselRef.current.style.transform = `translateX(-${targetIndex * (100 / 6)}%)`;
+      updateHeaderTransforms(-targetIndex * pageWidth, false);
 
       // If we didn't navigate yet, or if the final target is different from where we are currently centered
       if (targetIndex !== currentIndex) {

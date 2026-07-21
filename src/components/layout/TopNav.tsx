@@ -1,16 +1,16 @@
 import React, { useRef, useState, useLayoutEffect, useEffect } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { Menu, Plus } from 'lucide-react';
+import { Menu, Plus, X } from 'lucide-react';
 import { useUIStore } from '../../store/useUIStore';
 import { useAppStore } from '../../store/useAppStore';
 import { cn } from '../../utils/cn';
 import { triggerHaptic } from '../../utils/haptics';
 import logoDark from '../../assets/logo/logo_dark.png';
 import logoWhite from '../../assets/logo/logo_white.png';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export const TopNav: React.FC = () => {
-  const { toggleMainMenu, openProductModal } = useUIStore();
+  const { toggleMainMenu, openProductModal, activeBundleId, setActiveBundleId, setBundleDraft } = useUIStore();
   const { settings } = useAppStore();
   const location = useLocation();
 
@@ -62,15 +62,26 @@ export const TopNav: React.FC = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, [activeItem.to]);
 
+  const handleCancelBundle = () => {
+    triggerHaptic(15);
+    setBundleDraft(null);
+    setActiveBundleId(null);
+  };
+
+  const handleNewBundle = () => {
+    triggerHaptic(15);
+    setActiveBundleId('new');
+  };
+
   return (
     <header className={cn(
-      "fixed top-0 w-full z-50 px-4 md:px-6 py-2 md:py-3 flex items-center justify-between border-b transition-all duration-300",
+      "fixed top-0 w-full z-50 px-4 md:px-6 py-2 md:py-3 grid grid-cols-[auto_1fr] md:grid-cols-[1fr_auto_1fr] items-center border-b transition-all duration-300",
       settings.isGlassEnabled
         ? "backdrop-blur-xl bg-[var(--theme-glass-bg)] border-[var(--theme-glass-border)]"
         : "bg-bg-card border-border-primary"
     )}>
       {/* Logo */}
-      <div className="flex items-center gap-2 md:gap-3">
+      <div className="flex items-center gap-2 md:gap-3 justify-start">
         <img
           src={settings.theme === 'dark' ? logoWhite : logoDark}
           alt="Ventory Logo"
@@ -82,57 +93,115 @@ export const TopNav: React.FC = () => {
       </div>
 
       {/* Desktop Nav Pills – hidden on mobile (BottomNav takes over) */}
-      <nav 
-        className="relative hidden md:flex items-center gap-1 bg-text-primary/[0.07] border border-text-primary/5 p-1 rounded-full shadow-inner overflow-hidden"
-      >
-        {/* Sliding background indicator */}
-        {indicatorStyle.width > 0 && (
-          <motion.div
-            className="absolute top-0 left-0 bg-accent rounded-full shadow-md shadow-accent/15 pointer-events-none"
-            animate={{
-              x: indicatorStyle.left,
-              y: indicatorStyle.top,
-              width: indicatorStyle.width,
-              height: indicatorStyle.height
-            }}
-            transition={{ type: "spring", stiffness: 380, damping: 30 }}
-          />
-        )}
+      <div className="hidden md:flex justify-center">
+        <nav 
+          className="relative flex items-center gap-1 bg-text-primary/[0.07] border border-text-primary/5 p-1 rounded-full shadow-inner overflow-hidden"
+        >
+          {/* Sliding background indicator */}
+          {indicatorStyle.width > 0 && (
+            <motion.div
+              className="absolute top-0 left-0 bg-accent rounded-full shadow-md shadow-accent/15 pointer-events-none"
+              animate={{
+                x: indicatorStyle.left,
+                y: indicatorStyle.top,
+                width: indicatorStyle.width,
+                height: indicatorStyle.height
+              }}
+              transition={{ type: "spring", stiffness: 380, damping: 30 }}
+            />
+          )}
 
-        {navItems.map((item) => (
-          <NavLink
-            key={item.to}
-            to={item.to}
-            end={item.to === '/'}
-            ref={el => { tabsRef.current[item.to] = el; }}
-            onClick={() => triggerHaptic(15)}
-            className={({ isActive }) =>
-              cn(
-                "px-5 py-2 rounded-full text-sm font-medium transition-colors duration-300 select-none outline-none cursor-pointer z-10 bg-transparent",
-                isActive
-                  ? "text-bg-primary"
-                  : 'text-text-secondary hover:text-text-primary hover:bg-text-primary/10'
-              )
-            }
-          >
-            {item.label}
-          </NavLink>
-        ))}
-      </nav>
+          {navItems.map((item) => (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              end={item.to === '/'}
+              ref={el => { tabsRef.current[item.to] = el; }}
+              onClick={() => triggerHaptic(15)}
+              className={({ isActive }) =>
+                cn(
+                  "px-5 py-2 rounded-full text-sm font-medium transition-colors duration-300 select-none outline-none cursor-pointer z-10 bg-transparent",
+                  isActive
+                    ? "text-bg-primary"
+                    : 'text-text-secondary hover:text-text-primary hover:bg-text-primary/10'
+                )
+              }
+            >
+              {item.label}
+            </NavLink>
+          ))}
+        </nav>
+      </div>
 
       {/* Right Controls */}
-      <div className="flex items-center gap-2 md:gap-4">
-        {/* Global Add Product Button - Desktop Only */}
-        <button
-          onClick={() => {
-            triggerHaptic(15);
-            openProductModal();
-          }}
-          className="hidden md:flex h-10 items-center justify-center gap-1.5 bg-accent hover:bg-accent-hover text-bg-primary font-bold px-5 rounded-full text-sm shadow-md transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer select-none"
-        >
-          <Plus size={16} strokeWidth={2.5} />
-          <span>Neu</span>
-        </button>
+      <div className="flex items-center gap-2 md:gap-4 justify-end">
+        {/* Global Add Product Button - Desktop Only (Only on Katalog & Favoriten) */}
+        <AnimatePresence mode="popLayout">
+          {(location.pathname === '/katalog' || location.pathname === '/favoriten') && (
+            <motion.button
+              key="desktop-add-product-btn"
+              initial={{ opacity: 0, scale: 0.8, x: 8 }}
+              animate={{ opacity: 1, scale: 1, x: 0 }}
+              exit={{ opacity: 0, scale: 0.8, x: 8 }}
+              transition={{ type: "spring", stiffness: 450, damping: 32 }}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => {
+                triggerHaptic(15);
+                openProductModal();
+              }}
+              className="hidden md:flex h-10 items-center justify-center gap-1.5 bg-accent hover:bg-accent-hover text-bg-primary font-bold px-5 rounded-full text-sm shadow-md cursor-pointer select-none whitespace-nowrap origin-center transition-all duration-300"
+            >
+              <Plus size={16} strokeWidth={2.5} />
+              <span>Neu</span>
+            </motion.button>
+          )}
+
+          {/* Bundles Header Action Button (Neues Bundle / Abbrechen) */}
+          {location.pathname === '/bundles' && (
+            <motion.div
+              key="bundles-header-btn-wrapper"
+              initial={{ opacity: 0, scale: 0.8, x: 8 }}
+              animate={{ opacity: 1, scale: 1, x: 0 }}
+              exit={{ opacity: 0, scale: 0.8, x: 8 }}
+              transition={{ type: "spring", stiffness: 450, damping: 32 }}
+            >
+              <AnimatePresence mode="wait" initial={false}>
+                {activeBundleId ? (
+                  <motion.button
+                    key="cancel-bundle-btn"
+                    initial={{ opacity: 0, scale: 0.85, x: 5 }}
+                    animate={{ opacity: 1, scale: 1, x: 0 }}
+                    exit={{ opacity: 0, scale: 0.85, x: -5 }}
+                    transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={handleCancelBundle}
+                    className="flex h-9 md:h-10 items-center justify-center gap-1.5 bg-accent hover:bg-accent-hover text-bg-primary font-bold px-3.5 md:px-5 rounded-full text-xs md:text-sm shadow-md cursor-pointer select-none whitespace-nowrap origin-center transition-all duration-300"
+                  >
+                    <X size={15} strokeWidth={2.5} />
+                    <span>Abbrechen</span>
+                  </motion.button>
+                ) : (
+                  <motion.button
+                    key="new-bundle-btn"
+                    initial={{ opacity: 0, scale: 0.85, x: 5 }}
+                    animate={{ opacity: 1, scale: 1, x: 0 }}
+                    exit={{ opacity: 0, scale: 0.85, x: -5 }}
+                    transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={handleNewBundle}
+                    className="flex h-9 md:h-10 items-center justify-center gap-1.5 bg-accent hover:bg-accent-hover text-bg-primary font-bold px-3.5 md:px-5 rounded-full text-xs md:text-sm shadow-md cursor-pointer select-none whitespace-nowrap origin-center transition-all duration-300"
+                  >
+                    <Plus size={15} strokeWidth={2.5} />
+                    <span>Neues Bundle</span>
+                  </motion.button>
+                )}
+              </AnimatePresence>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Hamburger */}
         <button
@@ -140,7 +209,7 @@ export const TopNav: React.FC = () => {
             triggerHaptic(15);
             toggleMainMenu();
           }}
-          className="w-8 h-8 md:w-10 md:h-10 bg-bg-primary rounded-full shadow-sm flex items-center justify-center hover:bg-text-primary/5 transition-colors border border-border-primary/50"
+          className="w-8 h-8 md:w-10 md:h-10 bg-bg-primary rounded-full shadow-sm flex items-center justify-center hover:bg-text-primary/5 transition-colors border border-border-primary/50 shrink-0"
         >
           <Menu size={18} />
         </button>
@@ -148,3 +217,4 @@ export const TopNav: React.FC = () => {
     </header>
   );
 };
+

@@ -1,11 +1,13 @@
 import React, { useMemo, useState, useEffect, useRef } from 'react';
 import { useAppStore } from '../store/useAppStore';
 import { useUIStore } from '../store/useUIStore';
-import { Layers, Plus, Trash2, Search, X, BookOpen, ShoppingBag } from 'lucide-react';
+import { Layers, Plus, Trash2, Search, X, BookOpen, ShoppingBag, Check } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '../utils/cn';
 import type { BundleItem } from '../types';
 import { Button } from '../components/common/Button';
 import { FilterChip } from '../components/common/FilterChip';
+import { triggerHaptic } from '../utils/haptics';
 
 /* ── Marquee wrapper: scrolls children horizontally when they overflow ── */
 const MarqueeOverflow: React.FC<{ children: React.ReactNode; className?: string }> = ({ children, className = '' }) => {
@@ -52,6 +54,8 @@ export const BundlesView: React.FC = () => {
 
   // Mobile editor tab state: 'catalog' or 'bundle'
   const [mobileEditorTab, setMobileEditorTab] = useState<'catalog' | 'bundle'>('catalog');
+
+  const isEditing = Boolean(activeBundleId);
 
   // When active bundle changes, update draft in UIStore
   useEffect(() => {
@@ -113,6 +117,7 @@ export const BundlesView: React.FC = () => {
       setActiveBundleId(null);
       setBundleDraft(null);
     }
+    triggerHaptic(20);
   };
 
   const handleAddItem = (productId: string) => {
@@ -124,10 +129,12 @@ export const BundlesView: React.FC = () => {
       next = [...draftItems, { id: productId, qty: 1 }];
     }
     setDraftItems(next);
+    triggerHaptic(15);
   };
 
   const handleRemoveItem = (productId: string) => {
     setDraftItems(draftItems.filter(i => i.id !== productId));
+    triggerHaptic(15);
   };
 
   const handleDecreaseItem = (productId: string) => {
@@ -138,9 +145,11 @@ export const BundlesView: React.FC = () => {
       return i;
     }).filter(i => i.qty > 0);
     setDraftItems(next);
+    triggerHaptic(15);
   };
 
   const handleCancelBundle = () => {
+    triggerHaptic(15);
     setBundleDraft(null);
     setActiveBundleId(null);
   };
@@ -160,7 +169,7 @@ export const BundlesView: React.FC = () => {
   };
 
   return (
-    <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 min-h-[calc(100vh-140px)] flex flex-col">
+    <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 min-h-[calc(100vh-140px)] flex flex-col pt-2 md:pt-4">
       {/* Marquee keyframe style */}
       <style>{`
         @keyframes marquee {
@@ -175,349 +184,412 @@ export const BundlesView: React.FC = () => {
         }
       `}</style>
 
-      {/* Header */}
-      <div className="mb-6 md:mb-8 flex justify-between items-center px-1 md:px-4">
-        <h1 className="text-2xl md:text-3xl font-playfair font-bold">
-          Bundles
-        </h1>
-        <Button
-          onClick={() => setActiveBundleId('new')}
-          className="flex items-center gap-1.5 md:gap-2"
-        >
-          <Plus size={15} /> <span>Neues Bundle</span>
-        </Button>
-      </div>
-
-      {!activeBundleId ? (
-        <>
-          {bundles.length === 0 ? (
-            /* Empty State */
-            <div className="flex-1 flex flex-col items-center justify-center -mt-16">
-              <div className="w-16 h-16 bg-bg-primary rounded-full flex items-center justify-center shadow-lg mb-6">
-                <Layers size={28} className="text-text-primary" />
+      <AnimatePresence mode="wait" initial={false}>
+        {!activeBundleId ? (
+          <motion.div
+            key="bundle-list-view"
+            initial={{ opacity: 0, y: 15, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -15, scale: 0.98 }}
+            transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+            className="flex-1 flex flex-col"
+          >
+            {bundles.length === 0 ? (
+              /* Empty State */
+              <div className="flex-1 flex flex-col items-center justify-center -mt-16">
+                <div className="w-16 h-16 bg-bg-primary rounded-full flex items-center justify-center shadow-lg mb-6">
+                  <Layers size={28} className="text-text-primary" />
+                </div>
+                <h2 className="text-xl font-bold mb-2 text-text-primary">Noch keine Bundles erstellt</h2>
+                <p className="text-text-secondary text-sm mb-8">Erstelle dein erstes Bundle um Produkte zu gruppieren.</p>
+                <Button
+                  onClick={() => {
+                    triggerHaptic(15);
+                    setActiveBundleId('new');
+                  }}
+                >
+                  Jetzt erstellen
+                </Button>
               </div>
-              <h2 className="text-xl font-bold mb-2 text-text-primary">Noch keine Bundles erstellt</h2>
-              <p className="text-text-secondary text-sm mb-8">Erstelle dein erstes Bundle um Produkte zu gruppieren.</p>
-              <Button
-                onClick={() => setActiveBundleId('new')}
-              >
-                Jetzt erstellen
-              </Button>
-            </div>
-          ) : (
-            /* ── Bundle Cards ── */
-            <div className="flex flex-col gap-4 md:gap-6 px-1 md:px-4">
-              {bundles.map(bundle => {
-                const totalArticles = bundle.items.reduce((acc, i) => acc + i.qty, 0);
-                const totalPrice = getBundleTotal(bundle.items);
+            ) : (
+              /* ── Bundle Cards ── */
+              <div className="flex flex-col gap-4 md:gap-6 px-1 md:px-4">
+                {bundles.map(bundle => {
+                  const totalArticles = bundle.items.reduce((acc, i) => acc + i.qty, 0);
+                  const totalPrice = getBundleTotal(bundle.items);
 
-                return (
-                  <div
-                    key={bundle.id}
-                    className="glass-panel rounded-2xl md:rounded-3xl p-4 md:p-8 relative overflow-hidden"
-                  >
-                    {/* Top row: Name + Controls */}
-                    <div className="flex flex-col md:flex-row justify-between items-start mb-4 md:mb-8 gap-4 md:gap-3">
-                      <div className="w-full md:flex-1 min-w-0">
-                        <MarqueeOverflow>
-                          <h2 className="text-lg md:text-2xl font-playfair font-bold text-text-primary md:mr-8 whitespace-nowrap">{bundle.name}</h2>
-                        </MarqueeOverflow>
-                        <p className="text-xs text-text-secondary mt-1 md:mt-0.5">{totalArticles} Artikel</p>
-                      </div>
+                  return (
+                    <div
+                      key={bundle.id}
+                      className="glass-panel rounded-2xl md:rounded-3xl p-4 md:p-8 relative overflow-hidden"
+                    >
+                      {/* Top row: Name + Controls */}
+                      <div className="flex flex-col md:flex-row justify-between items-start mb-4 md:mb-8 gap-4 md:gap-3">
+                        <div className="w-full md:flex-1 min-w-0">
+                          <MarqueeOverflow>
+                            <h2 className="text-lg md:text-2xl font-playfair font-bold text-text-primary md:mr-8 whitespace-nowrap">{bundle.name}</h2>
+                          </MarqueeOverflow>
+                          <p className="text-xs text-text-secondary mt-1 md:mt-0.5">{totalArticles} Artikel</p>
+                        </div>
 
-                      {/* Right side: Price + Actions */}
-                      <div className="backdrop-blur-md rounded-2xl md:rounded-3xl p-3 md:p-4 flex flex-col items-end gap-2 md:gap-3 shrink-0 self-end md:self-start border border-text-primary/15 bg-text-primary/10 transition-all shadow-sm">
-                        <span className="text-lg md:text-2xl font-bold text-text-primary">{totalPrice.toFixed(2)} €</span>
-                        <div className="flex items-center gap-1.5 md:gap-2">
-                          <Button
-                            onClick={() => setActiveBundleId(bundle.id)}
-                            size="sm"
-                            className="h-7 md:h-8"
-                          >
-                            Bearbeiten
-                          </Button>
-                          <button
-                            onClick={() => deleteBundle(bundle.id)}
-                            className="w-7 h-7 md:w-8 md:h-8 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer shadow-sm group/trash border bg-accent text-bg-primary border-transparent hover:bg-heart hover:text-white"
-                          >
-                            <Trash2 size={13} />
-                          </button>
+                        {/* Right side: Price + Actions */}
+                        <div className="backdrop-blur-md rounded-2xl md:rounded-3xl p-3 md:p-4 flex flex-col items-end gap-2 md:gap-3 shrink-0 self-end md:self-start border border-text-primary/15 bg-text-primary/10 transition-all shadow-sm">
+                          <span className="text-lg md:text-2xl font-bold text-text-primary">{totalPrice.toFixed(2)} €</span>
+                          <div className="flex items-center gap-1.5 md:gap-2">
+                            <Button
+                              onClick={() => {
+                                triggerHaptic(15);
+                                setActiveBundleId(bundle.id);
+                              }}
+                              size="sm"
+                              className="h-7 md:h-8"
+                            >
+                              Bearbeiten
+                            </Button>
+                            <button
+                              onClick={() => {
+                                triggerHaptic(15);
+                                deleteBundle(bundle.id);
+                              }}
+                              className="w-7 h-7 md:w-8 md:h-8 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer shadow-sm group/trash border bg-accent text-bg-primary border-transparent hover:bg-heart hover:text-white"
+                            >
+                              <Trash2 size={13} />
+                            </button>
+                          </div>
                         </div>
                       </div>
-                    </div>
 
-                    {/* Products row – horizontal scroll */}
-                    <MarqueeOverflow className="mb-4 md:mb-8">
-                      <div className="flex gap-3 md:gap-6 pr-4 md:pr-8">
-                        {bundle.items.map(item => {
-                          const product = products.find(p => p.id === item.id);
-                          if (!product) return null;
-                          return (
-                            <div 
-                              key={item.id} 
-                              onClick={() => openProductDetailModal(product.id)}
-                              className="flex flex-col w-28 md:w-44 shrink-0 glass-panel rounded-xl md:rounded-2xl p-2 md:p-3 pb-3 md:pb-4 cursor-pointer transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1.5 hover:scale-[1.02] hover:shadow-xl"
-                            >
-                              <div className="w-full aspect-square rounded-lg md:rounded-xl overflow-hidden mb-2 md:mb-3 shadow-sm">
-                                <img
-                                  src={product.imgs[0] || 'https://via.placeholder.com/200'}
-                                  alt={product.name}
-                                  className="w-full h-full object-cover"
-                                />
+                      {/* Products row – horizontal scroll */}
+                      <MarqueeOverflow className="mb-4 md:mb-8">
+                        <div className="flex gap-3 md:gap-6 pr-4 md:pr-8">
+                          {bundle.items.map(item => {
+                            const product = products.find(p => p.id === item.id);
+                            if (!product) return null;
+                            return (
+                              <div 
+                                key={item.id} 
+                                onClick={() => openProductDetailModal(product.id)}
+                                className="flex flex-col w-28 md:w-44 shrink-0 glass-panel rounded-xl md:rounded-2xl p-2 md:p-3 pb-3 md:pb-4 cursor-pointer transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1.5 hover:scale-[1.02] hover:shadow-xl"
+                              >
+                                <div className="w-full aspect-square rounded-lg md:rounded-xl overflow-hidden mb-2 md:mb-3 shadow-sm">
+                                  <img
+                                    src={product.imgs[0] || 'https://via.placeholder.com/200'}
+                                    alt={product.name}
+                                    className="w-full h-full object-cover"
+                                  />
+                                </div>
+                                <p className="text-[9px] md:text-[10px] text-text-secondary uppercase tracking-wider font-medium">{product.shop}</p>
+                                <p className="text-xs md:text-sm font-bold text-text-primary truncate">{product.name}</p>
+                                <p className="text-xs md:text-sm text-text-primary mt-0.5">{product.finalPrice.toFixed(2)} €</p>
                               </div>
-                              <p className="text-[9px] md:text-[10px] text-text-secondary uppercase tracking-wider font-medium">{product.shop}</p>
-                              <p className="text-xs md:text-sm font-bold text-text-primary truncate">{product.name}</p>
-                              <p className="text-xs md:text-sm text-text-primary mt-0.5">{product.finalPrice.toFixed(2)} €</p>
-                            </div>
-                          );
-                        })}
+                            );
+                          })}
+                        </div>
+                      </MarqueeOverflow>
+
+                      {/* Bottom right: Kaufen button */}
+                      <div className="flex justify-end">
+                        <Button onClick={() => triggerHaptic(15)}>
+                          Kaufen
+                        </Button>
                       </div>
-                    </MarqueeOverflow>
-
-                    {/* Bottom right: Kaufen button */}
-                    <div className="flex justify-end">
-                      <Button>
-                        Kaufen
-                      </Button>
                     </div>
-                  </div>
-                );
-              })}
+                  );
+                })}
+              </div>
+            )}
+          </motion.div>
+        ) : (
+          /* ═══ BUNDLE EDITOR ═══ */
+          <motion.div
+            key="bundle-editor-view"
+            initial={{ opacity: 0, y: 25, scale: 0.97 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 25, scale: 0.97 }}
+            transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+            className="flex flex-col flex-1 min-h-0 gap-4 md:gap-6"
+          >
+            {/* Mobile Tab Switcher */}
+            <div className="flex md:hidden gap-0 glass-panel rounded-full p-1 mx-1">
+              <button
+                onClick={() => {
+                  triggerHaptic(15);
+                  setMobileEditorTab('catalog');
+                }}
+                className={cn(
+                  'flex-1 flex items-center justify-center gap-2 py-2.5 rounded-full text-sm font-semibold transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer',
+                  mobileEditorTab === 'catalog' ? 'bg-text-primary text-bg-primary shadow-sm' : 'text-text-secondary'
+                )}
+              >
+                <BookOpen size={16} />
+                Katalog
+              </button>
+              <button
+                onClick={() => {
+                  triggerHaptic(15);
+                  setMobileEditorTab('bundle');
+                }}
+                className={cn(
+                  'flex-1 flex items-center justify-center gap-2 py-2.5 rounded-full text-sm font-semibold transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer',
+                  mobileEditorTab === 'bundle' ? 'bg-text-primary text-bg-primary shadow-sm' : 'text-text-secondary'
+                )}
+              >
+                <ShoppingBag size={16} />
+                Bundle {draftItems.length > 0 && <span className="bg-heart text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center leading-none">{draftItems.length}</span>}
+              </button>
             </div>
-          )}
-        </>
-      ) : (
-        /* ═══ BUNDLE EDITOR ═══ */
-        <div className="flex flex-col flex-1 min-h-0 gap-4 md:gap-6">
 
-          {/* Mobile Tab Switcher */}
-          <div className="flex md:hidden gap-0 glass-panel rounded-full p-1 mx-1">
-            <button
-              onClick={() => setMobileEditorTab('catalog')}
-              className={cn(
-                'flex-1 flex items-center justify-center gap-2 py-2.5 rounded-full text-sm font-semibold transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer',
-                mobileEditorTab === 'catalog' ? 'bg-text-primary text-bg-primary shadow-sm' : 'text-text-secondary'
-              )}
-            >
-              <BookOpen size={16} />
-              Katalog
-            </button>
-            <button
-              onClick={() => setMobileEditorTab('bundle')}
-              className={cn(
-                'flex-1 flex items-center justify-center gap-2 py-2.5 rounded-full text-sm font-semibold transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer',
-                mobileEditorTab === 'bundle' ? 'bg-text-primary text-bg-primary shadow-sm' : 'text-text-secondary'
-              )}
-            >
-              <ShoppingBag size={16} />
-              Bundle {draftItems.length > 0 && <span className="bg-heart text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center leading-none">{draftItems.length}</span>}
-            </button>
-          </div>
+            <div className="flex flex-col md:flex-row flex-1 min-h-0 gap-4 md:gap-6">
+              {/* Left panel: Full Catalog with Filters */}
+              <div className={cn(
+                'flex-[3] glass-panel rounded-2xl md:rounded-3xl p-4 md:p-6 flex flex-col overflow-hidden relative',
+                // On mobile, hide this panel when on 'bundle' tab
+                mobileEditorTab === 'bundle' ? 'hidden md:flex' : 'flex'
+              )}>
+                {/* Filter Bar */}
+                <div className="flex flex-col gap-3 mb-4 shrink-0">
+                  {/* Search */}
+                  <div className="relative">
+                    <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-text-secondary" />
+                    <input
+                      type="text"
+                      value={searchQuery}
+                      onChange={e => setSearchQuery(e.target.value)}
+                      placeholder="Suchen..."
+                      className="w-full bg-[var(--theme-glass-bg)] border border-[var(--theme-glass-border)] rounded-full pl-10 pr-4 py-2 text-sm outline-none hover:border-text-secondary focus:border-text-secondary hover:-translate-y-0.5 focus:-translate-y-0.5 hover:scale-[1.02] focus:scale-[1.02] hover:shadow-md focus:shadow-md transition-all duration-500 ease-out transform-gpu origin-center shadow-sm"
+                    />
+                  </div>
 
-          <div className="flex flex-col md:flex-row flex-1 min-h-0 gap-4 md:gap-6">
-            {/* Left panel: Full Catalog with Filters */}
-            <div className={cn(
-              'flex-[3] glass-panel rounded-2xl md:rounded-3xl p-4 md:p-6 flex flex-col overflow-hidden relative',
-              // On mobile, hide this panel when on 'bundle' tab
-              mobileEditorTab === 'bundle' ? 'hidden md:flex' : 'flex'
-            )}>
-              {/* Filter Bar */}
-              <div className="flex flex-col gap-3 mb-4 shrink-0">
-                {/* Search */}
-                <div className="relative">
-                  <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-text-secondary" />
-                  <input
-                    type="text"
-                    value={searchQuery}
-                    onChange={e => setSearchQuery(e.target.value)}
-                    placeholder="Suchen..."
-                    className="w-full bg-[var(--theme-glass-bg)] border border-[var(--theme-glass-border)] rounded-full pl-10 pr-4 py-2 text-sm outline-none hover:border-text-secondary focus:border-text-secondary hover:-translate-y-0.5 focus:-translate-y-0.5 hover:scale-[1.02] focus:scale-[1.02] hover:shadow-md focus:shadow-md transition-all duration-500 ease-out transform-gpu origin-center shadow-sm"
-                  />
-                </div>
-
-                {/* Category pills – scrollable */}
-                <div className="flex gap-1.5 overflow-x-auto pb-1 no-scrollbar">
-                  <FilterChip
-                    active={editorMainCat === 'Alle'}
-                    onClick={() => setEditorMainCat('Alle')}
-                    className="shrink-0"
-                  >
-                    Alle
-                  </FilterChip>
-                  {categories.map(cat => (
+                  {/* Category pills – scrollable */}
+                  <div className="flex gap-1.5 overflow-x-auto pb-1 no-scrollbar">
                     <FilterChip
-                      key={cat}
-                      active={editorMainCat === cat}
-                      onClick={() => setEditorMainCat(cat)}
+                      active={editorMainCat === 'Alle'}
+                      onClick={() => setEditorMainCat('Alle')}
                       className="shrink-0"
-                    >
-                      {cat}
-                    </FilterChip>
-                  ))}
-                </div>
-
-                {/* Status filters */}
-                <div className="flex gap-2">
-                  <FilterChip
-                    active={editorStatusFilter === 'bought'}
-                    onClick={() => setEditorStatusFilter(editorStatusFilter === 'bought' ? 'all' : 'bought')}
-                    className="flex-1 text-center justify-center"
-                  >
-                    Gekauft
-                  </FilterChip>
-                  <FilterChip
-                    active={editorStatusFilter === 'reduced'}
-                    onClick={() => setEditorStatusFilter(editorStatusFilter === 'reduced' ? 'all' : 'reduced')}
-                    className="flex-1 text-center justify-center"
-                  >
-                    Reduziert
-                  </FilterChip>
-                </div>
-
-                {/* Sub-category chips */}
-                {editorMainCat !== 'Alle' && subCats[editorMainCat] && (
-                  <div className="flex flex-wrap gap-1.5 justify-center items-center">
-                    <FilterChip
-                      active={editorSelectedSubCats.length === 0}
-                      onClick={() => setEditorSubCats([])}
                     >
                       Alle
                     </FilterChip>
-                    {subCats[editorMainCat].map(sub => (
+                    {categories.map(cat => (
                       <FilterChip
-                        key={sub}
-                        active={editorSelectedSubCats.includes(sub)}
-                        onClick={() => {
-                          setEditorSubCats(
-                            editorSelectedSubCats.includes(sub)
-                              ? editorSelectedSubCats.filter(s => s !== sub)
-                              : [...editorSelectedSubCats, sub]
-                          );
-                        }}
+                        key={cat}
+                        active={editorMainCat === cat}
+                        onClick={() => setEditorMainCat(cat)}
+                        className="shrink-0"
                       >
-                        {sub}
+                        {cat}
                       </FilterChip>
                     ))}
                   </div>
-                )}
-              </div>
 
-              {/* Product Grid */}
-              <div className="flex-1 relative overflow-hidden">
-                <div className="absolute inset-0 overflow-y-auto hidden-scrollbar" style={{ maskImage: 'linear-gradient(to bottom, transparent 0%, black 40px, black calc(100% - 60px), transparent 100%)', WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 40px, black calc(100% - 60px), transparent 100%)' }}>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 pt-8 pb-16">
-                    {editorFilteredProducts.map(product => (
-                      <div
-                        key={product.id}
-                        onClick={() => { handleAddItem(product.id); setMobileEditorTab('bundle'); }}
-                        className="glass-panel group relative flex flex-col overflow-hidden hover:-translate-y-1.5 hover:scale-[1.02] hover:shadow-xl transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] transform-gpu rounded-2xl p-2 md:p-3 cursor-pointer"
+                  {/* Status filters */}
+                  <div className="flex gap-2">
+                    <FilterChip
+                      active={editorStatusFilter === 'bought'}
+                      onClick={() => setEditorStatusFilter(editorStatusFilter === 'bought' ? 'all' : 'bought')}
+                      className="flex-1 text-center justify-center"
+                    >
+                      Gekauft
+                    </FilterChip>
+                    <FilterChip
+                      active={editorStatusFilter === 'reduced'}
+                      onClick={() => setEditorStatusFilter(editorStatusFilter === 'reduced' ? 'all' : 'reduced')}
+                      className="flex-1 text-center justify-center"
+                    >
+                      Reduziert
+                    </FilterChip>
+                  </div>
+
+                  {/* Sub-category chips */}
+                  {editorMainCat !== 'Alle' && subCats[editorMainCat] && (
+                    <div className="flex flex-wrap gap-1.5 justify-center items-center">
+                      <FilterChip
+                        active={editorSelectedSubCats.length === 0}
+                        onClick={() => setEditorSubCats([])}
                       >
-                        <div className="relative w-full aspect-square rounded-xl overflow-hidden bg-text-primary/10 mb-2">
-                          <img
-                            src={product.imgs[0] || 'https://via.placeholder.com/400'}
-                            alt={product.name}
-                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                            loading="lazy"
-                          />
-                          {product.discount > 0 && (
-                            <div className="absolute top-1.5 left-1.5 bg-heart text-white text-[9px] font-bold px-1.5 py-0.5 rounded-md shadow-md">
-                              -{product.discount}%
+                        Alle
+                      </FilterChip>
+                      {subCats[editorMainCat].map(sub => (
+                        <FilterChip
+                          key={sub}
+                          active={editorSelectedSubCats.includes(sub)}
+                          onClick={() => {
+                            setEditorSubCats(
+                              editorSelectedSubCats.includes(sub)
+                                ? editorSelectedSubCats.filter(s => s !== sub)
+                                : [...editorSelectedSubCats, sub]
+                            );
+                          }}
+                        >
+                          {sub}
+                        </FilterChip>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Product Grid */}
+                <div className="flex-1 relative overflow-hidden">
+                  <div className="absolute inset-0 overflow-y-auto hidden-scrollbar" style={{ maskImage: 'linear-gradient(to bottom, transparent 0%, black 40px, black calc(100% - 60px), transparent 100%)', WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 40px, black calc(100% - 60px), transparent 100%)' }}>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 pt-8 pb-16">
+                      {editorFilteredProducts.map(product => {
+                        const draftItem = draftItems.find(i => i.id === product.id);
+                        const isSelected = Boolean(draftItem);
+                        const selectedQty = draftItem?.qty || 0;
+
+                        return (
+                          <div
+                            key={product.id}
+                            onClick={() => {
+                              handleAddItem(product.id);
+                            }}
+                            className={cn(
+                              "glass-panel group relative flex flex-col overflow-hidden transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] transform-gpu rounded-2xl p-2 md:p-3 cursor-pointer select-none",
+                              isSelected
+                                ? "ring-2 ring-accent border-accent bg-accent/15 dark:bg-accent/20 shadow-lg shadow-accent/15 scale-[1.01]"
+                                : "hover:-translate-y-1.5 hover:scale-[1.02] hover:shadow-xl"
+                            )}
+                          >
+                            <div className="relative w-full aspect-square rounded-xl overflow-hidden bg-text-primary/10 mb-2">
+                              <img
+                                src={product.imgs[0] || 'https://via.placeholder.com/400'}
+                                alt={product.name}
+                                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                                loading="lazy"
+                              />
+                              {product.discount > 0 && (
+                                <div className="absolute top-1.5 left-1.5 bg-heart text-white text-[9px] font-bold px-1.5 py-0.5 rounded-md shadow-md z-10">
+                                  -{product.discount}%
+                                </div>
+                              )}
+
+                              {/* Selection Highlight Badge */}
+                              <AnimatePresence>
+                                {isSelected && (
+                                  <motion.div
+                                    initial={{ scale: 0, opacity: 0 }}
+                                    animate={{ scale: 1, opacity: 1 }}
+                                    exit={{ scale: 0, opacity: 0 }}
+                                    transition={{ type: "spring", stiffness: 500, damping: 25 }}
+                                    className="absolute top-1.5 right-1.5 bg-accent text-bg-primary text-[10px] font-extrabold px-2 py-0.5 rounded-full shadow-lg flex items-center gap-1 z-10"
+                                  >
+                                    <Check size={11} className="stroke-[3]" />
+                                    <span>{selectedQty}x</span>
+                                  </motion.div>
+                                )}
+                              </AnimatePresence>
                             </div>
-                          )}
+
+                            <span className="text-[9px] md:text-[10px] font-bold uppercase tracking-wider text-text-secondary mb-0.5 line-clamp-1 px-0.5">
+                              {product.shop}
+                            </span>
+                            <h3 className={cn(
+                              "font-bold text-xs md:text-sm leading-snug mb-0.5 line-clamp-1 px-0.5 transition-colors",
+                              isSelected ? "text-accent font-extrabold" : "text-text-primary"
+                            )}>
+                              {product.name}
+                            </h3>
+                            <div className="flex items-center justify-between px-0.5 mt-auto pt-0.5">
+                              <span className="font-bold text-xs md:text-sm">
+                                {product.finalPrice.toFixed(2)} €
+                              </span>
+                              {isSelected && (
+                                <span className="text-[10px] font-extrabold text-accent bg-accent/20 px-1.5 py-0.5 rounded-md">
+                                  Ausgewählt
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                      {editorFilteredProducts.length === 0 && (
+                        <div className="col-span-full py-16 flex flex-col items-center justify-center text-text-secondary">
+                          <p className="text-sm">Keine Produkte gefunden.</p>
                         </div>
-                        <span className="text-[9px] md:text-[10px] font-bold uppercase tracking-wider text-text-secondary mb-0.5 line-clamp-1 px-0.5">{product.shop}</span>
-                        <h3 className="font-bold text-xs md:text-sm leading-snug mb-0.5 line-clamp-1 px-0.5">{product.name}</h3>
-                        <span className="font-bold text-xs md:text-sm px-0.5">{product.finalPrice.toFixed(2)} €</span>
-                      </div>
-                    ))}
-                    {editorFilteredProducts.length === 0 && (
-                      <div className="col-span-full py-16 flex flex-col items-center justify-center text-text-secondary">
-                        <p className="text-sm">Keine Produkte gefunden.</p>
-                      </div>
-                    )}
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
 
-            {/* Right panel: Bundle Editor */}
-            <div className={cn(
-              'md:flex-1 glass-panel rounded-2xl md:rounded-3xl p-4 md:p-6 flex flex-col justify-between overflow-hidden md:min-w-[280px]',
-              mobileEditorTab === 'catalog' ? 'hidden md:flex' : 'flex'
-            )}>
-              <div className="flex-1 flex flex-col min-h-0">
-                <div className="flex justify-between items-center mb-4 shrink-0">
-                  <input
-                    type="text"
-                    value={draftName}
-                    onChange={e => setDraftName(e.target.value)}
-                    placeholder="Name der Zusammenstellung..."
-                    className="bg-transparent border-b border-transparent hover:border-text-secondary/30 focus:border-text-secondary outline-none font-bold text-base md:text-lg text-text-primary placeholder:text-text-secondary/70 w-full py-1 transition-all duration-500 ease-out"
-                  />
-                  <button onClick={handleCancelBundle} className="text-text-secondary hover:text-text-primary transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer shrink-0 ml-3 font-bold rounded-full"><X size={18} /></button>
-                </div>
+              {/* Right panel: Bundle Editor */}
+              <div className={cn(
+                'md:flex-1 glass-panel rounded-2xl md:rounded-3xl p-4 md:p-6 flex flex-col justify-between overflow-hidden md:min-w-[280px]',
+                mobileEditorTab === 'catalog' ? 'hidden md:flex' : 'flex'
+              )}>
+                <div className="flex-1 flex flex-col min-h-0">
+                  <div className="flex justify-between items-center mb-4 shrink-0">
+                    <input
+                      type="text"
+                      value={draftName}
+                      onChange={e => setDraftName(e.target.value)}
+                      placeholder="Name der Zusammenstellung..."
+                      className="bg-transparent border-b border-transparent hover:border-text-secondary/30 focus:border-text-secondary outline-none font-bold text-base md:text-lg text-text-primary placeholder:text-text-secondary/70 w-full py-1 transition-all duration-500 ease-out"
+                    />
+                  </div>
 
-                <div className="flex-1 overflow-y-auto hidden-scrollbar pr-1 space-y-2.5 min-h-[200px]">
-                  {draftItems.length === 0 && (
-                    <div className="h-full min-h-[150px] flex flex-col items-center justify-center text-text-secondary opacity-50">
-                      <Layers size={28} className="mb-2" />
-                      <p className="text-sm text-center">Füge Produkte aus dem Katalog hinzu.</p>
-                    </div>
-                  )}
-                  {draftItems.map(item => {
-                    const product = products.find(p => p.id === item.id);
-                    if (!product) return null;
-                    return (
-                      <div key={item.id} className="flex items-center justify-between p-3 glass-panel rounded-xl md:rounded-2xl">
-                        <div className="flex items-center gap-2.5 flex-1 min-w-0">
-                          <img src={product.imgs[0] || 'https://via.placeholder.com/100'} className="w-10 h-10 md:w-12 md:h-12 object-cover rounded-lg md:rounded-xl shrink-0" alt="" />
-                          <div className="min-w-0">
-                            <p className="font-bold text-xs md:text-sm leading-tight line-clamp-1">{product.name}</p>
-                            <p className="text-[10px] text-text-secondary">{product.finalPrice.toLocaleString('de-DE')} € ({item.qty}x)</p>
+                  <div className="flex-1 overflow-y-auto hidden-scrollbar pr-1 space-y-2.5 min-h-[200px]">
+                    {draftItems.length === 0 && (
+                      <div className="h-full min-h-[150px] flex flex-col items-center justify-center text-text-secondary opacity-50">
+                        <Layers size={28} className="mb-2" />
+                        <p className="text-sm text-center">Füge Produkte aus dem Katalog hinzu.</p>
+                      </div>
+                    )}
+                    {draftItems.map(item => {
+                      const product = products.find(p => p.id === item.id);
+                      if (!product) return null;
+                      return (
+                        <div key={item.id} className="flex items-center justify-between p-3 glass-panel rounded-xl md:rounded-2xl border border-accent/20 bg-accent/5">
+                          <div className="flex items-center gap-2.5 flex-1 min-w-0">
+                            <img src={product.imgs[0] || 'https://via.placeholder.com/100'} className="w-10 h-10 md:w-12 md:h-12 object-cover rounded-lg md:rounded-xl shrink-0" alt="" />
+                            <div className="min-w-0">
+                              <p className="font-bold text-xs md:text-sm leading-tight line-clamp-1">{product.name}</p>
+                              <p className="text-[10px] text-text-secondary">{product.finalPrice.toLocaleString('de-DE')} € ({item.qty}x)</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-1.5 shrink-0 ml-2">
+                            <button
+                              onClick={() => handleDecreaseItem(item.id)}
+                              className="w-7 h-7 md:w-9 md:h-9 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer text-sm font-bold shadow-sm bg-accent text-bg-primary hover:bg-accent-hover"
+                            >
+                              −
+                            </button>
+                            <button
+                              onClick={() => handleAddItem(item.id)}
+                              className="w-7 h-7 md:w-9 md:h-9 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer text-sm font-bold shadow-sm bg-accent text-bg-primary hover:bg-accent-hover"
+                            >
+                              +
+                            </button>
+                            <button
+                              onClick={() => handleRemoveItem(item.id)}
+                              className="w-7 h-7 md:w-9 md:h-9 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer text-sm font-bold shadow-sm bg-accent text-bg-primary hover:bg-heart hover:text-white"
+                            >
+                              ×
+                            </button>
                           </div>
                         </div>
-                        <div className="flex items-center gap-1.5 shrink-0 ml-2">
-                          <button
-                            onClick={() => handleDecreaseItem(item.id)}
-                            className="w-7 h-7 md:w-9 md:h-9 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer text-sm font-bold shadow-sm bg-accent text-bg-primary hover:bg-accent-hover"
-                          >
-                            −
-                          </button>
-                          <button
-                            onClick={() => handleAddItem(item.id)}
-                            className="w-7 h-7 md:w-9 md:h-9 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer text-sm font-bold shadow-sm bg-accent text-bg-primary hover:bg-accent-hover"
-                          >
-                            +
-                          </button>
-                          <button
-                            onClick={() => handleRemoveItem(item.id)}
-                            className="w-7 h-7 md:w-9 md:h-9 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer text-sm font-bold shadow-sm bg-accent text-bg-primary hover:bg-heart hover:text-white"
-                          >
-                            ×
-                          </button>
-                        </div>
-                      </div>
-                    );
-                  })}
+                      );
+                    })}
+                  </div>
                 </div>
-              </div>
 
-              <div className="mt-4 pt-4 border-t border-[var(--theme-glass-border)] shrink-0">
-                <div className="flex justify-between items-center mb-3">
-                  <span className="text-sm text-text-secondary">Gesamtpreis:</span>
-                  <span className="font-bold text-lg md:text-xl">{draftTotal.toLocaleString('de-DE')} €</span>
+                <div className="mt-4 pt-4 border-t border-[var(--theme-glass-border)] shrink-0">
+                  <div className="flex justify-between items-center mb-3">
+                    <span className="text-sm text-text-secondary">Gesamtpreis:</span>
+                    <span className="font-bold text-lg md:text-xl">{draftTotal.toLocaleString('de-DE')} €</span>
+                  </div>
+                  <Button
+                    onClick={handleCreateOrUpdate}
+                    className="w-full py-2.5 md:py-3 shadow-sm bg-accent text-bg-primary hover:bg-accent-hover"
+                  >
+                    Zusammenstellung speichern
+                  </Button>
                 </div>
-                <Button
-                  onClick={handleCreateOrUpdate}
-                  className="w-full py-2.5 md:py-3 shadow-sm bg-accent text-bg-primary hover:bg-accent-hover"
-                >
-                  Zusammenstellung speichern
-                </Button>
               </div>
             </div>
-          </div>
-        </div>
-      )}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
+

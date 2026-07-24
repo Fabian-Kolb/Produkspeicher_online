@@ -222,7 +222,7 @@ export const CategoryEditMenu: React.FC<CategoryEditMenuProps> = ({
         {!showAddInput && (
           <FilterChip
             onClick={() => setShowAddInput(true)}
-            className="!border-dashed !border-emerald-400/50 !text-emerald-400 hover:!bg-emerald-400/10 cursor-pointer flex items-center justify-center"
+            className="!border-dashed !border-accent/50 !text-accent hover:!bg-accent/10 cursor-pointer flex items-center justify-center"
           >
             <Plus size={12} className="mr-1" />
             Neu
@@ -249,7 +249,7 @@ export const CategoryEditMenu: React.FC<CategoryEditMenuProps> = ({
             />
             <button
               onClick={handleAddCat}
-              className="p-1.5 rounded-full text-emerald-400 hover:bg-emerald-400/10 transition-colors cursor-pointer"
+              className="p-1.5 rounded-full text-accent hover:bg-accent/10 transition-colors cursor-pointer"
               title="Hinzufügen"
             >
               <Plus size={14} />

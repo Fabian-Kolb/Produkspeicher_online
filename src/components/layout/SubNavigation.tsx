@@ -11,8 +11,7 @@ export const SubNavigation: React.FC<{
   categories: string[];
 }> = ({ categories }) => {
   const { mainCat, setMainCat, toggleCategoryMenu, isCategoryMenuOpen, closeCategoryMenu } = useUIStore();
-  const { addCategory, deleteCategory, reorderCategories, settings } = useAppStore();
-  const isGlassEnabled = settings.isGlassEnabled;
+  const { addCategory, deleteCategory, reorderCategories } = useAppStore();
   
   const tabsRef = useRef<{ [key: string]: HTMLButtonElement | null }>({});
   const [indicatorStyle, setIndicatorStyle] = useState<{ left: number; width: number; height: number; top: number }>({ left: 0, width: 0, height: 0, top: 0 });
@@ -51,8 +50,7 @@ export const SubNavigation: React.FC<{
     <div className="w-full mt-2 mb-6 md:mb-12 flex flex-col items-center justify-center px-0">
       <div 
         className={cn(
-          "relative px-4 py-1 md:px-1.5 md:py-1.5 flex items-center gap-1 md:gap-2 rounded-full overflow-x-auto no-scrollbar shadow-sm w-full md:w-auto pb-1.5 md:pb-1 border transition-all duration-300",
-          isGlassEnabled ? "bg-[var(--theme-glass-bg)] border-[var(--theme-glass-border)] backdrop-blur-md" : "bg-bg-card border-border-primary"
+          "glass-panel rounded-full relative px-4 py-1 md:px-1.5 md:py-1.5 flex items-center gap-1 md:gap-2 overflow-x-auto no-scrollbar shadow-sm w-full md:w-auto pb-1.5 md:pb-1 transition-all duration-300"
         )}
       >
         {/* Sliding background indicator */}

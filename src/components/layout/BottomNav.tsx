@@ -2,7 +2,6 @@ import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { LayoutDashboard, BookOpen, Heart, Layers, Wallet, Tag } from 'lucide-react';
 import { cn } from '../../utils/cn';
-import { useAppStore } from '../../store/useAppStore';
 import { triggerHaptic } from '../../utils/haptics';
 
 const navItems = [
@@ -15,17 +14,9 @@ const navItems = [
 ];
 
 export const BottomNav: React.FC = () => {
-  const { settings } = useAppStore();
-  const isGlassEnabled = settings.isGlassEnabled;
-
   return (
     <nav
-      className={cn(
-        'fixed bottom-0 left-0 right-0 z-40 xl:hidden flex items-stretch border-t transition-all duration-300',
-        isGlassEnabled
-          ? 'bg-[var(--theme-glass-bg)] backdrop-blur-xl border-[var(--theme-glass-border)]'
-          : 'bg-bg-card border-border-primary'
-      )}
+      className="glass-panel rounded-none border-b-0 border-x-0 fixed bottom-0 left-0 right-0 z-40 xl:hidden flex items-stretch transition-all duration-300"
       style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
     >
       {navItems.map(({ to, label, Icon }) => (

@@ -344,60 +344,41 @@ export const ProductModal: React.FC = () => {
 
   const inputClass = cn(
     "!rounded-2xl !transition-all !duration-200 text-text-primary placeholder:text-text-secondary/50",
-    isGlass
-      ? "!bg-white/40 dark:!bg-white/5 !border-white/20 dark:!border-white/10 hover:!bg-white/50"
-      : "!bg-black/5 dark:!bg-white/5 !border-border-primary/20",
-    "focus:!border-accent/50 focus:outline-none"
+    "bg-text-primary/5 border-border-primary/20 hover:border-text-secondary focus:border-text-secondary focus:outline-none"
   );
 
   const textareaClass = cn(
-    "w-full rounded-2xl transition-all duration-200 text-text-primary placeholder:text-text-secondary/50 p-4 outline-none border",
-    "min-h-[90px] focus:min-h-[140px]",
-    isGlass
-      ? "bg-white/40 dark:bg-white/5 border-white/20 dark:border-white/10 hover:bg-white/50"
-      : "bg-black/5 dark:bg-white/5 border-border-primary/20 hover:bg-black/10 dark:hover:bg-white/10",
-    "focus:border-accent/50 focus:outline-none"
+    "w-full rounded-2xl transition-all duration-200 text-text-primary placeholder:text-text-secondary/50 p-4 outline-none border border-border-primary/20",
+    "min-h-[90px] focus:min-h-[140px] bg-text-primary/5 hover:bg-text-primary/10",
+    "focus:border-text-secondary focus:outline-none"
   );
 
   const dropdownTriggerClass = cn(
-    "w-full flex items-center justify-between outline-none transition-all duration-200 cursor-pointer text-left text-sm border",
-    "rounded-full px-5 py-2.5 text-text-primary",
-    isGlass
-      ? "bg-white/40 dark:bg-white/5 border-white/20 dark:border-white/10 hover:bg-white/50"
-      : "bg-black/5 dark:bg-white/5 border-border-primary/20 hover:bg-black/10 dark:hover:bg-white/10",
-    "focus:border-accent/50 focus:outline-none"
+    "w-full flex items-center justify-between outline-none transition-all duration-200 cursor-pointer text-left text-sm border border-border-primary/20",
+    "rounded-full px-5 py-2.5 text-text-primary bg-text-primary/5 hover:bg-text-primary/10",
+    "focus:border-text-secondary focus:outline-none"
   );
 
   const dropdownPanelClass = cn(
-    "absolute left-0 right-0 mt-2 z-50 rounded-2xl shadow-2xl p-3 flex flex-col gap-2 max-h-60 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-300 border",
-    isGlass
-      ? "bg-bg-card/95 backdrop-blur-xl border-white/30 text-text-primary"
-      : "bg-bg-card border-border-primary text-text-primary"
+    "absolute left-0 right-0 mt-2 z-50 rounded-2xl shadow-2xl p-3 flex flex-col gap-2 max-h-60 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-300 border border-border-primary/20 glass-panel text-text-primary"
   );
 
   const favoriteButtonClass = cn(
     "w-full h-[46px] rounded-full border flex items-center justify-center gap-2 text-sm font-semibold transition-all duration-200 cursor-pointer select-none active:scale-95",
     formData.isFavorite
       ? "bg-heart border-transparent text-white shadow-sm hover:opacity-90"
-      : isGlass
-        ? "bg-white/40 dark:bg-white/5 border-white/20 dark:border-white/10 text-text-secondary hover:bg-white/50 hover:text-text-primary"
-        : "bg-black/5 dark:bg-white/5 border-border-primary/20 text-text-secondary hover:bg-black/10 dark:hover:bg-white/10 hover:text-text-primary"
+      : "bg-text-primary/5 border-border-primary/20 text-text-secondary hover:bg-text-primary/10 hover:text-text-primary"
   );
 
   const sensorContainerClass = cn(
     "border-2 border-dashed rounded-2xl p-4 sm:p-6 text-center transition-all duration-200 cursor-pointer flex flex-col gap-3 sm:gap-4",
     isDragging
       ? "border-accent bg-accent/10 scale-[0.99]"
-      : isGlass
-        ? "border-white/30 dark:border-white/10 bg-white/20 dark:bg-white/5 hover:bg-white/30 hover:border-white/50"
-        : "border-border-primary/30 bg-black/[0.02] dark:bg-white/[0.02] hover:bg-black/[0.05] hover:border-border-primary"
+      : "border-border-primary/30 bg-text-primary/5 hover:bg-text-primary/10 hover:border-text-secondary"
   );
 
   const sectionCardClass = cn(
-    "rounded-2xl border transition-all duration-300",
-    isGlass
-      ? "bg-white/40 dark:bg-white/5 border-white/20 dark:border-white/10"
-      : "bg-black/[0.02] dark:bg-white/[0.02] border-border-primary/20"
+    "rounded-2xl border border-border-primary/20 transition-all duration-300 bg-text-primary/[0.02]"
   );
 
   const sectionHeaderClass = cn(
@@ -406,15 +387,11 @@ export const ProductModal: React.FC = () => {
   );
 
   const headerClass = cn(
-    "flex items-center justify-between p-4 sm:p-6 border-b shrink-0",
-    isGlass ? "border-white/20 dark:border-white/10" : "border-border-primary/20"
+    "flex items-center justify-between p-4 sm:p-6 border-b border-border-primary/20 shrink-0"
   );
 
   const footerClass = cn(
-    "p-4 sm:p-6 flex justify-end gap-3 rounded-b-[1.5rem] border-t shrink-0",
-    isGlass
-      ? "bg-white/30 dark:bg-white/5 border-white/20 dark:border-white/10"
-      : "bg-black/[0.02] dark:bg-white/[0.02] border-border-primary/20"
+    "p-4 sm:p-6 flex justify-end gap-3 rounded-b-[1.5rem] border-t border-border-primary/20 shrink-0 bg-text-primary/[0.02]"
   );
 
   return (
@@ -424,7 +401,7 @@ export const ProductModal: React.FC = () => {
     )}>
       <div className={cn(
         "w-full max-w-2xl max-h-[98vh] sm:max-h-[95vh] overflow-hidden flex flex-col animate-in zoom-in-95 duration-300 rounded-[1.5rem]",
-        isGlass ? "glass-panel text-text-primary shadow-2xl" : "bg-bg-card border border-border-primary text-text-primary shadow-xl"
+        "glass-panel text-text-primary shadow-2xl"
       )}>
 
         {/* Header */}
@@ -438,7 +415,7 @@ export const ProductModal: React.FC = () => {
               <button
                 type="button"
                 onClick={closeAllSections}
-                className="flex items-center gap-1.5 text-xs font-semibold text-text-secondary hover:text-text-primary transition-colors py-1.5 px-3 rounded-full bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 cursor-pointer active:scale-95"
+                className="flex items-center gap-1.5 text-xs font-semibold text-text-secondary hover:text-text-primary transition-colors py-1.5 px-3 rounded-full bg-text-primary/5 hover:bg-text-primary/10 cursor-pointer active:scale-95"
               >
                 <ChevronsUpDown size={14} />
                 <span>Alle zuklappen</span>
@@ -446,7 +423,7 @@ export const ProductModal: React.FC = () => {
             )}
             <button 
               onClick={handleCancel} 
-              className="w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center rounded-full bg-black/5 dark:bg-white/5 text-text-secondary hover:text-text-primary transition-colors cursor-pointer"
+              className="w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center rounded-full bg-text-primary/5 text-text-secondary hover:text-text-primary hover:bg-text-primary/10 transition-colors cursor-pointer"
             >
               <X size={22} />
             </button>

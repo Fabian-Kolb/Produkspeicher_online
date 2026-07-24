@@ -5,12 +5,11 @@ import { useUIStore } from '../store/useUIStore';
 import { SubNavigation } from '../components/layout/SubNavigation';
 import { ProductCard } from '../components/features/ProductCard';
 import type { Product } from '../types';
-import { cn } from '../utils/cn';
 import { FilterChip } from '../components/common/FilterChip';
 
 
 export const KatalogView: React.FC = () => {
-  const { products, categories, subCats, settings } = useAppStore();
+  const { products, categories, subCats } = useAppStore();
   const {
     mainCat, selectedSubCats, sortMode, searchQuery, statusFilter,
     setSearchQuery, setSortMode, setStatusFilter
@@ -80,19 +79,14 @@ export const KatalogView: React.FC = () => {
                 placeholder="Suchen..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full sm:w-64 hover:sm:w-80 focus:sm:w-80 bg-[var(--theme-glass-bg)] border border-[var(--theme-glass-border)] backdrop-blur-md rounded-full pl-10 pr-4 py-2 text-sm outline-none hover:border-text-secondary focus:border-text-secondary hover:-translate-y-0.5 focus:-translate-y-0.5 hover:scale-[1.02] focus:scale-[1.02] hover:shadow-md focus:shadow-md transition-all duration-500 ease-out transform-gpu origin-center shadow-sm"
+                className="glass-panel rounded-full w-full sm:w-64 hover:sm:w-80 focus:sm:w-80 pl-10 pr-4 py-2 text-sm outline-none hover:border-text-secondary focus:border-text-secondary hover:-translate-y-0.5 focus:-translate-y-0.5 hover:scale-[1.02] focus:scale-[1.02] hover:shadow-md focus:shadow-md transition-all duration-500 ease-out transform-gpu origin-center shadow-sm"
               />
             </div>
 
             <select
               value={sortMode}
               onChange={(e) => setSortMode(e.target.value as any)}
-              className={cn(
-                "rounded-full px-4 py-2 text-sm outline-none focus:border-text-secondary shadow-sm appearance-none pr-8 relative cursor-pointer border transition-all duration-300",
-                settings.isGlassEnabled
-                  ? "bg-[var(--theme-glass-bg)] border-[var(--theme-glass-border)] backdrop-blur-md"
-                  : "bg-bg-card border-border-primary"
-              )}
+              className="glass-panel rounded-full px-4 py-2 text-sm outline-none focus:border-text-secondary shadow-sm appearance-none pr-8 relative cursor-pointer transition-all duration-300"
             >
               <option value="default">Sort: Favoriten</option>
               <option value="priceAsc">Preis aufsteigend</option>

@@ -78,14 +78,14 @@ export const FavoritenView: React.FC = () => {
                 placeholder="In Favoriten suchen..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full sm:w-64 hover:sm:w-80 focus:sm:w-80 bg-[var(--theme-glass-bg)] border border-[var(--theme-glass-border)] backdrop-blur-md rounded-full pl-10 pr-4 py-2 text-sm outline-none hover:border-text-secondary focus:border-text-secondary hover:-translate-y-0.5 focus:-translate-y-0.5 hover:scale-[1.02] focus:scale-[1.02] hover:shadow-md focus:shadow-md transition-all duration-500 ease-out transform-gpu origin-center shadow-sm"
+                className="glass-panel rounded-full w-full sm:w-64 hover:sm:w-80 focus:sm:w-80 pl-10 pr-4 py-2 text-sm outline-none hover:border-text-secondary focus:border-text-secondary hover:-translate-y-0.5 focus:-translate-y-0.5 hover:scale-[1.02] focus:scale-[1.02] hover:shadow-md focus:shadow-md transition-all duration-500 ease-out transform-gpu origin-center shadow-sm"
               />
             </div>
 
             <select
               value={sortMode}
               onChange={(e) => setSortMode(e.target.value as any)}
-              className="bg-[var(--theme-glass-bg)] border border-[var(--theme-glass-border)] backdrop-blur-md rounded-full px-4 py-2 text-sm outline-none focus:border-text-secondary shadow-sm appearance-none pr-8 relative cursor-pointer"
+              className="glass-panel rounded-full px-4 py-2 text-sm outline-none focus:border-text-secondary shadow-sm appearance-none pr-8 relative cursor-pointer"
             >
               <option value="default">Sort: Standard</option>
               <option value="priceAsc">Preis aufsteigend</option>

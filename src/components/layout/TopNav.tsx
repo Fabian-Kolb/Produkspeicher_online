@@ -111,12 +111,7 @@ export const TopNav: React.FC = () => {
   const buttonConfig = getHeaderButtonConfig();
 
   return (
-    <header className={cn(
-      "fixed top-0 w-full z-50 px-4 md:px-6 py-2 md:py-3 grid grid-cols-[auto_1fr] xl:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center border-b transition-all duration-300",
-      settings.isGlassEnabled
-        ? "backdrop-blur-xl bg-[var(--theme-glass-bg)] border-[var(--theme-glass-border)]"
-        : "bg-bg-card border-border-primary"
-    )}>
+    <header className="glass-panel rounded-none border-t-0 border-x-0 fixed top-0 w-full z-50 px-4 md:px-6 py-2 md:py-3 grid grid-cols-[auto_1fr] xl:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center transition-all duration-300">
       {/* Logo */}
       <div className="flex items-center gap-2 md:gap-3 justify-start">
         <img

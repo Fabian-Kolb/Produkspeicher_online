@@ -142,19 +142,13 @@ const AddShopModal: React.FC<AddShopModalProps> = ({ open, onClose, onAdd, categ
 
   const inputClass = cn(
     "!rounded-2xl !transition-all !duration-200 text-text-primary placeholder:text-text-secondary/50",
-    isGlass
-      ? "!bg-white/40 dark:!bg-white/5 !border-white/20 dark:!border-white/10 hover:!bg-white/50"
-      : "!bg-black/5 dark:!bg-white/5 !border-border-primary/20",
-    "focus:!border-accent/50 focus:outline-none"
+    "bg-text-primary/5 border-border-primary/20 hover:border-text-secondary focus:border-text-secondary focus:outline-none"
   );
 
   const dropdownTriggerClass = cn(
-    "w-full flex items-center justify-between outline-none transition-all duration-200 cursor-pointer text-left text-sm border",
-    "rounded-full px-5 py-2.5 text-text-primary",
-    isGlass
-      ? "bg-white/40 dark:bg-white/5 border-white/20 dark:border-white/10 hover:bg-white/50"
-      : "bg-black/5 dark:bg-white/5 border-border-primary/20 hover:bg-black/10 dark:hover:bg-white/10",
-    "focus:border-accent/50 focus:outline-none"
+    "w-full flex items-center justify-between outline-none transition-all duration-200 cursor-pointer text-left text-sm border border-border-primary/20",
+    "rounded-full px-5 py-2.5 text-text-primary bg-text-primary/5 hover:bg-text-primary/10",
+    "focus:border-text-secondary focus:outline-none"
   );
 
   return createPortal(
@@ -164,20 +158,17 @@ const AddShopModal: React.FC<AddShopModalProps> = ({ open, onClose, onAdd, categ
     )}>
       <div className={cn(
         "w-full max-w-md max-h-[98vh] sm:max-h-[95vh] overflow-hidden flex flex-col transition-all duration-300 animate-in zoom-in-95 rounded-[1.5rem]",
-        isGlass ? "glass-panel text-text-primary shadow-2xl" : "bg-bg-card border border-border-primary text-text-primary shadow-xl"
+        "glass-panel text-text-primary shadow-2xl"
       )}>
         {/* Header */}
-        <div className={cn(
-          "flex items-center justify-between p-4 sm:p-6 border-b shrink-0",
-          isGlass ? "border-white/20 dark:border-white/10" : "border-border-primary/20"
-        )}>
+        <div className="flex items-center justify-between p-4 sm:p-6 border-b border-border-primary/20 shrink-0">
           <h2 className="text-xl font-semibold text-text-primary tracking-tight">
             Neuen Shop hinzufügen
           </h2>
           <button 
             type="button"
             onClick={handleClose} 
-            className="w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center rounded-full bg-black/5 dark:bg-white/5 text-text-secondary hover:text-text-primary transition-colors cursor-pointer"
+            className="w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center rounded-full bg-text-primary/5 text-text-secondary hover:text-text-primary hover:bg-text-primary/10 transition-colors cursor-pointer"
           >
             <X size={22} />
           </button>
@@ -236,12 +227,7 @@ const AddShopModal: React.FC<AddShopModalProps> = ({ open, onClose, onAdd, categ
                   transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
                   className="overflow-hidden mt-2"
                 >
-                  <div className={cn(
-                    "rounded-2xl p-2 flex flex-col gap-1 border",
-                    isGlass
-                      ? "bg-bg-card/60 backdrop-blur-md border-white/20 text-text-primary"
-                      : "bg-black/5 dark:bg-white/5 border-border-primary/20 text-text-primary"
-                  )}>
+                  <div className="rounded-2xl p-2 flex flex-col gap-1 border glass-panel text-text-primary">
                     {selectableCats.map(c => (
                       <button
                         key={c}
@@ -270,7 +256,7 @@ const AddShopModal: React.FC<AddShopModalProps> = ({ open, onClose, onAdd, categ
 
           {/* Live Preview Card */}
           {name.trim() && (
-            <div className="flex items-center gap-3 p-3.5 rounded-2xl border border-border-primary/20 bg-black/5 dark:bg-white/5 animate-in fade-in zoom-in-95 duration-200 mt-1">
+            <div className="flex items-center gap-3 p-3.5 rounded-2xl border border-border-primary/20 bg-text-primary/5 animate-in fade-in zoom-in-95 duration-200 mt-1">
               <div className="w-10 h-10 rounded-xl bg-accent text-bg-primary font-bold flex items-center justify-center text-base shadow-sm">
                 {name.trim()[0]?.toUpperCase()}
               </div>
@@ -285,10 +271,7 @@ const AddShopModal: React.FC<AddShopModalProps> = ({ open, onClose, onAdd, categ
           )}
 
           {/* Modal Footer */}
-          <div className={cn(
-            "pt-4 mt-2 flex justify-end gap-3 border-t shrink-0",
-            isGlass ? "border-white/20 dark:border-white/10" : "border-border-primary/20"
-          )}>
+          <div className="pt-4 mt-2 flex justify-end gap-3 border-t border-border-primary/20 shrink-0">
             <button
               type="button"
               onClick={handleClose}
@@ -516,7 +499,7 @@ export const DashboardView: React.FC = () => {
                 </div>
 
                 {/* Enhanced Progress Bar */}
-                <div className="w-full h-3 bg-black/10 dark:bg-white/10 rounded-full overflow-hidden shadow-inner relative mb-2">
+                <div className="w-full h-3 bg-text-primary/10 rounded-full overflow-hidden shadow-inner relative mb-2">
                   <div 
                     className={cn(
                       "absolute top-0 left-0 h-full rounded-full transition-all duration-1000 ease-out overflow-hidden bg-gradient-to-r",
@@ -608,7 +591,7 @@ export const DashboardView: React.FC = () => {
       <div className="mt-4">
         <div className="flex items-center justify-between gap-2 sm:gap-3 mb-5">
           <h2 className="text-lg sm:text-xl md:text-2xl font-playfair font-bold whitespace-nowrap shrink-0">Deine Shops</h2>
-          <div className="flex items-center gap-1 sm:gap-1.5 p-0.5 sm:p-1 rounded-full bg-white dark:bg-white/10 border border-white/80 dark:border-white/10 shadow-sm shrink-0">
+          <div className="flex items-center gap-1 sm:gap-1.5 p-0.5 sm:p-1 rounded-full glass-panel border-0 shadow-sm shrink-0">
             <button
               onClick={() => setShowAddShopModal(true)}
               className="flex items-center gap-1 sm:gap-1.5 px-2.5 py-1 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm font-medium active:scale-95 transition-all duration-200 shadow-sm bg-accent text-bg-primary hover:bg-accent-hover whitespace-nowrap"

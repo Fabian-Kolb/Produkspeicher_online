@@ -73,9 +73,7 @@
     border-radius: 1.5rem;
     box-shadow: 0 8px 32px rgba(0,0,0,0.05);
     background-color: var(--card-bg);
-    translate: 0 0;
-    scale: 1;
-    transition-property: background-color, border-color, backdrop-filter, transform, translate, scale, box-shadow;
+    transition-property: background-color, border-color, backdrop-filter, transform, box-shadow;
     transition-duration: 500ms;
     transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
   }
@@ -87,7 +85,7 @@
     backdrop-filter: blur(24px);
   }
   .focus-ring {
-    @apply focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent;
+    @apply focus:outline-none hover:border-text-secondary focus:border-text-secondary;
   }
   .scrollbar-premium {
     scrollbar-width: thin;

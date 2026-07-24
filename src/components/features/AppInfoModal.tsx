@@ -770,7 +770,7 @@ export const AppInfoModal: React.FC = () => {
           </div>
           <button 
             onClick={toggleAppInfoModal}
-            className="w-10 h-10 flex items-center justify-center rounded-full transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer bg-black/5 dark:bg-white/5 text-text-secondary hover:text-text-primary"
+            className="w-10 h-10 flex items-center justify-center rounded-full transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer bg-text-primary/5 hover:bg-text-primary/10 text-text-secondary hover:text-text-primary"
           >
             <X size={20} />
           </button>
@@ -811,7 +811,7 @@ export const AppInfoModal: React.FC = () => {
                     className={cn(
                       "rounded-[2rem] border transition-all duration-500 overflow-hidden",
                       isExpanded 
-                        ? "bg-black/5 dark:bg-white/5 border-border-primary/50 shadow-sm" 
+                        ? "bg-text-primary/5 border-border-primary/50 shadow-sm" 
                         : "bg-transparent border-border-primary/20 hover:border-border-primary/45"
                     )}
                   >
@@ -905,7 +905,7 @@ export const AppInfoModal: React.FC = () => {
         </div>
 
         {/* Footer */}
-        <div className="p-6 border-t text-center transition-colors border-border-primary/30 bg-black/5 dark:bg-white/5">
+        <div className="p-6 border-t text-center transition-colors border-border-primary/30 bg-text-primary/5">
           <p className="text-[10px] font-bold opacity-20 uppercase tracking-[0.3em]">
             Built with ❤️ by Vibe-Coding © 2026
           </p>

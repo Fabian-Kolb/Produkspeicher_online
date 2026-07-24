@@ -229,7 +229,7 @@ export const BundlesView: React.FC = () => {
                         </div>
 
                         {/* Right side: Price + Actions */}
-                        <div className="backdrop-blur-md rounded-2xl md:rounded-3xl p-3 md:p-4 flex flex-col items-end gap-2 md:gap-3 shrink-0 self-end md:self-start border border-text-primary/15 bg-text-primary/10 transition-all shadow-sm">
+                        <div className="glass-panel rounded-2xl md:rounded-3xl p-3 md:p-4 flex flex-col items-end gap-2 md:gap-3 shrink-0 self-end md:self-start transition-all shadow-sm">
                           <span className="text-lg md:text-2xl font-bold text-text-primary">{totalPrice.toFixed(2)} €</span>
                           <div className="flex items-center gap-1.5 md:gap-2">
                             <Button
@@ -364,7 +364,7 @@ export const BundlesView: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="mt-3 pt-3 border-t border-[var(--theme-glass-border)] shrink-0">
+                <div className="mt-3 pt-3 border-t border-border-primary/30 shrink-0">
                   <div className="flex justify-between items-center mb-2.5">
                     <span className="text-xs lg:text-sm text-text-secondary">Gesamtpreis:</span>
                     <span className="font-bold text-base lg:text-xl">{draftTotal.toLocaleString('de-DE')} €</span>
@@ -391,7 +391,7 @@ export const BundlesView: React.FC = () => {
                         value={searchQuery}
                         onChange={e => setSearchQuery(e.target.value)}
                         placeholder="Suchen..."
-                        className="w-full bg-[var(--theme-glass-bg)] border border-[var(--theme-glass-border)] rounded-full pl-10 pr-4 py-2 text-sm outline-none hover:border-text-secondary focus:border-text-secondary hover:-translate-y-0.5 focus:-translate-y-0.5 hover:scale-[1.01] focus:scale-[1.01] hover:shadow-md focus:shadow-md transition-all duration-300 ease-out transform-gpu shadow-sm"
+                        className="w-full glass-panel rounded-full pl-10 pr-4 py-2 text-sm outline-none hover:border-text-secondary focus:border-text-secondary hover:-translate-y-0.5 focus:-translate-y-0.5 hover:scale-[1.01] focus:scale-[1.01] hover:shadow-md focus:shadow-md transition-all duration-300 ease-out transform-gpu shadow-sm"
                       />
                     </div>
 
@@ -405,7 +405,7 @@ export const BundlesView: React.FC = () => {
                         "lg:hidden h-9 px-3.5 rounded-full text-xs font-bold flex items-center gap-1.5 border transition-all duration-300 shrink-0 cursor-pointer select-none",
                         isMobileFilterOpen || activeFilterCount > 0
                           ? "bg-accent text-bg-primary border-accent shadow-sm"
-                          : "bg-[var(--theme-glass-bg)] border-[var(--theme-glass-border)] text-text-secondary hover:text-text-primary"
+                          : "glass-panel text-text-secondary hover:text-text-primary"
                       )}
                     >
                       <SlidersHorizontal size={14} />
@@ -454,7 +454,7 @@ export const BundlesView: React.FC = () => {
 
                     {/* Sub-category chips (if main category selected) */}
                     {editorMainCat !== 'Alle' && subCats[editorMainCat] && subCats[editorMainCat].length > 0 && (
-                      <div className="flex flex-wrap gap-1.5 items-center pt-2 pb-1 border-t border-[var(--theme-glass-border)]">
+                      <div className="flex flex-wrap gap-1.5 items-center pt-2 pb-1 border-t border-border-primary/30">
                         <span className="text-[10px] uppercase font-bold text-text-secondary mr-1">Unterkategorien:</span>
                         <FilterChip
                           active={editorSelectedSubCats.length === 0}
@@ -487,7 +487,7 @@ export const BundlesView: React.FC = () => {
                     )}
 
                     {/* Status filter pills (Gekauft / Reduziert as sleek mini-chips) */}
-                    <div className="flex items-center gap-1.5 pt-2 pb-1 border-t border-[var(--theme-glass-border)]">
+                    <div className="flex items-center gap-1.5 pt-2 pb-1 border-t border-border-primary/30">
                       <span className="text-[10px] uppercase font-bold text-text-secondary mr-1">Status:</span>
                       <FilterChip
                         active={editorStatusFilter === 'bought'}
@@ -530,7 +530,7 @@ export const BundlesView: React.FC = () => {
                           className={cn(
                             "glass-panel group relative flex flex-col overflow-hidden transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] transform-gpu rounded-xl sm:rounded-2xl p-1.5 sm:p-2.5 cursor-pointer select-none",
                             isSelected
-                              ? "ring-2 ring-accent border-accent bg-accent/15 dark:bg-accent/20 shadow-lg shadow-accent/15 scale-[1.01]"
+                              ? "border-accent bg-accent/15 scale-[1.01]"
                               : "hover:-translate-y-1.5 hover:scale-[1.02] hover:shadow-xl"
                           )}
                         >

@@ -46,10 +46,10 @@ export const MainMenuSidebar: React.FC = () => {
       />
       <div 
         className={cn(
-          'fixed top-0 right-0 h-full w-[320px] border-l z-[101] shadow-2xl transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]',
+          'fixed top-0 right-0 h-full w-[320px] max-w-[85vw] z-[101] shadow-2xl transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] border-l',
           settings.isGlassEnabled
-            ? 'bg-[var(--theme-glass-bg)] backdrop-blur-xl border-[var(--theme-glass-border)]'
-            : 'bg-bg-card border-border-primary',
+            ? 'bg-[var(--theme-glass-bg)] backdrop-blur-xl border-[var(--theme-glass-border)] text-text-primary'
+            : 'bg-bg-card border-border-primary text-text-primary',
           isMainMenuOpen ? 'translate-x-0' : 'translate-x-full'
         )}
       >

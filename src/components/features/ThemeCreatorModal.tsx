@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Check, Trash2, Plus } from 'lucide-react';
+import { X, Check, Trash2, Plus, Heart } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useUIStore } from '../../store/useUIStore';
 import { useAppStore } from '../../store/useAppStore';
@@ -467,7 +467,10 @@ export const ThemeCreatorModal: React.FC = () => {
                     </div>
 
                     {/* Live Preview Minimap */}
-                    <div className="mt-4 p-4 sm:p-6 rounded-3xl border border-border-primary relative overflow-hidden" style={{ background: draftTheme.colors?.bg }}>
+                    <div 
+                      className="mt-4 p-4 sm:p-6 rounded-3xl border border-border-primary relative overflow-hidden transition-colors duration-300" 
+                      style={{ background: draftTheme.colors?.bg || '#1a1a1a' }}
+                    >
                       {/* Glowing Blobs for preview if glassmorphism is checked */}
                       {draftTheme.isGlassEnabled && (
                         <div className="absolute inset-0 pointer-events-none overflow-hidden opacity-30 z-0">
@@ -476,14 +479,16 @@ export const ThemeCreatorModal: React.FC = () => {
                         </div>
                       )}
 
-                      <div className="relative z-10">
-                        <h4 className="text-[10px] font-black uppercase tracking-[0.2em] mb-4" style={{ color: draftTheme.colors?.textDark }}>Live Vorschau</h4>
-                        
-                        <div className="grid grid-cols-2 gap-3">
-                          {/* Left Minimap Card */}
+                      <div className="relative z-10 flex flex-col gap-4">
+                        <h4 className="text-[10px] font-black uppercase tracking-[0.2em]" style={{ color: draftTheme.colors?.textDark }}>
+                          Live Vorschau
+                        </h4>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                          {/* 1. MiniDashboardWidget */}
                           <div 
                             className={cn(
-                              "p-3 sm:p-5 rounded-2xl border transition-all duration-300",
+                              "p-3.5 sm:p-4 rounded-2xl border transition-all duration-300 flex flex-col justify-between gap-3",
                               draftTheme.isGlassEnabled ? "backdrop-blur-xl" : ""
                             )}
                             style={{ 
@@ -491,31 +496,23 @@ export const ThemeCreatorModal: React.FC = () => {
                               borderColor: draftTheme.isGlassEnabled ? draftTheme.colors?.glassBorder : draftTheme.colors?.border 
                             }}
                           >
-                            <div className="h-3 w-2/3 rounded mb-2" style={{ background: draftTheme.colors?.textDark }}></div>
-                            <div className="h-2 w-full rounded mb-4" style={{ background: draftTheme.colors?.textGrey }}></div>
-                            
-                            <div className="flex gap-2">
-                              <button 
-                                className="flex-1 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-wider text-center"
-                                style={{ backgroundColor: draftTheme.colors?.accent, color: draftTheme.colors?.bg }}
-                                onClick={() => {}}
-                              >
-                                Aktiv
-                              </button>
-                              <button 
-                                className="flex-1 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-wider text-center"
-                                style={{ backgroundColor: draftTheme.colors?.inactiveBtnBg, color: draftTheme.colors?.inactiveBtnText }}
-                                onClick={() => {}}
-                              >
-                                Inaktiv
-                              </button>
+                            <div className="flex flex-col gap-1">
+                              <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: draftTheme.colors?.textGrey }}>
+                                Monatsbudget
+                              </span>
+                              <span className="text-xs sm:text-sm font-bold" style={{ color: draftTheme.colors?.textDark }}>
+                                1.250 € / 2.000 €
+                              </span>
+                            </div>
+                            <div className="w-full h-2 rounded-full overflow-hidden" style={{ backgroundColor: draftTheme.colors?.inactiveBtnBg || '#333333' }}>
+                              <div className="h-full rounded-full transition-all duration-300" style={{ width: '62.5%', backgroundColor: draftTheme.colors?.accent }} />
                             </div>
                           </div>
 
-                          {/* Right Minimap Card */}
+                          {/* 2. MiniProductCard */}
                           <div 
                             className={cn(
-                              "p-3 sm:p-5 rounded-2xl border transition-all duration-300 flex flex-col justify-between",
+                              "p-3.5 sm:p-4 rounded-2xl border transition-all duration-300 flex flex-col gap-2.5",
                               draftTheme.isGlassEnabled ? "backdrop-blur-xl" : ""
                             )}
                             style={{ 
@@ -523,11 +520,102 @@ export const ThemeCreatorModal: React.FC = () => {
                               borderColor: draftTheme.isGlassEnabled ? draftTheme.colors?.glassBorder : draftTheme.colors?.border 
                             }}
                           >
-                            <div className="flex justify-between items-center mb-6">
-                              <span className="text-[9px] font-bold" style={{ color: draftTheme.colors?.textGrey }}>Shop Name</span>
-                              <span style={{ color: draftTheme.colors?.heart }}>❤</span>
+                            <div className="relative w-full h-16 rounded-xl bg-black/20 overflow-hidden flex items-center justify-center border border-white/5">
+                              <span className="text-[10px] font-medium" style={{ color: draftTheme.colors?.textGrey }}>Vorschau Bild</span>
+                              <div className="absolute top-1.5 right-1.5 px-1.5 py-0.5 rounded-md text-[9px] font-black text-white shadow-sm" style={{ backgroundColor: draftTheme.colors?.heart }}>
+                                -20%
+                              </div>
                             </div>
-                            <div className="h-3.5 w-1/2 rounded" style={{ background: draftTheme.colors?.textDark }}></div>
+                            <div className="flex items-center justify-between">
+                              <span className="text-[10px] font-semibold" style={{ color: draftTheme.colors?.textGrey }}>Amazon</span>
+                              <Heart size={14} className="fill-current shrink-0" style={{ color: draftTheme.colors?.heart }} />
+                            </div>
+                            <div className="text-xs font-bold truncate" style={{ color: draftTheme.colors?.textDark }}>
+                              Wireless Headphones
+                            </div>
+                            <div className="flex items-center justify-between gap-2">
+                              <span className="text-xs font-bold" style={{ color: draftTheme.colors?.textDark }}>149.99 €</span>
+                              <div className="w-12 h-1.5 rounded-full relative overflow-hidden bg-black/10">
+                                <div className="absolute inset-0 opacity-10" style={{ backgroundColor: draftTheme.colors?.textDark }} />
+                                <div className="relative h-full rounded-full" style={{ width: '80%', backgroundColor: draftTheme.colors?.accent }} />
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* 3. MiniFilterChip Row */}
+                          <div 
+                            className={cn(
+                              "p-3.5 sm:p-4 rounded-2xl border transition-all duration-300 flex items-center gap-2 overflow-x-auto",
+                              draftTheme.isGlassEnabled ? "backdrop-blur-xl" : ""
+                            )}
+                            style={{ 
+                              backgroundColor: draftTheme.isGlassEnabled ? draftTheme.colors?.glassBg : draftTheme.colors?.card, 
+                              borderColor: draftTheme.isGlassEnabled ? draftTheme.colors?.glassBorder : draftTheme.colors?.border 
+                            }}
+                          >
+                            <span 
+                              className="px-3 py-1.5 rounded-xl text-xs font-bold border transition-all shrink-0 cursor-default"
+                              style={{ 
+                                backgroundColor: draftTheme.colors?.accent, 
+                                color: draftTheme.colors?.bg, 
+                                borderColor: draftTheme.colors?.accent 
+                              }}
+                            >
+                              Hardware
+                            </span>
+                            <span 
+                              className="px-3 py-1.5 rounded-xl text-xs font-bold border transition-all shrink-0 cursor-default"
+                              style={{ 
+                                backgroundColor: draftTheme.colors?.card, 
+                                color: draftTheme.colors?.textDark, 
+                                borderColor: draftTheme.colors?.border 
+                              }}
+                            >
+                              Software
+                            </span>
+                          </div>
+
+                          {/* 4. MiniActionButton Group */}
+                          <div 
+                            className={cn(
+                              "p-3.5 sm:p-4 rounded-2xl border transition-all duration-300 flex items-center gap-2",
+                              draftTheme.isGlassEnabled ? "backdrop-blur-xl" : ""
+                            )}
+                            style={{ 
+                              backgroundColor: draftTheme.isGlassEnabled ? draftTheme.colors?.glassBg : draftTheme.colors?.card, 
+                              borderColor: draftTheme.isGlassEnabled ? draftTheme.colors?.glassBorder : draftTheme.colors?.border 
+                            }}
+                          >
+                            <button
+                              type="button"
+                              className="flex-1 py-2 px-3 rounded-xl text-xs font-bold transition-all duration-200 shadow-sm cursor-pointer text-center"
+                              style={{
+                                backgroundColor: draftTheme.colors?.accent,
+                                color: draftTheme.colors?.bg,
+                              }}
+                              onMouseEnter={(e) => {
+                                if (draftTheme.colors?.accentHover) {
+                                  e.currentTarget.style.backgroundColor = draftTheme.colors.accentHover;
+                                }
+                              }}
+                              onMouseLeave={(e) => {
+                                if (draftTheme.colors?.accent) {
+                                  e.currentTarget.style.backgroundColor = draftTheme.colors.accent;
+                                }
+                              }}
+                            >
+                              Aktion ausführen
+                            </button>
+                            <button
+                              type="button"
+                              className="flex-1 py-2 px-3 rounded-xl text-xs font-bold transition-all duration-200 cursor-pointer text-center"
+                              style={{
+                                backgroundColor: draftTheme.colors?.inactiveBtnBg,
+                                color: draftTheme.colors?.inactiveBtnText,
+                              }}
+                            >
+                              Abbrechen
+                            </button>
                           </div>
                         </div>
                       </div>

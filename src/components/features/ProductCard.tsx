@@ -40,7 +40,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     >
       
       {/* Image Container */}
-      <div className="relative w-full aspect-square rounded-2xl overflow-hidden bg-black/20 mb-3">
+      <div className="relative w-full aspect-square rounded-2xl overflow-hidden bg-text-primary/10 mb-3">
         <img 
           src={mainImg} 
           alt={product.name}
@@ -73,10 +73,10 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         {/* Right Side: Actions (Vertical) */}
         <div className="flex flex-col gap-3 shrink-0 items-center justify-start mt-1">
           <button onClick={handleToggleBought} className="text-text-secondary hover:text-text-primary transition-colors">
-            <ShoppingBag size={16} strokeWidth={2} className={product.status === 'bought' ? 'text-emerald-500 fill-emerald-500' : ''} />
+            <ShoppingBag size={16} strokeWidth={2} className={product.status === 'bought' ? 'text-accent fill-accent' : ''} />
           </button>
-          <button onClick={handleToggleFavorite} className="text-text-secondary hover:text-amber-400 transition-colors">
-            <Bookmark size={16} strokeWidth={2} fill={product.isFavorite ? 'currentColor' : 'none'} className={product.isFavorite ? 'text-amber-400' : ''} />
+          <button onClick={handleToggleFavorite} className="text-text-secondary hover:text-heart transition-colors">
+            <Bookmark size={16} strokeWidth={2} fill={product.isFavorite ? 'currentColor' : 'none'} className={product.isFavorite ? 'text-heart' : ''} />
           </button>
           <button onClick={handleDelete} className="text-text-secondary hover:text-heart transition-colors">
             <Trash2 size={16} strokeWidth={2} />

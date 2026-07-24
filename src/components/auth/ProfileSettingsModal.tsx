@@ -155,7 +155,7 @@ export const ProfileSettingsModal: React.FC = () => {
           </h2>
           <button 
             onClick={toggleProfileModal}
-            className="w-10 h-10 flex items-center justify-center rounded-full transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer bg-black/5 dark:bg-white/5 text-text-secondary hover:text-text-primary"
+            className="w-10 h-10 flex items-center justify-center rounded-full transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer bg-text-primary/5 hover:bg-text-primary/10 text-text-secondary hover:text-text-primary"
           >
             <X size={18} />
           </button>
@@ -173,7 +173,7 @@ export const ProfileSettingsModal: React.FC = () => {
           <div className="flex flex-col items-center gap-4">
             <div 
               onClick={() => fileInputRef.current?.click()}
-              className="relative w-28 h-28 rounded-full border-2 flex items-center justify-center cursor-pointer transition-all group overflow-hidden bg-black/5 dark:bg-white/5 border-border-primary/50 hover:border-accent/40 shadow-inner"
+              className="relative w-28 h-28 rounded-full border-2 flex items-center justify-center cursor-pointer transition-all group overflow-hidden bg-text-primary/5 border-border-primary/50 hover:border-accent/40 shadow-inner"
             >
               {avatarUrl ? (
                 <img src={avatarUrl} alt="Profil" className="w-full h-full object-cover" />
@@ -209,7 +209,7 @@ export const ProfileSettingsModal: React.FC = () => {
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Dein Vorname"
-              className="w-full rounded-2xl px-5 py-4 text-sm font-medium focus:outline-none bg-black/5 dark:bg-white/5 border border-border-primary/30 hover:border-text-secondary focus:border-text-secondary hover:-translate-y-0.5 focus:-translate-y-0.5 hover:scale-[1.015] focus:scale-[1.015] hover:shadow-md focus:shadow-md focus:bg-black/10 dark:focus:bg-white/10 text-text-primary placeholder:text-text-secondary/45 transition-all duration-500 ease-out transform-gpu origin-center"
+              className="w-full rounded-2xl px-5 py-4 text-sm font-medium focus:outline-none bg-text-primary/5 border border-border-primary/30 hover:border-text-secondary focus:border-text-secondary hover:-translate-y-0.5 focus:-translate-y-0.5 hover:scale-[1.015] focus:scale-[1.015] hover:shadow-md focus:shadow-md focus:bg-text-primary/10 text-text-primary placeholder:text-text-secondary/45 transition-all duration-500 ease-out transform-gpu origin-center"
             />
           </div>
 

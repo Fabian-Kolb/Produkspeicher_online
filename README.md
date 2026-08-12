@@ -6,6 +6,13 @@
 
 ---
 
+## 🔒 Zugang & Live-Demo
+Diese Web-App befindet sich in der aktiven Entwicklung. Um automatisierte Zugriffe (Spam) zu verhindern und die regulären API-Nutzungslimits zu schonen, liegt die Live-Version hinter einem geschlossenen Login.
+
+Falls Sie dieses Projekt im Rahmen einer Bewerbung oder eines Portfolio-Reviews sichten, kontaktieren Sie mich gerne über die in meinen Unterlagen hinterlegten Kontaktdaten, um einen temporären Demo-Zugang anzufordern.
+
+---
+
 ## ✨ Highlights & Funktionen
 
 - 📦 **Produkt-Management**: Vollständiges CRUD (Erstellen, Lesen, Aktualisieren, Löschen) mit Details wie Preis-Tracking, Kategorien und Shop-Links.

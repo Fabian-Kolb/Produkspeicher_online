@@ -1,4 +1,4 @@
-import { Settings, Info, Trash2, X, Sparkles, User, Moon, Sun } from 'lucide-react';
+import { Settings, Info, Trash2, X, Sparkles, User, Moon, Sun, Scale } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { useUIStore } from '../../store/useUIStore';
 import { useAppStore } from '../../store/useAppStore';
@@ -7,13 +7,30 @@ import logoWhite from '../../assets/logo/logo_white.png';
 import { triggerHaptic } from '../../utils/haptics';
 
 export const MainMenuSidebar: React.FC = () => {
-  const { isMainMenuOpen, toggleMainMenu, toggleThemeManager, toggleProfileModal, toggleAppInfoModal } = useUIStore();
-  const { settings, isDemoMode, toggleDemoMode, updateSettings, avatarUrl, userName } = useAppStore();
+  const { 
+    isMainMenuOpen, 
+    toggleMainMenu, 
+    toggleThemeManager, 
+    toggleProfileModal, 
+    toggleAppInfoModal,
+    openGuestWelcomeModal,
+    openLegalDisclaimerModal
+  } = useUIStore();
+  const { settings, isDemoMode, isGuest, toggleDemoMode, updateSettings, avatarUrl, userName } = useAppStore();
 
-  
   const handleInfo = () => {
     toggleMainMenu();
     toggleAppInfoModal();
+  };
+
+  const handleGuestInfo = () => {
+    toggleMainMenu();
+    openGuestWelcomeModal();
+  };
+
+  const handleLegal = () => {
+    toggleMainMenu();
+    openLegalDisclaimerModal();
   };
 
   const handleReset = async () => {
@@ -86,19 +103,39 @@ export const MainMenuSidebar: React.FC = () => {
               )}
             </span>
             <div className="flex flex-col">
-              <span className="text-sm font-medium text-text-primary">{userName || 'Profil & Account'}</span>
-              {userName && <span className="text-[10px] text-text-secondary">Einstellungen verwalten</span>}
+              <span className="text-sm font-medium text-text-primary">
+                {userName || (isGuest ? 'Gast-Account' : 'Profil & Account')}
+              </span>
+              <span className="text-[10px] text-text-secondary">
+                {isGuest ? 'Lokale Demo-Sitzung' : 'Einstellungen verwalten'}
+              </span>
             </div>
           </button>
+          
           <MenuButton icon={<Settings size={18} />} onClick={() => { toggleMainMenu(); toggleThemeManager(); }}>
             Design & Themes
           </MenuButton>
-          <MenuButton icon={<Sparkles size={18} />} onClick={handleDemoMode} isActive={isDemoMode}>
-            {isDemoMode ? 'Demo-Modus: AN' : 'Demo-Modus aktivieren'}
-          </MenuButton>
+
+          {isGuest && (
+            <MenuButton icon={<Sparkles size={18} />} onClick={handleGuestInfo} isActive>
+              Gast-Modus (Info)
+            </MenuButton>
+          )}
+
+          {!isGuest && (
+            <MenuButton icon={<Sparkles size={18} />} onClick={handleDemoMode} isActive={isDemoMode}>
+              {isDemoMode ? 'Demo-Modus: AN' : 'Demo-Modus aktivieren'}
+            </MenuButton>
+          )}
+
           <MenuButton icon={<Info size={18} />} onClick={handleInfo}>
             Info / Version
           </MenuButton>
+
+          <MenuButton icon={<Scale size={18} />} onClick={handleLegal}>
+            Datenschutz & Haftung
+          </MenuButton>
+
           <MenuButton icon={<Trash2 size={18} />} onClick={handleReset} isDestructive>
             Reset / Löschen
           </MenuButton>

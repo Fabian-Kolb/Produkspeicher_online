@@ -4,12 +4,12 @@ import { supabase } from '../../lib/supabase';
 import { useUIStore } from '../../store/useUIStore';
 import { useAppStore } from '../../store/useAppStore';
 import { cn } from '../../utils/cn';
-import { X, ImagePlus, User, Loader2, Save, Trash2, LogOut } from 'lucide-react';
+import { X, ImagePlus, User, Loader2, Save, Trash2, LogOut, Sparkles } from 'lucide-react';
 import { Button } from '../common/Button';
 
 export const ProfileSettingsModal: React.FC = () => {
   const { isProfileModalOpen, toggleProfileModal } = useUIStore();
-  const settings = useAppStore(state => state.settings);
+  const { settings, isGuest, exitGuestMode, setUserName, setAvatarUrl: setStoreAvatar } = useAppStore();
   
   const [name, setName] = useState('');
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
@@ -29,6 +29,12 @@ export const ProfileSettingsModal: React.FC = () => {
   }, [isProfileModalOpen]);
 
   const loadProfileData = async () => {
+    if (isGuest) {
+      setName(useAppStore.getState().userName || 'Gast');
+      setAvatarUrl(useAppStore.getState().avatarUrl || null);
+      return;
+    }
+
     const { data: { session } } = await supabase.auth.getSession();
     if (session) {
       setName(session.user.user_metadata?.display_name || '');
@@ -41,6 +47,13 @@ export const ProfileSettingsModal: React.FC = () => {
       setErrorMsg('');
       const file = event.target.files?.[0];
       if (!file) return;
+
+      if (isGuest) {
+        // In guest mode, use local object URL
+        const localUrl = URL.createObjectURL(file);
+        setAvatarUrl(localUrl);
+        return;
+      }
 
       setIsUploading(true);
       const { data: { session } } = await supabase.auth.getSession();
@@ -78,6 +91,14 @@ export const ProfileSettingsModal: React.FC = () => {
     try {
       setIsSubmitting(true);
       setErrorMsg('');
+
+      if (isGuest) {
+        setUserName(name.trim());
+        setStoreAvatar(avatarUrl);
+        toggleProfileModal();
+        return;
+      }
+
       const { error } = await supabase.auth.updateUser({
         data: { 
           display_name: name.trim(),
@@ -86,7 +107,7 @@ export const ProfileSettingsModal: React.FC = () => {
       });
       if (error) throw error;
       toggleProfileModal();
-      // Reload page to refresh topnav/sidebar data seamlessly (until we add a global user store)
+      // Reload page to refresh topnav/sidebar data seamlessly
       window.location.reload(); 
     } catch (err: any) {
       console.error(err);
@@ -100,6 +121,11 @@ export const ProfileSettingsModal: React.FC = () => {
     if (!window.confirm("Möchtest du deinen Profil-Namen löschen? Beim nächsten Login startet das Onboarding neu.")) return;
     try {
       setIsSubmitting(true);
+      if (isGuest) {
+        setUserName('Gast');
+        toggleProfileModal();
+        return;
+      }
       const { error } = await supabase.auth.updateUser({
         data: { display_name: '' }
       });
@@ -118,6 +144,13 @@ export const ProfileSettingsModal: React.FC = () => {
     try {
       setIsSubmitting(true);
       setErrorMsg('');
+
+      if (isGuest) {
+        exitGuestMode();
+        toggleProfileModal();
+        return;
+      }
+
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
       toggleProfileModal();
@@ -164,6 +197,18 @@ export const ProfileSettingsModal: React.FC = () => {
         {errorMsg && (
           <div className="mb-6 p-4 rounded-xl bg-heart/10 text-heart text-sm border border-heart/20">
             {errorMsg}
+          </div>
+        )}
+
+        {isGuest && (
+          <div className="mb-6 p-4 rounded-2xl bg-accent/10 border border-accent/20 flex items-start gap-3">
+            <Sparkles className="w-5 h-5 text-accent shrink-0 mt-0.5" />
+            <div className="text-xs space-y-1">
+              <strong className="text-text-primary block font-bold">Gast-Sitzung aktiv</strong>
+              <p className="text-text-secondary leading-relaxed">
+                Änderungen werden rein lokal gehalten. Klicke auf „Abmelden / Logout“, um zur Login-Seite zurückzukehren.
+              </p>
+            </div>
           </div>
         )}
 

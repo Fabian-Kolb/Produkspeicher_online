@@ -67,6 +67,7 @@ export const BudgetChart: React.FC<BudgetChartProps> = ({
   // Zoom States & Gesture Refs
   const [zoomX, setZoomX] = useState(1.0);
   const [zoomY, setZoomY] = useState(1.0);
+  const [containerWidth, setContainerWidth] = useState(600);
 
   const zoomXRef = useRef(zoomX);
   const zoomYRef = useRef(zoomY);
@@ -79,6 +80,37 @@ export const BudgetChart: React.FC<BudgetChartProps> = ({
     zoomX: number;
     zoomY: number;
   } | null>(null);
+
+  // Measure container dimensions with ResizeObserver for modern fluid responsiveness
+  useEffect(() => {
+    const container = chartContainerRef.current;
+    if (!container) return;
+
+    const updateWidth = () => {
+      const width = container.clientWidth || container.getBoundingClientRect().width;
+      if (width > 0) {
+        setContainerWidth(width);
+      }
+    };
+
+    updateWidth();
+
+    if (typeof ResizeObserver !== 'undefined') {
+      const observer = new ResizeObserver((entries) => {
+        for (const entry of entries) {
+          const width = entry.contentRect.width;
+          if (width > 0) {
+            setContainerWidth(width);
+          }
+        }
+      });
+      observer.observe(container);
+      return () => observer.disconnect();
+    } else {
+      window.addEventListener('resize', updateWidth);
+      return () => window.removeEventListener('resize', updateWidth);
+    }
+  }, []);
 
   useEffect(() => {
     zoomXRef.current = zoomX;
@@ -183,15 +215,26 @@ export const BudgetChart: React.FC<BudgetChartProps> = ({
     };
   }, []);
 
+  // Responsive Content Width Calculation
+  const baseWidth = useMemo(() => {
+    if (timeRange === '7d' || timeRange === 'total') {
+      return Math.max(containerWidth, 280);
+    }
+    // 'month' mode: full width on desktop (>=640px), minimum 560px on mobile for easy finger touch
+    return Math.max(containerWidth, 560);
+  }, [timeRange, containerWidth]);
+
+  const contentWidth = Math.round(baseWidth * zoomX);
+
   // Coordinate Constants for SVG Mapping
-  const PAD_TOP = 40;
-  const PAD_BOTTOM = 220;
-  const MARGIN_LEFT = 50;
-  const MARGIN_RIGHT = 20;
+  const SVG_HEIGHT = 260;
+  const PAD_TOP = 30;
+  const PAD_BOTTOM = 215;
+  const MARGIN_LEFT = 48;
+  const MARGIN_RIGHT = 18;
   const DRAW_HEIGHT = PAD_BOTTOM - PAD_TOP;
-  const DRAW_WIDTH_BASE = 600 - MARGIN_LEFT - MARGIN_RIGHT;
-  const DRAW_WIDTH = DRAW_WIDTH_BASE * zoomX;
-  const viewBoxWidth = MARGIN_LEFT + DRAW_WIDTH + MARGIN_RIGHT;
+  const DRAW_WIDTH = Math.max(contentWidth - MARGIN_LEFT - MARGIN_RIGHT, 100);
+  const viewBoxWidth = contentWidth;
 
   const chartVal = (d: ChartDataItem) =>
     chartMode === 'cumulative' && timeRange !== 'total' ? d.cumulativeValue : d.dailyValue;
@@ -227,7 +270,7 @@ export const BudgetChart: React.FC<BudgetChartProps> = ({
   const effectiveMax = roundedMax / zoomY;
 
   const getY = (val: number) => PAD_BOTTOM - (val / effectiveMax) * DRAW_HEIGHT;
-  const BAR_PITCH = DRAW_WIDTH / (chartData.length || 1);
+  const BAR_PITCH = DRAW_WIDTH / Math.max(chartData.length, 1);
   const getX = (i: number) => {
     const isBar = chartMode === 'daily' || timeRange === 'total';
     if (isBar) {
@@ -240,9 +283,13 @@ export const BudgetChart: React.FC<BudgetChartProps> = ({
 
   const barWidth = useMemo(() => {
     const pitch = DRAW_WIDTH / Math.max(chartData.length, 1);
-    if (timeRange === '7d') return 48 * zoomX;
-    if (timeRange === 'month') return Math.max(pitch * 0.6, 6);
-    return Math.max(pitch * 0.6, 12);
+    if (timeRange === '7d') {
+      return Math.max(Math.min(pitch * 0.48, 48 * zoomX), 14);
+    }
+    if (timeRange === 'total') {
+      return Math.max(Math.min(pitch * 0.5, 42 * zoomX), 14);
+    }
+    return Math.max(Math.min(pitch * 0.6, 26 * zoomX), 4);
   }, [chartData.length, timeRange, DRAW_WIDTH, zoomX]);
 
   // Compute curve paths using actualData
@@ -258,7 +305,7 @@ export const BudgetChart: React.FC<BudgetChartProps> = ({
       path += ` C ${cp1x} ${prevY}, ${cp1x} ${currY}, ${currX} ${currY}`;
     }
     return path;
-  }, [actualData, chartMode, roundedMax, zoomX, zoomY]);
+  }, [actualData, chartData.length, chartMode, timeRange, effectiveMax, DRAW_WIDTH, contentWidth, zoomX, zoomY]);
 
   const areaPath = useMemo(() => {
     if (actualData.length === 0) return '';
@@ -275,7 +322,7 @@ export const BudgetChart: React.FC<BudgetChartProps> = ({
     path += ` L ${getX(actualData.length - 1)} ${PAD_BOTTOM}`;
     path += ' Z';
     return path;
-  }, [actualData, chartMode, roundedMax, zoomX, zoomY]);
+  }, [actualData, chartData.length, chartMode, timeRange, effectiveMax, DRAW_WIDTH, contentWidth, zoomX, zoomY]);
 
   const latestCumulativeSpend = useMemo(() => {
     if (actualData.length === 0) return 0;
@@ -283,43 +330,45 @@ export const BudgetChart: React.FC<BudgetChartProps> = ({
   }, [actualData]);
 
   return (
-    <div className="lg:col-span-2 bg-[var(--theme-glass-bg)] border border-[var(--theme-glass-border)] backdrop-blur-xl p-6 rounded-3xl shadow-sm flex flex-col min-h-[400px] relative">
-      <div className="flex flex-col gap-3 mb-5">
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-2 w-full">
-          <h3 className="font-bold text-base md:text-lg shrink-0">Ausgabenverlauf</h3>
+    <div className="lg:col-span-2 bg-[var(--theme-glass-bg)] border border-[var(--theme-glass-border)] backdrop-blur-xl p-4 sm:p-6 rounded-3xl shadow-sm flex flex-col min-h-[400px] sm:min-h-[440px] md:min-h-[460px] relative">
+      <div className="flex flex-col gap-3 mb-4">
+        <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 w-full">
+          <div className="flex items-center gap-3">
+            <h3 className="font-bold text-base md:text-lg shrink-0">Ausgabenverlauf</h3>
 
-          {/* Paginator / Time Traveler */}
-          <div className="flex items-center gap-1 bg-text-primary/5 border border-[var(--theme-glass-border)] rounded-full px-1.5 py-0.5 shadow-sm text-xs select-none relative">
-            <button
-              onClick={handlePrevPeriod}
-              className="p-1 rounded-full hover:bg-text-primary/10 text-text-secondary hover:text-text-primary transition-colors cursor-pointer"
-              title="Vorheriger Zeitraum"
-            >
-              <ChevronLeft size={14} />
-            </button>
+            {/* Paginator / Time Traveler */}
+            <div className="flex items-center gap-1 bg-text-primary/5 border border-[var(--theme-glass-border)] rounded-full px-1.5 py-0.5 shadow-sm text-xs select-none relative">
+              <button
+                onClick={handlePrevPeriod}
+                className="p-1 rounded-full hover:bg-text-primary/10 text-text-secondary hover:text-text-primary transition-colors cursor-pointer"
+                title="Vorheriger Zeitraum"
+              >
+                <ChevronLeft size={14} />
+              </button>
 
-            <button
-              onClick={onOpenDatePicker}
-              className="px-2.5 py-0.5 rounded-full font-bold text-[10px] uppercase tracking-wider text-text-secondary hover:text-text-primary hover:bg-text-primary/5 transition-all flex items-center gap-1.5 cursor-pointer"
-              title="Monat auswählen"
-            >
-              <span>{formattedActivePeriod}</span>
-              <Calendar size={11} className="opacity-70" />
-            </button>
+              <button
+                onClick={onOpenDatePicker}
+                className="px-2.5 py-0.5 rounded-full font-bold text-[10px] uppercase tracking-wider text-text-secondary hover:text-text-primary hover:bg-text-primary/5 transition-all flex items-center gap-1.5 cursor-pointer"
+                title="Monat auswählen"
+              >
+                <span>{formattedActivePeriod}</span>
+                <Calendar size={11} className="opacity-70" />
+              </button>
 
-            <button
-              onClick={handleNextPeriod}
-              disabled={isNextDisabled}
-              className={cn(
-                'p-1 rounded-full transition-colors',
-                isNextDisabled
-                  ? 'opacity-25 cursor-not-allowed'
-                  : 'hover:bg-text-primary/10 text-text-secondary hover:text-text-primary cursor-pointer'
-              )}
-              title="Nächster Zeitraum"
-            >
-              <ChevronRight size={14} />
-            </button>
+              <button
+                onClick={handleNextPeriod}
+                disabled={isNextDisabled}
+                className={cn(
+                  'p-1 rounded-full transition-colors',
+                  isNextDisabled
+                    ? 'opacity-25 cursor-not-allowed'
+                    : 'hover:bg-text-primary/10 text-text-secondary hover:text-text-primary cursor-pointer'
+                )}
+                title="Nächster Zeitraum"
+              >
+                <ChevronRight size={14} />
+              </button>
+            </div>
           </div>
 
           {/* Chart Mode Toggle */}
@@ -393,11 +442,15 @@ export const BudgetChart: React.FC<BudgetChartProps> = ({
       {/* SVG Area Chart with Integrated Grid */}
       <div
         ref={chartContainerRef}
-        className="flex-1 relative mt-4 mx-2 md:mx-6 mb-10 h-[200px] md:h-[250px] overflow-hidden select-none"
+        className="flex-1 relative mt-2 w-full h-[250px] sm:h-[280px] md:h-[310px] overflow-hidden select-none"
       >
-        {/* Soft Edge-Mask Scroll Indicators on Mobile */}
-        <div className="absolute left-0 top-0 bottom-10 w-6 bg-gradient-to-r from-bg-primary/50 to-transparent pointer-events-none z-10 block md:hidden" />
-        <div className="absolute right-0 top-0 bottom-10 w-6 bg-gradient-to-l from-bg-primary/50 to-transparent pointer-events-none z-10 block md:hidden" />
+        {/* Soft Edge-Mask Scroll Indicators on Mobile when content overflows */}
+        {contentWidth > containerWidth && (
+          <>
+            <div className="absolute left-0 top-0 bottom-8 w-6 bg-gradient-to-r from-bg-primary/60 to-transparent pointer-events-none z-10 block sm:hidden" />
+            <div className="absolute right-0 top-0 bottom-8 w-6 bg-gradient-to-l from-bg-primary/60 to-transparent pointer-events-none z-10 block sm:hidden" />
+          </>
+        )}
 
         {/* Reset Zoom Button Overlay */}
         {(zoomX !== 1.0 || zoomY !== 1.0) && (
@@ -427,7 +480,7 @@ export const BudgetChart: React.FC<BudgetChartProps> = ({
           </button>
         )}
 
-        <div ref={scrollContainerRef} className="w-full h-full overflow-x-auto overflow-y-hidden scrollbar-premium pb-6">
+        <div ref={scrollContainerRef} className="w-full h-full overflow-x-auto overflow-y-hidden scrollbar-premium pb-2">
           <motion.div
             key={`${timeRange}-${chartMode}-${currentPeriodDate.getTime()}`}
             initial={{ opacity: 0 }}
@@ -435,14 +488,13 @@ export const BudgetChart: React.FC<BudgetChartProps> = ({
             transition={{ duration: 0.3 }}
             className="h-full relative"
             style={{
-              width: `${(timeRange === 'month' ? 750 : 500) * zoomX}px`,
-              minWidth: `${(timeRange === 'month' ? 750 : 500) * zoomX}px`,
+              width: `${contentWidth}px`,
+              minWidth: `${contentWidth}px`,
             }}
           >
             <svg
               className="w-full h-full overflow-visible"
-              viewBox={`0 0 ${viewBoxWidth} 250`}
-              preserveAspectRatio="none"
+              viewBox={`0 0 ${contentWidth} ${SVG_HEIGHT}`}
               onClick={() => onSelectDay(null)}
             >
               <defs>
@@ -803,23 +855,24 @@ export const BudgetChart: React.FC<BudgetChartProps> = ({
             </svg>
 
             {/* X-Axis Labels */}
-            <div className="absolute inset-x-0 bottom-0 h-8 pointer-events-none">
+            <div className="absolute inset-x-0 bottom-1 h-7 pointer-events-none">
               {chartData.map((day, idx) => {
-                const xPercent = (getX(idx) / viewBoxWidth) * 100;
-                const shouldHideOnMobile = chartData.length > 15 && idx % 4 !== 0 && idx !== chartData.length - 1;
-                const shouldHideOnTablet = chartData.length > 15 && idx % 2 !== 0 && idx !== chartData.length - 1;
+                const xPercent = (getX(idx) / contentWidth) * 100;
+                const isDense = chartData.length > 14;
+                const shouldHideOnMobile = isDense && idx % 4 !== 0 && idx !== chartData.length - 1;
+                const shouldHideOnTablet = isDense && idx % 2 !== 0 && idx !== chartData.length - 1;
 
                 return (
                   <div
                     key={idx}
                     className={cn(
                       'absolute flex flex-col items-center top-0 origin-center transition-opacity',
-                      shouldHideOnMobile ? 'hidden md:flex' : 'flex',
-                      shouldHideOnTablet ? 'md:hidden lg:flex' : 'md:flex'
+                      shouldHideOnMobile ? 'hidden sm:flex' : 'flex',
+                      shouldHideOnTablet ? 'sm:hidden md:flex' : 'sm:flex'
                     )}
                     style={{ left: `${xPercent}%`, transform: 'translateX(-50%)' }}
                   >
-                    <div className="w-[1px] h-2 bg-[var(--theme-glass-border)] mb-2"></div>
+                    <div className="w-[1px] h-1.5 bg-[var(--theme-glass-border)] mb-1"></div>
                     <span className="text-[10px] text-text-secondary font-medium whitespace-nowrap">{day.label}</span>
                   </div>
                 );

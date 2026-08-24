@@ -8,6 +8,8 @@ interface UIState {
   isProfileModalOpen: boolean;
   isCategoryMenuOpen: boolean;
   isAppInfoModalOpen: boolean;
+  isGuestWelcomeModalOpen: boolean;
+  isLegalDisclaimerModalOpen: boolean;
 
   // Products View State
   mainCat: string;
@@ -24,6 +26,11 @@ interface UIState {
   toggleCategoryMenu: () => void;
   closeCategoryMenu: () => void;
   toggleAppInfoModal: () => void;
+  openGuestWelcomeModal: () => void;
+  closeGuestWelcomeModal: () => void;
+  openLegalDisclaimerModal: () => void;
+  closeLegalDisclaimerModal: () => void;
+  toggleLegalDisclaimerModal: () => void;
 
   isProductModalOpen: boolean;
   editingProductId: string | null;
@@ -58,6 +65,8 @@ export const useUIStore = create<UIState>((set) => ({
   isProductDetailModalOpen: false,
   viewingProductId: null,
   isAppInfoModalOpen: false,
+  isGuestWelcomeModalOpen: false,
+  isLegalDisclaimerModalOpen: false,
 
   mainCat: 'Alle',
   selectedSubCats: [],
@@ -72,6 +81,11 @@ export const useUIStore = create<UIState>((set) => ({
   toggleCategoryMenu: () => set((state) => ({ isCategoryMenuOpen: !state.isCategoryMenuOpen, isThemeManagerOpen: false })),
   closeCategoryMenu: () => set({ isCategoryMenuOpen: false }),
   toggleAppInfoModal: () => set((state) => ({ isAppInfoModalOpen: !state.isAppInfoModalOpen })),
+  openGuestWelcomeModal: () => set({ isGuestWelcomeModalOpen: true }),
+  closeGuestWelcomeModal: () => set({ isGuestWelcomeModalOpen: false }),
+  openLegalDisclaimerModal: () => set({ isLegalDisclaimerModalOpen: true }),
+  closeLegalDisclaimerModal: () => set({ isLegalDisclaimerModalOpen: false }),
+  toggleLegalDisclaimerModal: () => set((state) => ({ isLegalDisclaimerModalOpen: !state.isLegalDisclaimerModalOpen })),
 
   openProductModal: (productId) => set({ isProductModalOpen: true, editingProductId: productId || null }),
   closeProductModal: () => set({ isProductModalOpen: false, editingProductId: null }),

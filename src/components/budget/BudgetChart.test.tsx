@@ -211,4 +211,52 @@ describe('BudgetChart Gesture & Zoom Handler Empirical Tests', () => {
 
     expect(screen.queryByText('Zoom zurücksetzen')).not.toBeInTheDocument();
   });
+
+  it('renders matching SVG viewBox width and content width without distortion', () => {
+    const { container } = render(<BudgetChart {...defaultProps} timeRange="7d" />);
+    const svg = container.querySelector('svg.w-full');
+    expect(svg).not.toBeNull();
+    const viewBox = svg!.getAttribute('viewBox');
+    expect(viewBox).toMatch(/^0 0 \d+ 260$/);
+  });
+
+  it('renders seamless connection between cumulative line path and forecast line', () => {
+    const monthData: ChartDataItem[] = Array.from({ length: 31 }, (_, i) => {
+      const day = i + 1;
+      const isPast = day <= 24;
+      return {
+        dateKey: `2026-08-${String(day).padStart(2, '0')}`,
+        label: `${day}.`,
+        dateLabel: `${String(day).padStart(2, '0')}.08.2026`,
+        dailyValue: day === 11 ? 500 : 0,
+        cumulativeValue: isPast ? (day >= 11 ? 500 : 0) : null,
+        isFuture: !isPast,
+        products: [],
+      };
+    });
+
+    const actualMonthData = monthData.filter(d => !d.isFuture);
+
+    const { container } = render(
+      <BudgetChart
+        {...defaultProps}
+        chartMode="cumulative"
+        timeRange="month"
+        chartData={monthData}
+        actualData={actualMonthData}
+        isCurrentMonth={true}
+      />
+    );
+
+    // Curve path and area path should exist and span across all actual data points (up to day 24)
+    const curvePath = container.querySelector('path[stroke="url(#curveGradient)"]');
+    expect(curvePath).not.toBeNull();
+    const d = curvePath!.getAttribute('d');
+    expect(d).toContain('M ');
+    expect(d).toContain('C ');
+
+    // Forecast dashed line should start at the last actual data point (day 24)
+    const forecastLine = container.querySelector('line[stroke-dasharray="4 4"]');
+    expect(forecastLine).not.toBeNull();
+  });
 });

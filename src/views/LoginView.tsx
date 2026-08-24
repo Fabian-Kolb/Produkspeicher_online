@@ -1,6 +1,9 @@
 import React, { useState, useCallback, useRef } from 'react';
 import { supabase } from '../lib/supabase';
-import { Lock, Mail, Loader2, ShoppingCart, ChevronDown, Cloud } from 'lucide-react';
+import { Lock, Mail, Loader2, ShoppingCart, ChevronDown, Cloud, Sparkles } from 'lucide-react';
+import { useUIStore } from '../store/useUIStore';
+import { triggerHaptic } from '../utils/haptics';
+import { LegalDisclaimerModal } from '../components/auth/LegalDisclaimerModal';
 import logoWhite from '../assets/logo/logo_white.png';
 import dashboardPreviewImg from '../assets/landing/dashboard-preview.png';
 import budgetGraphImg from '../assets/landing/budget-graph.png';
@@ -139,7 +142,8 @@ const wait = (ms: number) => new Promise(r => setTimeout(r, ms));
 /* ══════════════════════════════════════════
    Main LoginView
    ══════════════════════════════════════════ */
-export const LoginView: React.FC<{ onLoginStart?: () => void }> = ({ onLoginStart }) => {
+export const LoginView: React.FC<{ onLoginStart?: () => void; onGuestLogin?: () => void }> = ({ onLoginStart, onGuestLogin }) => {
+  const { openLegalDisclaimerModal } = useUIStore();
   const [email, setEmail]       = useState('');
   const [password, setPassword] = useState('');
   const [error, setError]       = useState<string | null>(null);
@@ -185,6 +189,26 @@ export const LoginView: React.FC<{ onLoginStart?: () => void }> = ({ onLoginStar
     }
   }, [email, password, onLoginStart]);
 
+  const handleGuestLogin = useCallback(async () => {
+    if (submitting.current) return;
+    submitting.current = true;
+    setError(null);
+    triggerHaptic(15);
+
+    // ── Step 1: Cart drives right (300ms) ──
+    setPhase('cart-drive');
+    await wait(350);
+
+    // ── Step 2: Spinner + all exit animations start ──
+    setPhase('loading');
+    
+    // Call parent handler to switch store to guest mode
+    onGuestLogin?.();
+
+    await wait(500);
+    setPhase('success');
+  }, [onGuestLogin]);
+
   const rootClasses = [
     'login-root',
     phase === 'cart-drive' && 'login-root--cart-drive',
@@ -202,6 +226,8 @@ export const LoginView: React.FC<{ onLoginStart?: () => void }> = ({ onLoginStar
 
   return (
     <div className={rootClasses}>
+      <LegalDisclaimerModal />
+
       {/* ambient gradient blobs */}
       <div className="login-blob login-blob--1" />
       <div className="login-blob login-blob--2" />
@@ -274,11 +300,40 @@ export const LoginView: React.FC<{ onLoginStart?: () => void }> = ({ onLoginStar
                 </span>
                 <div className="login-card__submit-shine" />
               </button>
+
+              {/* 1-Klick Gast-Zugang Divider & Button */}
+              <div className="flex items-center gap-3 my-2 text-white/30 text-xs font-semibold uppercase tracking-wider">
+                <div className="h-px bg-white/10 flex-1" />
+                <span>oder</span>
+                <div className="h-px bg-white/10 flex-1" />
+              </div>
+
+              <button
+                type="button"
+                onClick={handleGuestLogin}
+                disabled={isActive}
+                className="w-full flex items-center justify-center gap-2.5 py-3.5 px-5 rounded-2xl bg-white/10 hover:bg-white/15 active:scale-[0.98] border border-white/15 hover:border-accent/40 text-white font-bold text-sm shadow-lg transition-all duration-300 cursor-pointer group select-none"
+              >
+                <Sparkles size={16} className="text-accent group-hover:scale-110 group-hover:rotate-12 transition-transform duration-300" />
+                <span>Als Gast ausprobieren (Demo)</span>
+              </button>
             </form>
 
-            <p className="login-card__footer">
-              Secure access &bull; Encrypted connection
-            </p>
+            <div className="login-card__footer flex flex-col items-center gap-1.5 mt-4">
+              <p className="text-[11px] text-white/40">
+                Secure access &bull; Encrypted connection
+              </p>
+              <button
+                type="button"
+                onClick={() => {
+                  triggerHaptic(15);
+                  openLegalDisclaimerModal();
+                }}
+                className="text-[11px] text-white/50 hover:text-white underline decoration-white/30 hover:decoration-white transition-colors cursor-pointer"
+              >
+                Datenschutz & Haftungsausschluss
+              </button>
+            </div>
           </div>
         </div>
 

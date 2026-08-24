@@ -4,6 +4,7 @@ import type { Product, AppSettings, Bundle, Website, CustomTheme } from '../type
 import { createDemoData } from '../utils/demoData';
 
 interface AppState {
+  isGuest: boolean;
   isDemoMode: boolean;
   _dbProducts: Product[];
   _dbBundles: Bundle[];
@@ -25,6 +26,8 @@ interface AppState {
   fetchAllData: (userId: string) => Promise<void>;
 
   // Actions
+  enterGuestMode: () => void;
+  exitGuestMode: () => void;
   toggleDemoMode: () => void;
   _refreshView: () => void;
 
@@ -76,8 +79,8 @@ const defaultSettings: AppSettings = {
 };
 
 // Helper function to update app_state in Supabase
-const syncAppState = async (userId: string, state: any) => {
-  if (!userId) return;
+const syncAppState = async (userId: string | null, state: any) => {
+  if (!userId || state.isGuest || state.isDemoMode || userId === 'guest-user') return;
   const { categories, subCats, websiteCats, settings } = state;
   await supabase.from('app_state').upsert({
     user_id: userId,
@@ -89,6 +92,7 @@ const syncAppState = async (userId: string, state: any) => {
 };
 
 export const useAppStore = create<AppState>()((set, get) => ({
+  isGuest: localStorage.getItem('ventory_is_guest') === 'true',
   isDemoMode: localStorage.getItem('ventory_demo_mode') === 'true',
   _dbProducts: [],
   _dbBundles: [],
@@ -107,6 +111,44 @@ export const useAppStore = create<AppState>()((set, get) => ({
   setUserName: (userName) => set({ userName }),
   setAvatarUrl: (avatarUrl) => set({ avatarUrl }),
 
+  enterGuestMode: () => {
+    const demo = createDemoData();
+    localStorage.setItem('ventory_is_guest', 'true');
+    localStorage.setItem('ventory_demo_mode', 'true');
+    set({
+      isGuest: true,
+      isDemoMode: true,
+      userId: 'guest-user',
+      userName: 'Gast',
+      avatarUrl: null,
+      products: demo.products,
+      bundles: demo.bundles,
+      _dbProducts: [],
+      _dbBundles: [],
+      categories: defaultCategories,
+      subCats: defaultSubCats,
+      websites: [],
+      websiteCats: ['Allgemein', 'Mode', 'Elektronik', 'Wohnen', 'Sport', 'Musik'],
+      settings: defaultSettings
+    });
+  },
+
+  exitGuestMode: () => {
+    localStorage.removeItem('ventory_is_guest');
+    localStorage.removeItem('ventory_demo_mode');
+    set({
+      isGuest: false,
+      isDemoMode: false,
+      userId: null,
+      userName: null,
+      avatarUrl: null,
+      products: [],
+      bundles: [],
+      _dbProducts: [],
+      _dbBundles: []
+    });
+  },
+
   toggleDemoMode: () => {
     const newVal = !get().isDemoMode;
     localStorage.setItem('ventory_demo_mode', String(newVal));
@@ -115,17 +157,20 @@ export const useAppStore = create<AppState>()((set, get) => ({
   },
 
   _refreshView: () => {
-    const { isDemoMode, _dbProducts, _dbBundles } = get();
-    if (isDemoMode) {
-      const demo = createDemoData();
-      set({ products: demo.products, bundles: demo.bundles });
+    const { isDemoMode, isGuest, _dbProducts, _dbBundles } = get();
+    if (isDemoMode || isGuest) {
+      if (get().products.length === 0) {
+        const demo = createDemoData();
+        set({ products: demo.products, bundles: demo.bundles });
+      }
     } else {
       set({ products: _dbProducts, bundles: _dbBundles });
     }
   },
 
   fetchAllData: async (userId) => {
-    set({ userId, isDemoMode: false });
+    set({ userId, isGuest: false, isDemoMode: false });
+    localStorage.setItem('ventory_is_guest', 'false');
     localStorage.setItem('ventory_demo_mode', 'false');
     
     // Fetch Products
@@ -159,8 +204,8 @@ export const useAppStore = create<AppState>()((set, get) => ({
   },
 
   addProduct: async (product) => {
-    const { userId, isDemoMode } = get();
-    if (!userId) return;
+    const { userId, isDemoMode, isGuest } = get();
+    const isLocalOnly = isGuest || isDemoMode || !userId || userId === 'guest-user';
 
     const newProduct = {
       ...product,
@@ -168,7 +213,7 @@ export const useAppStore = create<AppState>()((set, get) => ({
       dateAdded: new Date().toISOString()
     } as Product;
 
-    if (isDemoMode) {
+    if (isLocalOnly) {
       set((state) => ({
         products: [...state.products, newProduct]
       }));
@@ -184,13 +229,14 @@ export const useAppStore = create<AppState>()((set, get) => ({
   },
 
   updateProduct: async (id, updated) => {
-    const { isDemoMode } = get();
+    const { userId, isDemoMode, isGuest } = get();
+    const isLocalOnly = isGuest || isDemoMode || !userId || userId === 'guest-user';
     const updateData = { ...updated };
     if (updated.status === 'bought') {
       updateData.dateBought = new Date().toISOString();
     }
 
-    if (isDemoMode) {
+    if (isLocalOnly) {
       set((state) => ({
         products: state.products.map(p => p.id === id ? { ...p, ...updateData } : p)
       }));
@@ -204,8 +250,9 @@ export const useAppStore = create<AppState>()((set, get) => ({
   },
   
   deleteProduct: async (id) => {
-    const { isDemoMode } = get();
-    if (isDemoMode) {
+    const { userId, isDemoMode, isGuest } = get();
+    const isLocalOnly = isGuest || isDemoMode || !userId || userId === 'guest-user';
+    if (isLocalOnly) {
       set((state) => ({
         products: state.products.filter(p => p.id !== id)
       }));
@@ -223,12 +270,15 @@ export const useAppStore = create<AppState>()((set, get) => ({
       categories: [...state.categories, cat],
       subCats: { ...state.subCats, [cat]: [] }
     }));
-    await syncAppState(get().userId!, get());
+    const { userId, isGuest, isDemoMode } = get();
+    if (!isGuest && !isDemoMode && userId && userId !== 'guest-user') {
+      await syncAppState(userId, get());
+    }
   },
 
   renameCategory: async (oldName, newName) => {
-    const { userId, products, _dbProducts, subCats, categories } = get();
-    if (!userId) return;
+    const { userId, products, _dbProducts, subCats, categories, isGuest, isDemoMode } = get();
+    const isLocalOnly = isGuest || isDemoMode || !userId || userId === 'guest-user';
 
     const newCategories = categories.map(c => c === oldName ? newName : c);
     const newSubCats = { ...subCats };
@@ -247,13 +297,15 @@ export const useAppStore = create<AppState>()((set, get) => ({
       _dbProducts: updatedDbProducts
     });
 
-    await syncAppState(userId, { ...get(), categories: newCategories, subCats: newSubCats });
-    await supabase.from('products').update({ mainCat: newName }).eq('user_id', userId).eq('mainCat', oldName);
+    if (!isLocalOnly) {
+      await syncAppState(userId, { ...get(), categories: newCategories, subCats: newSubCats });
+      await supabase.from('products').update({ mainCat: newName }).eq('user_id', userId).eq('mainCat', oldName);
+    }
   },
 
   deleteCategory: async (cat) => {
-    const { userId, products, _dbProducts } = get();
-    if (!userId) return;
+    const { userId, products, _dbProducts, isGuest, isDemoMode } = get();
+    const isLocalOnly = isGuest || isDemoMode || !userId || userId === 'guest-user';
 
     const updatedProducts = products.map(p => p.mainCat === cat ? { ...p, mainCat: 'Alle' } : p);
     const updatedDbProducts = _dbProducts.map(p => p.mainCat === cat ? { ...p, mainCat: 'Alle' } : p);
@@ -269,15 +321,19 @@ export const useAppStore = create<AppState>()((set, get) => ({
         _dbProducts: updatedDbProducts
       };
     });
-    await syncAppState(userId, get());
-    await supabase.from('products').update({ mainCat: 'Alle' }).eq('user_id', userId).eq('mainCat', cat);
+
+    if (!isLocalOnly) {
+      await syncAppState(userId, get());
+      await supabase.from('products').update({ mainCat: 'Alle' }).eq('user_id', userId).eq('mainCat', cat);
+    }
   },
 
   reorderCategories: async (newCats) => {
-    const { userId } = get();
-    if (!userId) return;
     set({ categories: newCats });
-    await syncAppState(userId, get());
+    const { userId, isGuest, isDemoMode } = get();
+    if (!isGuest && !isDemoMode && userId && userId !== 'guest-user') {
+      await syncAppState(userId, get());
+    }
   },
 
   addSubCategory: async (mainCat, subCat) => {
@@ -286,7 +342,10 @@ export const useAppStore = create<AppState>()((set, get) => ({
       if (current.includes(subCat)) return state;
       return { subCats: { ...state.subCats, [mainCat]: [...current, subCat] } };
     });
-    await syncAppState(get().userId!, get());
+    const { userId, isGuest, isDemoMode } = get();
+    if (!isGuest && !isDemoMode && userId && userId !== 'guest-user') {
+      await syncAppState(userId, get());
+    }
   },
 
   deleteSubCategory: async (mainCat, subCat) => {
@@ -294,27 +353,31 @@ export const useAppStore = create<AppState>()((set, get) => ({
       const current = state.subCats[mainCat] || [];
       return { subCats: { ...state.subCats, [mainCat]: current.filter(s => s !== subCat) } };
     });
-    await syncAppState(get().userId!, get());
+    const { userId, isGuest, isDemoMode } = get();
+    if (!isGuest && !isDemoMode && userId && userId !== 'guest-user') {
+      await syncAppState(userId, get());
+    }
   },
 
   addWebsite: async (web) => {
-    const { userId } = get();
-    if (!userId) return;
+    const { userId, isGuest, isDemoMode } = get();
     const newWeb = { ...web, id: crypto.randomUUID() };
     set((state) => ({ websites: [...state.websites, newWeb] }));
-    await supabase.from('websites').insert([{ ...newWeb, user_id: userId }]);
+    if (!isGuest && !isDemoMode && userId && userId !== 'guest-user') {
+      await supabase.from('websites').insert([{ ...newWeb, user_id: userId }]);
+    }
   },
 
   deleteWebsite: async (name) => {
-    const { websites } = get();
+    const { websites, userId, isGuest, isDemoMode } = get();
     const site = websites.find(w => w.n === name);
     if (!site) return;
     set((state) => ({
       websites: state.websites.filter(w => w.n !== name)
     }));
-    if ((site as any).id) {
-       await supabase.from('websites').delete().eq('id', (site as any).id);
-     }
+    if (!isGuest && !isDemoMode && userId && userId !== 'guest-user' && (site as any).id) {
+      await supabase.from('websites').delete().eq('id', (site as any).id);
+    }
   },
 
   addWebsiteCat: async (cat) => {
@@ -323,13 +386,14 @@ export const useAppStore = create<AppState>()((set, get) => ({
     set((state) => ({
       websiteCats: [...state.websiteCats, trimmed]
     }));
-    await syncAppState(get().userId!, get());
+    const { userId, isGuest, isDemoMode } = get();
+    if (!isGuest && !isDemoMode && userId && userId !== 'guest-user') {
+      await syncAppState(userId, get());
+    }
   },
 
   deleteWebsiteCat: async (cat) => {
-    const { userId, websites } = get();
-    if (!userId) return;
-
+    const { userId, websites, isGuest, isDemoMode } = get();
     const updatedWebsites = websites.map(w => w.c === cat ? { ...w, c: 'Allgemein' } : w);
 
     set({
@@ -337,24 +401,28 @@ export const useAppStore = create<AppState>()((set, get) => ({
       websites: updatedWebsites
     });
 
-    await syncAppState(userId, get());
-    if (!get().isDemoMode) {
+    if (!isGuest && !isDemoMode && userId && userId !== 'guest-user') {
+      await syncAppState(userId, get());
       await supabase.from('websites').update({ c: 'Allgemein' }).eq('user_id', userId).eq('c', cat);
     }
   },
 
   reorderWebsiteCats: async (newCats) => {
-    const { userId } = get();
-    if (!userId) return;
     set({ websiteCats: newCats });
-    await syncAppState(userId, get());
+    const { userId, isGuest, isDemoMode } = get();
+    if (!isGuest && !isDemoMode && userId && userId !== 'guest-user') {
+      await syncAppState(userId, get());
+    }
   },
 
   updateSettings: async (newSettings) => {
     set((state) => ({
       settings: { ...state.settings, ...newSettings }
     }));
-    await syncAppState(get().userId!, get());
+    const { userId, isGuest, isDemoMode } = get();
+    if (!isGuest && !isDemoMode && userId && userId !== 'guest-user') {
+      await syncAppState(userId, get());
+    }
   },
 
   addCustomTheme: async (theme) => {
@@ -368,7 +436,10 @@ export const useAppStore = create<AppState>()((set, get) => ({
         isGlassEnabled: !!newTheme.isGlassEnabled
       }
     }));
-    await syncAppState(get().userId!, get());
+    const { userId, isGuest, isDemoMode } = get();
+    if (!isGuest && !isDemoMode && userId && userId !== 'guest-user') {
+      await syncAppState(userId, get());
+    }
   },
 
   updateCustomTheme: async (id, updatedTheme) => {
@@ -386,7 +457,10 @@ export const useAppStore = create<AppState>()((set, get) => ({
         }
       };
     });
-    await syncAppState(get().userId!, get());
+    const { userId, isGuest, isDemoMode } = get();
+    if (!isGuest && !isDemoMode && userId && userId !== 'guest-user') {
+      await syncAppState(userId, get());
+    }
   },
 
   deleteCustomTheme: async (id) => {
@@ -398,14 +472,17 @@ export const useAppStore = create<AppState>()((set, get) => ({
         isGlassEnabled: state.settings.activeThemeId === id ? true : state.settings.isGlassEnabled
       }
     }));
-    await syncAppState(get().userId!, get());
+    const { userId, isGuest, isDemoMode } = get();
+    if (!isGuest && !isDemoMode && userId && userId !== 'guest-user') {
+      await syncAppState(userId, get());
+    }
   },
 
   addBundle: async (bundle) => {
-    const { userId, isDemoMode } = get();
-    if (!userId) return;
+    const { userId, isDemoMode, isGuest } = get();
+    const isLocalOnly = isGuest || isDemoMode || !userId || userId === 'guest-user';
     const newBundle = { ...bundle, id: crypto.randomUUID(), dateAdded: new Date().toISOString() };
-    if (isDemoMode) {
+    if (isLocalOnly) {
       set((state) => ({
         bundles: [...state.bundles, newBundle as Bundle]
       }));
@@ -419,8 +496,9 @@ export const useAppStore = create<AppState>()((set, get) => ({
   },
 
   updateBundle: async (id, updated) => {
-    const { isDemoMode } = get();
-    if (isDemoMode) {
+    const { userId, isDemoMode, isGuest } = get();
+    const isLocalOnly = isGuest || isDemoMode || !userId || userId === 'guest-user';
+    if (isLocalOnly) {
       set((state) => ({
         bundles: state.bundles.map(b => b.id === id ? { ...b, ...updated } : b)
       }));
@@ -434,8 +512,9 @@ export const useAppStore = create<AppState>()((set, get) => ({
   },
 
   deleteBundle: async (id) => {
-    const { isDemoMode } = get();
-    if (isDemoMode) {
+    const { userId, isDemoMode, isGuest } = get();
+    const isLocalOnly = isGuest || isDemoMode || !userId || userId === 'guest-user';
+    if (isLocalOnly) {
       set((state) => ({
         bundles: state.bundles.filter(b => b.id !== id)
       }));

@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { supabase } from './lib/supabase';
 import { useAppStore } from './store/useAppStore';
+import { useUIStore } from './store/useUIStore';
 
 import { AppContainer } from './components/layout/AppContainer';
 import { LoginView } from './views/LoginView';
@@ -22,9 +23,18 @@ function App() {
   // Tracks whether the login came from the form (not a page refresh)
   const loginFromForm = useRef(false);
 
-  const { fetchAllData, setUserName, setAvatarUrl } = useAppStore();
+  const { isGuest, enterGuestMode, fetchAllData, setUserName, setAvatarUrl } = useAppStore();
+  const { openGuestWelcomeModal } = useUIStore();
 
   useEffect(() => {
+    // Initial guest session check
+    if (isGuest) {
+      enterGuestMode();
+      setLoading(false);
+      setShowLogin(false);
+      return;
+    }
+
     // Initial session check
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
@@ -59,8 +69,6 @@ function App() {
 
         if (loginFromForm.current) {
           // Came from the login form → keep LoginView visible for exit animation
-          // The original LoginView is still mounted with its running animations
-          // Dashboard now renders UNDERNEATH it (LoginView is position:fixed)
           loginFromForm.current = false;
           setTimeout(() => {
             setShowLogin(false);
@@ -72,25 +80,38 @@ function App() {
           if (!hasDisplayName) setShowOnboarding(true);
         }
       } else {
-        setSession(null);
-        setUserName(null);
-        setAvatarUrl(null);
-        setShowLogin(true);
-        setShowOnboarding(false);
+        if (!useAppStore.getState().isGuest) {
+          setSession(null);
+          setUserName(null);
+          setAvatarUrl(null);
+          setShowLogin(true);
+          setShowOnboarding(false);
+        }
       }
     });
 
     return () => subscription.unsubscribe();
-  }, [fetchAllData]);
+  }, [fetchAllData, isGuest, enterGuestMode]);
+
+  const handleGuestLogin = () => {
+    loginFromForm.current = true;
+    enterGuestMode();
+    openGuestWelcomeModal();
+    setTimeout(() => {
+      setShowLogin(false);
+    }, 1800);
+  };
 
   if (loading) {
     return <div className="h-screen w-screen flex items-center justify-center bg-bg-primary"><div className="animate-spin h-8 w-8 border-4 border-accent rounded-full border-t-transparent"></div></div>;
   }
 
+  const isAuthenticated = !!session || isGuest;
+
   return (
     <>
-      {/* Dashboard renders whenever session exists */}
-      {session && (
+      {/* Dashboard renders whenever session or guest mode exists */}
+      {isAuthenticated && (
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<AppContainer />}>
@@ -107,11 +128,14 @@ function App() {
       )}
       {/* LoginView stays mounted with its own animations — position:fixed overlays Dashboard */}
       {showLogin && (
-        <LoginView onLoginStart={() => { loginFromForm.current = true; }} />
+        <LoginView 
+          onLoginStart={() => { loginFromForm.current = true; }} 
+          onGuestLogin={handleGuestLogin}
+        />
       )}
       
       {/* Onboarding View overlays Dashboard and blanks it out */}
-      {showOnboarding && !showLogin && (
+      {showOnboarding && !showLogin && !isGuest && (
         <OnboardingModal onComplete={() => setShowOnboarding(false)} />
       )}
     </>

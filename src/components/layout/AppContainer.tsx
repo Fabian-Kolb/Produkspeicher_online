@@ -11,6 +11,8 @@ import { ProductModal } from '../features/ProductModal';
 import { ProductDetailModal } from '../features/ProductDetailModal';
 import { AppInfoModal } from '../features/AppInfoModal';
 import { ProfileSettingsModal } from '../auth/ProfileSettingsModal';
+import { GuestWelcomeModal } from '../auth/GuestWelcomeModal';
+import { LegalDisclaimerModal } from '../auth/LegalDisclaimerModal';
 import { useAppStore } from '../../store/useAppStore';
 import { useUIStore } from '../../store/useUIStore';
 import { applyGlobalTheme, applyBaseMode, THEME_PRESETS } from '../../utils/themeHelpers';
@@ -441,6 +443,8 @@ export const AppContainer: React.FC = () => {
       <ProductDetailModal />
       <AppInfoModal />
       <ProfileSettingsModal />
+      <GuestWelcomeModal />
+      <LegalDisclaimerModal />
 
       {/* Mobile Floating Action Button (FAB) */}
       <AnimatePresence mode="wait">

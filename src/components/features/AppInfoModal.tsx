@@ -17,6 +17,23 @@ interface LogEntry {
 
 const CHANGELOG: LogEntry[] = [
   {
+    version: '0.9.0',
+    date: '24. August 2026',
+    changes: {
+      added: [
+        '1-Klick Gast-Zugang (Demo-Modus): Sofortiges Ausprobieren der App ohne Login oder Registrierung mit vollständiger lokaler Datenisolation.',
+        'Gast-Willkommens-Modal: Transparente Gegenüberstellung von testbaren Funktionen und Einschränkungen (rein lokale Browser-Sitzung ohne Cloud-Speicherung).',
+        'Datenschutz- & Haftungsausschluss-Modal: Umfassende Aufklärung zu „Wie besehen“-Bereitstellung, Haftungsausschluss, Dateninhalten und Eigenverantwortung.',
+        'Sicherheitsarchitektur für Gäste: Alle Mutationen (Produkte, Bundles, Kategorien, Themes) bleiben 100% lokal im Browser-State ohne Backend-Schreibzugriffe.'
+      ],
+      improved: [
+        'Responsives Diagramm-Fenster (Vigi / BudgetChart): Fluid-responsive Container-Messung (`ResizeObserver`), nahtloses 100%-Fitting auf Desktop & Mobilgeräten ohne Verzerrungen oder unpassende Randabstände.',
+        'Login-Screen UX: Prominenter Gast-Button („Als Gast ausprobieren“) und dezente Rechtsbelehrungs-Verlinkung im Footer.',
+        'Profil- & Sidebar-Anpassung: Klare Kennzeichnung der aktiven Gast-Sitzung und bequeme 1-Klick Rückkehr zum Login.'
+      ]
+    }
+  },
+  {
     version: '0.8.28',
     date: '21. Juli 2026',
     changes: {

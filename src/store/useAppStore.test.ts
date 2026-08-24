@@ -137,4 +137,73 @@ describe('useAppStore', () => {
     expect(updatedStore.settings.activeThemeId).toBe('default-dark-glass');
     expect(updatedStore.settings.isGlassEnabled).toBe(true);
   });
+
+  it('sollte in den Gast-Modus wechseln und Beispieldaten vorbefuellen', () => {
+    const store = useAppStore.getState();
+    store.enterGuestMode();
+
+    const guestStore = useAppStore.getState();
+    expect(guestStore.isGuest).toBe(true);
+    expect(guestStore.isDemoMode).toBe(true);
+    expect(guestStore.userName).toBe('Gast');
+    expect(guestStore.userId).toBe('guest-user');
+    expect(guestStore.products.length).toBeGreaterThan(0);
+    expect(guestStore.bundles.length).toBeGreaterThan(0);
+  });
+
+  it('sollte im Gast-Modus Mutationen isoliert und ohne Supabase-Schreibzugriffe ausführen', async () => {
+    const { supabase } = await import('../lib/supabase');
+    vi.clearAllMocks();
+
+    const store = useAppStore.getState();
+    store.enterGuestMode();
+
+    // Produkt lokal hinzufügen
+    const initialCount = useAppStore.getState().products.length;
+    await store.addProduct({
+      name: 'Test Guest Product',
+      shop: 'Demo Store',
+      url: 'https://demo.de',
+      mainCat: 'Hardware',
+      subCats: ['Gadgets'],
+      price: 99,
+      discount: 0,
+      finalPrice: 99,
+      rating: 5,
+      details: 'Guest Test Item',
+      imgs: ['https://placeholder.jpg'],
+      isFavorite: false,
+      status: 'active'
+    });
+
+    const afterAdd = useAppStore.getState();
+    expect(afterAdd.products.length).toBe(initialCount + 1);
+    const addedProduct = afterAdd.products.find(p => p.name === 'Test Guest Product');
+    expect(addedProduct).toBeDefined();
+
+    // Produkt lokal updaten
+    await store.updateProduct(addedProduct!.id, { name: 'Updated Guest Product' });
+    expect(useAppStore.getState().products.find(p => p.id === addedProduct!.id)?.name).toBe('Updated Guest Product');
+
+    // Produkt lokal löschen
+    await store.deleteProduct(addedProduct!.id);
+    expect(useAppStore.getState().products.find(p => p.id === addedProduct!.id)).toBeUndefined();
+
+    // Es dürfen keine Supabase 'insert' Aufrufe erfolgt sein
+    expect(supabase.from).not.toHaveBeenCalledWith('products');
+  });
+
+  it('sollte den Gast-Modus beim Logout sauber zuruecksetzen', () => {
+    const store = useAppStore.getState();
+    store.enterGuestMode();
+    expect(useAppStore.getState().isGuest).toBe(true);
+
+    store.exitGuestMode();
+    const cleanStore = useAppStore.getState();
+    expect(cleanStore.isGuest).toBe(false);
+    expect(cleanStore.isDemoMode).toBe(false);
+    expect(cleanStore.userId).toBeNull();
+    expect(cleanStore.products).toEqual([]);
+    expect(cleanStore.bundles).toEqual([]);
+  });
 });

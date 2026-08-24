@@ -708,24 +708,34 @@ export const ProductModal: React.FC = () => {
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <label className={labelClass}>Bewertung (1-10)</label>
-                        <Input
-                          type="number"
-                          min="0"
-                          max="10"
-                          step="0.1"
-                          value={formData.rating || ''}
-                          onChange={e => {
-                            const val = Math.max(0, Math.min(10, Number(e.target.value)));
-                            setFormData({ ...formData, rating: val });
-                          }}
-                          placeholder="z. B. 8.5"
-                          className={inputClass}
-                        />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
+                      <div className="flex flex-col gap-1.5">
+                        <div className="flex items-center justify-between">
+                          <label className={labelClass}>Bewertung (0–10)</label>
+                          <span className="text-xs font-extrabold text-accent px-2.5 py-0.5 rounded-full bg-accent/10 border border-accent/20 tabular-nums">
+                            {Number(formData.rating || 0).toFixed(1)} / 10
+                          </span>
+                        </div>
+                        <div className="relative flex items-center h-[46px] px-3.5 rounded-full bg-text-primary/5 border border-border-primary/20 hover:border-border-primary/40 transition-colors">
+                          <input
+                            type="range"
+                            min="0"
+                            max="10"
+                            step="0.1"
+                            value={formData.rating || 0}
+                            onChange={e => {
+                              const val = parseFloat(e.target.value);
+                              setFormData({ ...formData, rating: val });
+                              triggerHaptic(5);
+                            }}
+                            className="w-full h-2 rounded-full appearance-none cursor-pointer accent-accent focus:outline-none"
+                            style={{
+                              background: `linear-gradient(to right, var(--theme-accent, #3b82f6) 0%, var(--theme-accent, #3b82f6) ${(Number(formData.rating || 0) / 10) * 100}%, rgba(255,255,255,0.12) ${(Number(formData.rating || 0) / 10) * 100}%, rgba(255,255,255,0.12) 100%)`
+                            }}
+                          />
+                        </div>
                       </div>
-                      <div>
+                      <div className="flex flex-col gap-1.5">
                         <label className={labelClass}>Als Favorit markieren</label>
                         <button
                           type="button"

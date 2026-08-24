@@ -3,6 +3,8 @@ import { useAppStore } from '../store/useAppStore';
 import { useUIStore } from '../store/useUIStore';
 import type { Product } from '../types';
 import { cn } from '../utils/cn';
+import { triggerHaptic } from '../utils/haptics';
+import { Calendar } from 'lucide-react';
 
 import { BudgetKpiCards } from '../components/budget/BudgetKpiCards';
 import { BudgetChart, type ChartDataItem } from '../components/budget/BudgetChart';
@@ -25,7 +27,7 @@ export const BudgetView: React.FC = () => {
   const { products, settings, updateSettings } = useAppStore();
   const { setView, setStatusFilter, setSearchQuery } = useUIStore();
 
-  const [timeRange, setTimeRange] = useState<'7d' | 'month' | 'total'>('month');
+  const [timeRange, setTimeRange] = useState<'7d' | 'month' | 'total' | 'custom'>('month');
   const [chartMode, setChartMode] = useState<'daily' | 'cumulative'>('cumulative');
   const [sortBy, setSortBy] = useState<'date' | 'price'>('date');
   const [hoveredDay, setHoveredDay] = useState<ChartDataItem | null>(null);
@@ -42,6 +44,13 @@ export const BudgetView: React.FC = () => {
     return new Date(d.getFullYear(), d.getMonth() - 5, 1);
   });
   const [totalEndDate, setTotalEndDate] = useState<Date>(() => new Date());
+  const [customStartDate, setCustomStartDate] = useState<Date>(() => {
+    const d = new Date();
+    d.setDate(d.getDate() - 30);
+    return d;
+  });
+  const [customEndDate, setCustomEndDate] = useState<Date>(() => new Date());
+
   const [selectedMonthForWeekPicker, setSelectedMonthForWeekPicker] = useState<{ year: number; month: number } | null>(
     null
   );
@@ -50,7 +59,7 @@ export const BudgetView: React.FC = () => {
   // Reset selected day on view/period changes
   useEffect(() => {
     setSelectedDay(null);
-  }, [timeRange, currentPeriodDate]);
+  }, [timeRange, currentPeriodDate, customStartDate, customEndDate]);
 
   const boughtProducts = useMemo(() => products.filter((p: Product) => p.status === 'bought'), [products]);
 
@@ -73,6 +82,16 @@ export const BudgetView: React.FC = () => {
         return pDate.getMonth() === currentPeriodDate.getMonth() && pDate.getFullYear() === currentPeriodDate.getFullYear();
       }
 
+      if (timeRange === 'custom') {
+        const startDate = new Date(customStartDate);
+        startDate.setHours(0, 0, 0, 0);
+        const endDate = new Date(customEndDate);
+        endDate.setHours(23, 59, 59, 999);
+
+        const checkDate = new Date(pDate);
+        return checkDate >= startDate && checkDate <= endDate;
+      }
+
       // For 'total' (custom span from totalStartDate to totalEndDate)
       const startDate = new Date(totalStartDate);
       startDate.setHours(0, 0, 0, 0);
@@ -82,7 +101,7 @@ export const BudgetView: React.FC = () => {
       const checkDate = new Date(pDate);
       return checkDate >= startDate && checkDate <= endDate;
     });
-  }, [boughtProducts, timeRange, currentPeriodDate, totalStartDate, totalEndDate]);
+  }, [boughtProducts, timeRange, currentPeriodDate, totalStartDate, totalEndDate, customStartDate, customEndDate]);
 
   const spentThisMonth = useMemo(() => {
     const targetMonth = currentPeriodDate.getMonth();
@@ -145,6 +164,36 @@ export const BudgetView: React.FC = () => {
           products: [],
         };
       }
+    } else if (timeRange === 'custom') {
+      const diffTime = Math.abs(customEndDate.getTime() - customStartDate.getTime());
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+      if (diffDays <= 60) {
+        for (let d = new Date(customStartDate); d <= customEndDate; d.setDate(d.getDate() + 1)) {
+          const dateKey = getLocalDateKey(d);
+          const label = d.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' });
+          dateMap[dateKey] = {
+            label,
+            dateLabel: d.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' }),
+            value: 0,
+            products: [],
+          };
+        }
+      } else {
+        let current = new Date(customStartDate.getFullYear(), customStartDate.getMonth(), 1);
+        const endLimit = new Date(customEndDate.getFullYear(), customEndDate.getMonth(), 1);
+        while (current <= endLimit) {
+          const dateKey = `${current.getFullYear()}-${String(current.getMonth() + 1).padStart(2, '0')}`;
+          const label = current.toLocaleDateString('de-DE', { month: 'short' });
+          dateMap[dateKey] = {
+            label,
+            dateLabel: current.toLocaleDateString('de-DE', { month: 'long', year: 'numeric' }),
+            value: 0,
+            products: [],
+          };
+          current.setMonth(current.getMonth() + 1);
+        }
+      }
     } else if (timeRange === 'total') {
       let current = new Date(totalStartDate.getFullYear(), totalStartDate.getMonth(), 1);
       const endLimit = new Date(totalEndDate.getFullYear(), totalEndDate.getMonth(), 1);
@@ -163,11 +212,13 @@ export const BudgetView: React.FC = () => {
       }
     }
 
+    const isCustomMonthly = timeRange === 'custom' && Math.ceil(Math.abs(customEndDate.getTime() - customStartDate.getTime()) / (1000 * 60 * 60 * 24)) > 60;
+
     boughtProducts.forEach((p) => {
       const pDate = new Date(p.dateBought || p.dateAdded);
       let pKey = '';
 
-      if (timeRange === 'total') {
+      if (timeRange === 'total' || isCustomMonthly) {
         pKey = `${pDate.getFullYear()}-${String(pDate.getMonth() + 1).padStart(2, '0')}`;
       } else {
         pKey = getLocalDateKey(pDate);
@@ -258,7 +309,13 @@ export const BudgetView: React.FC = () => {
     }
   }, [actualData, chartMode, timeRange, settings.monthlyBudget, spentThisMonth]);
 
-  const timeRangeLabel = timeRange === '7d' ? 'Woche' : timeRange === 'month' ? 'Dieser Monat' : 'Gesamt';
+  const timeRangeLabel = useMemo(() => {
+    if (timeRange === '7d') return 'Woche';
+    if (timeRange === 'month') return 'Dieser Monat';
+    if (timeRange === 'total') return 'Gesamt';
+    return 'Benutzerdefiniert';
+  }, [timeRange]);
+
   const timeRangeSpend = chartData.reduce((sum, d) => sum + d.dailyValue, 0);
   const timeRangeProductsCount = chartData.reduce((sum, d) => sum + d.products.length, 0);
   const averagePrice = timeRangeProductsCount > 0 ? timeRangeSpend / timeRangeProductsCount : 0;
@@ -285,83 +342,15 @@ export const BudgetView: React.FC = () => {
     if (timeRange === 'month') {
       return currentPeriodDate.toLocaleDateString('de-DE', { month: 'long', year: 'numeric' });
     }
+    if (timeRange === 'custom') {
+      const startStr = customStartDate.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' });
+      const endStr = customEndDate.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' });
+      return `${startStr} - ${endStr}`;
+    }
     const startStr = totalStartDate.toLocaleDateString('de-DE', { month: 'short', year: 'numeric' });
     const endStr = totalEndDate.toLocaleDateString('de-DE', { month: 'short', year: 'numeric' });
     return `${startStr} - ${endStr}`;
-  }, [currentPeriodDate, timeRange, totalStartDate, totalEndDate]);
-
-  const handlePrevPeriod = () => {
-    if (timeRange === '7d') {
-      const newDate = new Date(currentPeriodDate);
-      newDate.setDate(newDate.getDate() - 7);
-      setCurrentPeriodDate(getMonday(newDate));
-    } else if (timeRange === 'total') {
-      const newStart = new Date(totalStartDate);
-      const newEnd = new Date(totalEndDate);
-      newStart.setMonth(newStart.getMonth() - 1);
-      newEnd.setMonth(newEnd.getMonth() - 1);
-      setTotalStartDate(newStart);
-      setTotalEndDate(newEnd);
-      setCurrentPeriodDate(new Date(newEnd.getFullYear(), newEnd.getMonth() + 1, 0));
-    } else {
-      const newDate = new Date(currentPeriodDate);
-      newDate.setMonth(newDate.getMonth() - 1);
-      setCurrentPeriodDate(newDate);
-    }
-  };
-
-  const handleNextPeriod = () => {
-    const today = new Date();
-    if (timeRange === '7d') {
-      const newDate = new Date(currentPeriodDate);
-      newDate.setDate(newDate.getDate() + 7);
-      const targetMonday = getMonday(newDate);
-      const currentWeekMonday = getMonday(today);
-      setCurrentPeriodDate(targetMonday > currentWeekMonday ? currentWeekMonday : targetMonday);
-    } else if (timeRange === 'total') {
-      const newStart = new Date(totalStartDate);
-      const newEnd = new Date(totalEndDate);
-      newStart.setMonth(newStart.getMonth() + 1);
-      newEnd.setMonth(newEnd.getMonth() + 1);
-
-      const maxEnd = new Date(today.getFullYear(), today.getMonth(), 1);
-      const targetEnd = new Date(newEnd.getFullYear(), newEnd.getMonth(), 1);
-
-      if (targetEnd <= maxEnd) {
-        setTotalStartDate(newStart);
-        setTotalEndDate(newEnd);
-        setCurrentPeriodDate(new Date(newEnd.getFullYear(), newEnd.getMonth() + 1, 0));
-      }
-    } else {
-      const newDate = new Date(currentPeriodDate);
-      newDate.setMonth(newDate.getMonth() + 1);
-      if (
-        newDate.getFullYear() > today.getFullYear() ||
-        (newDate.getFullYear() === today.getFullYear() && newDate.getMonth() > today.getMonth())
-      ) {
-        setCurrentPeriodDate(today);
-      } else {
-        setCurrentPeriodDate(newDate);
-      }
-    }
-  };
-
-  const isNextDisabled = useMemo(() => {
-    const today = new Date();
-    if (timeRange === '7d') {
-      return getMonday(currentPeriodDate) >= getMonday(today);
-    }
-    if (timeRange === 'total') {
-      return (
-        totalEndDate.getFullYear() > today.getFullYear() ||
-        (totalEndDate.getFullYear() === today.getFullYear() && totalEndDate.getMonth() >= today.getMonth())
-      );
-    }
-    return (
-      currentPeriodDate.getFullYear() > today.getFullYear() ||
-      (currentPeriodDate.getFullYear() === today.getFullYear() && currentPeriodDate.getMonth() >= today.getMonth())
-    );
-  }, [currentPeriodDate, timeRange, totalEndDate]);
+  }, [currentPeriodDate, timeRange, totalStartDate, totalEndDate, customStartDate, customEndDate]);
 
   const topCategories = useMemo(() => {
     const productsInTimeRange = chartData.flatMap((d) => d.products);
@@ -413,30 +402,51 @@ export const BudgetView: React.FC = () => {
 
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 min-h-[calc(100vh-100px)]">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6 md:mb-10 px-2 mt-4">
-        <h1 className="text-2xl md:text-3xl font-playfair font-bold">Budget</h1>
-
-        <div className="bg-[var(--theme-glass-bg)] border border-[var(--theme-glass-border)] backdrop-blur-md px-1 py-1 flex items-center rounded-full shadow-sm self-start sm:self-auto">
-          {(['7d', 'month', 'total'] as const).map((range) => (
+      {/* Centered Time Range SubNavigation Pill Bar with Integrated Calendar Button */}
+      <div className="w-full mt-1 mb-4 sm:mb-5 flex flex-col items-center justify-center relative z-20">
+        <div className="glass-panel rounded-full relative p-1 sm:p-1.5 flex flex-wrap items-center justify-center gap-1 shadow-sm border border-border-primary/20">
+          {(['7d', 'month', 'total', 'custom'] as const).map((range) => (
             <button
               key={range}
               onClick={() => {
+                triggerHaptic(15);
                 setTimeRange(range);
                 if (range === '7d') {
                   setCurrentPeriodDate(getMonday(new Date()));
+                } else if (range === 'custom') {
+                  setIsDatePickerOpen(true);
                 }
               }}
               className={cn(
-                'px-4 py-1.5 rounded-full text-xs font-bold transition-all duration-300 whitespace-nowrap cursor-pointer',
+                'px-3.5 sm:px-5 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-semibold transition-all duration-300 whitespace-nowrap cursor-pointer select-none',
                 timeRange === range
-                  ? 'bg-accent text-bg-primary shadow-md'
-                  : 'text-text-secondary hover:text-text-primary bg-text-primary/5'
+                  ? 'bg-accent text-bg-primary shadow-md shadow-accent/20'
+                  : 'text-text-secondary hover:text-text-primary hover:bg-text-primary/5'
               )}
             >
-              {range === '7d' ? 'Woche' : range === 'month' ? 'Monat' : 'Gesamt'}
+              {range === '7d' ? 'Woche' : range === 'month' ? 'Monat' : range === 'total' ? 'Gesamt' : 'Benutzerdefiniert'}
             </button>
           ))}
+
+          <div className="h-5 w-[1px] bg-border-primary/30 mx-0.5 hidden xs:block" />
+
+          {/* Calendar Picker Trigger Button */}
+          <button
+            onClick={() => {
+              triggerHaptic(15);
+              setIsDatePickerOpen((prev) => !prev);
+            }}
+            className={cn(
+              'px-3 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-semibold transition-all duration-200 flex items-center gap-1.5 cursor-pointer select-none',
+              isDatePickerOpen
+                ? 'bg-accent/20 text-accent border border-accent/40'
+                : 'text-text-secondary hover:text-text-primary hover:bg-text-primary/5'
+            )}
+            title="Kalender / Zeitraum auswählen"
+          >
+            <Calendar size={14} className="text-accent shrink-0" />
+            <span className="max-w-[140px] sm:max-w-[200px] truncate">{formattedActivePeriod}</span>
+          </button>
         </div>
       </div>
 
@@ -450,8 +460,8 @@ export const BudgetView: React.FC = () => {
         onUpdateBudget={(newBudget) => updateSettings({ monthlyBudget: newBudget })}
       />
 
-      {/* Main Content Split */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8 items-start relative">
+      {/* Main Content Split: Chart (2 cols) & Digital Receipt (1 col) */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 mb-4 sm:mb-5 items-stretch relative">
         {/* SVG Chart Sub-Component */}
         <BudgetChart
           timeRange={timeRange}
@@ -470,14 +480,6 @@ export const BudgetView: React.FC = () => {
           isOverBudget={isOverBudget}
           isCurrentMonth={isCurrentMonth}
           isCurrentWeek={isCurrentWeek}
-          formattedActivePeriod={formattedActivePeriod}
-          handlePrevPeriod={handlePrevPeriod}
-          handleNextPeriod={handleNextPeriod}
-          isNextDisabled={isNextDisabled}
-          onOpenDatePicker={() => {
-            setPickerYear(currentPeriodDate.getFullYear());
-            setIsDatePickerOpen(true);
-          }}
           getSollPaceVal={getSollPaceVal}
           getTargetVal={getTargetVal}
         />
@@ -487,6 +489,7 @@ export const BudgetView: React.FC = () => {
           isOpen={isDatePickerOpen}
           onClose={() => setIsDatePickerOpen(false)}
           timeRange={timeRange}
+          setTimeRange={setTimeRange}
           currentPeriodDate={currentPeriodDate}
           setCurrentPeriodDate={setCurrentPeriodDate}
           pickerYear={pickerYear}
@@ -499,22 +502,35 @@ export const BudgetView: React.FC = () => {
           setTotalStartDate={setTotalStartDate}
           totalEndDate={totalEndDate}
           setTotalEndDate={setTotalEndDate}
+          customStartDate={customStartDate}
+          setCustomStartDate={setCustomStartDate}
+          customEndDate={customEndDate}
+          setCustomEndDate={setCustomEndDate}
         />
 
-        {/* Right Column */}
-        <div className="flex flex-col gap-6 h-full">
-          <div className="grid grid-cols-2 gap-2.5 sm:gap-4 order-2 lg:order-1 min-w-0">
-            <BudgetTrackerCard
-              spentThisMonth={spentThisMonth}
-              monthlyBudget={settings.monthlyBudget}
-              isCurrentMonth={isCurrentMonth}
-            />
+        {/* Right Column: Digital Receipt */}
+        <ReceiptPanel
+          timeRange={timeRange}
+          selectedDay={selectedDay}
+          onSelectDay={setSelectedDay}
+          chartData={chartData}
+          actualData={actualData}
+          monthlyBudget={settings.monthlyBudget}
+        />
+      </div>
 
-            <TopCategoriesWidget topCategories={topCategories} maxCategorySpend={maxCategorySpend} />
-          </div>
+      {/* Row 3: Budget Tracker & Top Categories in 2 spacious balanced cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mb-6">
+        <BudgetTrackerCard
+          spentThisMonth={spentThisMonth}
+          monthlyBudget={settings.monthlyBudget}
+          isCurrentMonth={isCurrentMonth}
+        />
 
-          <ReceiptPanel timeRange={timeRange} selectedDay={selectedDay} monthlyBudget={settings.monthlyBudget} />
-        </div>
+        <TopCategoriesWidget
+          topCategories={topCategories}
+          maxCategorySpend={maxCategorySpend}
+        />
       </div>
 
       {/* Grouped Transactions List */}

@@ -1,8 +1,9 @@
 import React, { useMemo, useState, useRef, useEffect } from 'react';
 import type { Product } from '../../types';
 import { cn } from '../../utils/cn';
-import { BarChart3, TrendingUp, ChevronLeft, ChevronRight, Calendar } from 'lucide-react';
+import { BarChart3, TrendingUp } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { triggerHaptic } from '../../utils/haptics';
 
 export interface ChartDataItem {
   dateKey: string;
@@ -15,7 +16,7 @@ export interface ChartDataItem {
 }
 
 interface BudgetChartProps {
-  timeRange: '7d' | 'month' | 'total';
+  timeRange: '7d' | 'month' | 'total' | 'custom';
   chartMode: 'daily' | 'cumulative';
   setChartMode: (mode: 'daily' | 'cumulative') => void;
   currentPeriodDate: Date;
@@ -31,11 +32,6 @@ interface BudgetChartProps {
   isOverBudget: boolean;
   isCurrentMonth: boolean;
   isCurrentWeek: boolean;
-  formattedActivePeriod: string;
-  handlePrevPeriod: () => void;
-  handleNextPeriod: () => void;
-  isNextDisabled: boolean;
-  onOpenDatePicker: () => void;
   getSollPaceVal: (i: number) => number;
   getTargetVal: (dateKey: string) => number;
 }
@@ -57,11 +53,6 @@ export const BudgetChart: React.FC<BudgetChartProps> = ({
   isOverBudget,
   isCurrentMonth,
   isCurrentWeek,
-  formattedActivePeriod,
-  handlePrevPeriod,
-  handleNextPeriod,
-  isNextDisabled,
-  onOpenDatePicker,
   getSollPaceVal,
 }) => {
   // Zoom States & Gesture Refs
@@ -330,45 +321,11 @@ export const BudgetChart: React.FC<BudgetChartProps> = ({
   }, [actualData]);
 
   return (
-    <div className="lg:col-span-2 bg-[var(--theme-glass-bg)] border border-[var(--theme-glass-border)] backdrop-blur-xl p-4 sm:p-6 rounded-3xl shadow-sm flex flex-col min-h-[400px] sm:min-h-[440px] md:min-h-[460px] relative">
-      <div className="flex flex-col gap-3 mb-4">
+    <div className="lg:col-span-2 bg-[var(--theme-glass-bg)] border border-[var(--theme-glass-border)] backdrop-blur-xl p-3.5 sm:p-5 rounded-3xl shadow-sm flex flex-col min-h-[320px] sm:min-h-[350px] md:min-h-[370px] relative">
+      <div className="flex flex-col gap-2.5 mb-3">
         <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 w-full">
-          <div className="flex items-center gap-3">
-            <h3 className="font-bold text-base md:text-lg shrink-0">Ausgabenverlauf</h3>
-
-            {/* Paginator / Time Traveler */}
-            <div className="flex items-center gap-1 bg-text-primary/5 border border-[var(--theme-glass-border)] rounded-full px-1.5 py-0.5 shadow-sm text-xs select-none relative">
-              <button
-                onClick={handlePrevPeriod}
-                className="p-1 rounded-full hover:bg-text-primary/10 text-text-secondary hover:text-text-primary transition-colors cursor-pointer"
-                title="Vorheriger Zeitraum"
-              >
-                <ChevronLeft size={14} />
-              </button>
-
-              <button
-                onClick={onOpenDatePicker}
-                className="px-2.5 py-0.5 rounded-full font-bold text-[10px] uppercase tracking-wider text-text-secondary hover:text-text-primary hover:bg-text-primary/5 transition-all flex items-center gap-1.5 cursor-pointer"
-                title="Monat auswählen"
-              >
-                <span>{formattedActivePeriod}</span>
-                <Calendar size={11} className="opacity-70" />
-              </button>
-
-              <button
-                onClick={handleNextPeriod}
-                disabled={isNextDisabled}
-                className={cn(
-                  'p-1 rounded-full transition-colors',
-                  isNextDisabled
-                    ? 'opacity-25 cursor-not-allowed'
-                    : 'hover:bg-text-primary/10 text-text-secondary hover:text-text-primary cursor-pointer'
-                )}
-                title="Nächster Zeitraum"
-              >
-                <ChevronRight size={14} />
-              </button>
-            </div>
+          <div className="flex items-center gap-2.5">
+            <h3 className="font-bold text-sm md:text-base shrink-0">Ausgabenverlauf</h3>
           </div>
 
           {/* Chart Mode Toggle */}
@@ -442,7 +399,7 @@ export const BudgetChart: React.FC<BudgetChartProps> = ({
       {/* SVG Area Chart with Integrated Grid */}
       <div
         ref={chartContainerRef}
-        className="flex-1 relative mt-2 w-full h-[250px] sm:h-[280px] md:h-[310px] overflow-hidden select-none"
+        className="flex-1 relative mt-1 w-full h-[200px] sm:h-[220px] md:h-[240px] overflow-hidden select-none"
       >
         {/* Soft Edge-Mask Scroll Indicators on Mobile when content overflows */}
         {contentWidth > containerWidth && (
@@ -783,27 +740,11 @@ export const BudgetChart: React.FC<BudgetChartProps> = ({
                     onTouchStart={() => onHoverDay(d)}
                     onClick={(e) => {
                       e.stopPropagation();
-                      const rect = e.currentTarget.getBoundingClientRect();
-                      const clickYRelative = e.clientY - rect.top;
-                      const svgY = (clickYRelative / rect.height) * (DRAW_HEIGHT + 40) + (PAD_TOP - 20);
-
-                      let isClickOnTarget = false;
-                      if (chartMode === 'daily' || timeRange === 'total') {
-                        const barYStart = getY(d.dailyValue);
-                        isClickOnTarget = d.dailyValue > 0 && svgY >= barYStart - 15 && svgY <= PAD_BOTTOM + 15;
-                      } else {
-                        const pointY = getY(chartVal(d) || 0);
-                        isClickOnTarget = Math.abs(svgY - pointY) <= 25;
-                      }
-
-                      if (isClickOnTarget) {
-                        if (selectedDay?.dateKey === d.dateKey) {
-                          onSelectDay(null);
-                        } else {
-                          onSelectDay(d);
-                        }
-                      } else {
+                      triggerHaptic(15);
+                      if (selectedDay?.dateKey === d.dateKey) {
                         onSelectDay(null);
+                      } else {
+                        onSelectDay(d);
                       }
                     }}
                   >

@@ -1,11 +1,10 @@
 import React, { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ShieldCheck, Scale, AlertTriangle, FileText, X, Check } from 'lucide-react';
+import { ShieldCheck, Scale, AlertTriangle, FileText, X } from 'lucide-react';
 import { useUIStore } from '../../store/useUIStore';
 import { useAppStore } from '../../store/useAppStore';
 import { cn } from '../../utils/cn';
 import { triggerHaptic } from '../../utils/haptics';
-import { Button } from '../common/Button';
 
 export const LegalDisclaimerModal: React.FC = () => {
   const { isLegalDisclaimerModalOpen, closeLegalDisclaimerModal } = useUIStore();
@@ -63,7 +62,7 @@ export const LegalDisclaimerModal: React.FC = () => {
               </div>
               <div>
                 <span className="text-[10px] font-black uppercase tracking-[0.25em] text-text-secondary block opacity-70">Rechtliche Hinweise & Bedingungen</span>
-                <h2 className="text-xl sm:text-2xl font-bold tracking-tight">Datenschutz & Haftungsausschluss</h2>
+                <h2 className="text-xl sm:text-2xl font-bold tracking-tight">Datenschutz und Nutzungshinweise</h2>
               </div>
             </div>
             <button 
@@ -100,40 +99,38 @@ export const LegalDisclaimerModal: React.FC = () => {
               </p>
             </div>
 
-            {/* 3. KI- & Analyseinhalte */}
+            {/* 3. Daten & KI */}
             <div className="p-4 sm:p-5 rounded-2xl bg-text-primary/[0.03] border border-border-primary/40 space-y-1.5">
               <div className="flex items-center gap-2 text-text-primary font-bold text-sm">
-                <AlertTriangle size={16} className="text-amber-400 shrink-0" />
+                <AlertTriangle size={16} className="text-accent shrink-0" />
                 <h3>3. Daten- & KI-Inhalte</h3>
               </div>
               <p>
-                Automatisch generierte Auswertungen, Preisalarme, Budget-Prognosen und Vorschläge dienen ausschließlich der unverbindlichen Orientierung. Sie stellen zu keinem Zeitpunkt eine verbindliche Finanz-, Kauf- oder Rechtsberatung dar.
+                Automatisch generierte Inhalte, Preishistorien, Deals, Budgets oder KI-gestützte Einwertungen dienen reinen Informationszwecken. Es besteht kein Anspruch auf Vollständigkeit, Richtigkeit oder Aktualität.
               </p>
             </div>
 
-            {/* 4. Eigenverantwortung (Important Box) */}
-            <div className="p-4 sm:p-5 rounded-2xl bg-heart/10 border border-heart/25 text-text-primary">
-              <div className="flex items-center gap-2 text-heart font-bold text-sm mb-2">
-                <AlertTriangle size={16} className="shrink-0" />
-                <h3 className="uppercase tracking-wider text-xs sm:text-sm">4. Eigenverantwortung</h3>
+            {/* 4. Eigenverantwortung */}
+            <div className="p-4 sm:p-5 rounded-2xl bg-accent/10 border border-accent/25 space-y-1.5 text-text-primary">
+              <div className="flex items-center gap-2 font-bold text-sm text-accent">
+                <Scale size={16} className="shrink-0" />
+                <h3>4. Eigenverantwortung</h3>
               </div>
-              <p className="font-medium text-xs sm:text-sm text-text-primary leading-relaxed">
-                „Das Betreten und Ausprobieren dieser App geschieht vollkommen auf eigene Gefahr und in reiner Selbstverantwortung – es gibt hier weder Sicherheiten noch Garantien.“
+              <p className="font-medium">
+                Das Betreten und Ausprobieren dieser App geschieht vollkommen auf eigene Gefahr und in reiner Selbstverantwortung – es gibt hier weder Sicherheiten noch Garantien.
               </p>
             </div>
 
           </div>
 
           {/* Footer */}
-          <div className="mt-6 pt-4 border-t border-border-primary/40 flex justify-end">
-            <Button
+          <div className="pt-5 mt-4 border-t border-border-primary/50 flex justify-end">
+            <button
               onClick={handleClose}
-              variant="primary"
-              className="w-full sm:w-auto py-2.5 px-6 text-xs sm:text-sm font-bold tracking-wider uppercase gap-2"
+              className="w-full sm:w-auto px-6 py-3 rounded-xl bg-accent hover:bg-accent-hover active:scale-[0.98] text-white font-semibold text-sm transition-all duration-300 shadow-md shadow-accent/20 cursor-pointer text-center"
             >
-              <Check size={16} />
-              <span>Gelesen & Akzeptiert</span>
-            </Button>
+              Verstanden & Schließen
+            </button>
           </div>
         </motion.div>
       </div>

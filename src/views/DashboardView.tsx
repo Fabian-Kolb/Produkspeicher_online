@@ -398,8 +398,6 @@ export const DashboardView: React.FC = () => {
   const budgetPct = Math.min((spentThisMonth / settings.monthlyBudget) * 100, 100);
   const isOverBudget = spentThisMonth > settings.monthlyBudget;
 
-  const todayStr = new Date().toISOString().split('T')[0];
-
   /* ── Shop filter state ─────────────────────────────────── */
   const displayCats = useMemo(() => ['Alle', ...websiteCats], [websiteCats]);
   const [activeFilter, setActiveFilter] = useState('Alle');
@@ -437,13 +435,11 @@ export const DashboardView: React.FC = () => {
       {/* ── Welcome Hero ─────────────────────────────────── */}
       <div className="flex flex-col items-center justify-center text-center mt-4">
         <h1 className="text-2xl md:text-3xl lg:text-4xl font-playfair font-bold mb-2">{welcomeMessage}</h1>
-        <p className="text-text-secondary text-sm md:text-base">
-          Hier ist dein Shopping-Überblick für den{' '}
-          <input
-            type="date"
-            defaultValue={todayStr}
-            className="bg-transparent border-b border-text-secondary text-text-primary outline-none focus:border-text-primary transition-colors cursor-pointer"
-          />
+        <p className="text-text-secondary text-sm md:text-base flex items-center justify-center gap-1.5 flex-wrap">
+          <span>Dein Shopping- & Inventar-Überblick für</span>
+          <span className="font-semibold text-text-primary">
+            {new Date().toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' })}
+          </span>
         </p>
       </div>
 

@@ -6,10 +6,12 @@
 
 ---
 
-## 🔒 Zugang & Live-Demo
-Diese Web-App befindet sich in der aktiven Entwicklung. Um automatisierte Zugriffe (Spam) zu verhindern und die regulären API-Nutzungslimits zu schonen, liegt die Live-Version hinter einem geschlossenen Login.
+## 🌐 Live-Version & Gastmodus
 
-Falls Sie dieses Projekt im Rahmen einer Bewerbung oder eines Portfolio-Reviews sichten, kontaktieren Sie mich gerne über die in meinen Unterlagen hinterlegten Kontaktdaten, um einen temporären Demo-Zugang anzufordern.
+Die Web-App ist online verfügbar und kann direkt ausprobiert werden! Wenn du sehen möchtest, was die Anwendung kann und wie sie sich bedienen lässt, kannst du sie unkompliziert im **Gastmodus** testen.
+
+> 📌 **Link zur Website:**  
+> Den Link zur Live-Version findest du hier im GitHub-Repository oben rechts im Bereich **„About“** (Website-Feld).
 
 ---
 

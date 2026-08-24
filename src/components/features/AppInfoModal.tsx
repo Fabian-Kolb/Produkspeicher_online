@@ -17,19 +17,49 @@ interface LogEntry {
 
 const CHANGELOG: LogEntry[] = [
   {
+    version: '0.9.1',
+    date: '24. August 2026',
+    changes: {
+      added: [
+        'Benutzerdefinierter Zeitraum im Budget: Beliebiges Start- und Enddatum mit Schnell-Presets (Letzte 7/30/90 Tage, Dieses Jahr, Dieser Monat).',
+        'Zentrierter Kalender & Zeitraum-Modal: Perfekt zentriertes Backdrop-Modal für alle Screen-Größen mit integriertem Kalender-Button in der Navigationspille.'
+      ],
+      improved: [
+        'Kompakte Budget-Viewport-Optimierung: Schlankere Diagramm- und Kachelhöhen, sodass KPIs, Ausgabenverlauf, Beleg, Tracker und Top-Kategorien ohne Scrollen im Viewport sichtbar sind.',
+        'SubNavigation-Pille: Zeitrahmen-Auswahl (Woche | Monat | Gesamt | Benutzerdefiniert) nahtlos oben zentriert, redundante Budget-Überschrift entfernt.'
+      ]
+    }
+  },
+  {
     version: '0.9.0',
     date: '24. August 2026',
     changes: {
       added: [
+        'Interaktive Gast-Schnelleinweisung (2-Schritt-Guide): Geführte Einführung in die 4 Kernbereiche (Inventar, Budget, Bundles, Mobile Gesten) vor den Test-Hinweisen.',
+        'Wegweiser zum Hinweisfenster: Explizite Aufklärung, dass die Einweisung & Gast-Infos jederzeit über das Profil-Icon oder die Sidebar erneut aufgerufen werden können.',
+        'Mobile-Hervorhebung auf der Willkommensseite: Prominente Smartphone-Badge im Hero-Header und neue Bento-Kachel für Touch- & Wischgesten.',
         '1-Klick Gast-Zugang (Demo-Modus): Sofortiges Ausprobieren der App ohne Login oder Registrierung mit vollständiger lokaler Datenisolation.',
-        'Gast-Willkommens-Modal: Transparente Gegenüberstellung von testbaren Funktionen und Einschränkungen (rein lokale Browser-Sitzung ohne Cloud-Speicherung).',
-        'Datenschutz- & Haftungsausschluss-Modal: Umfassende Aufklärung zu „Wie besehen“-Bereitstellung, Haftungsausschluss, Dateninhalten und Eigenverantwortung.',
+        'Datenschutz und Nutzungshinweise-Modal: Umfassende Aufklärung zu „Wie besehen“-Bereitstellung, Haftungsausschluss, Dateninhalten und Eigenverantwortung.',
         'Sicherheitsarchitektur für Gäste: Alle Mutationen (Produkte, Bundles, Kategorien, Themes) bleiben 100% lokal im Browser-State ohne Backend-Schreibzugriffe.'
       ],
       improved: [
+        'Login- & Showcase-Redesign: Elegante Obsidian-Atmosphäre mit Ambient Spotlight, dezentem Grid-Muster, Multi-Layer Frosted Glass (blur(36px) & Lichtkanten) und nahtlos integrierten Inset-Inputfeldern ohne Label-Schnittkanten.',
+        'High-End Bento-Showcase: Überarbeitete Feature-Karten mit dynamischen Metric-Pills (Budget-Effizienz, Live-Deals), Cloud-Sync Status-Visualisierung mit Uptime-Pill und modernem Touch-Smartphone Mockup.',
+        'Digitaler Kassenbeleg & Tagesbeleg (ReceiptPanel): Modernes Glas-Kassenbon-Design mit Einzelpositionen, Haptik, Budget-Differenzanzeige und 1-Klick Schnellzugriff („Heute anzeigen“).',
+        'Intuitive Diagramm-Interaktion (BudgetChart): Direkte 1-Klick-Auswahl jedes Tages über die gesamte Spaltenhöhe, pulsierender Interaktions-Hinweis und animierter Cursor-Indikator.',
+        'Bento-Grid 4-Kachel-Layout: Ausgewogenes 4-Spalten-Raster für Finanz-Check, Preis-Alarm, Cloud-Sync und Smartphone-Erlebnis.',
+        'Interaktiver Bewertungs-Schieberegler (ProductModal): Das Zahlenfeld wurde durch einen eleganten Schiebebalken (0–10) mit Live-Vorschau und Farbverlauf ersetzt.',
+        'Interaktive ProductCard & Badges: Reaktiver Bewertungsbalken (0–10) mit Farbverlauf, smarte Status-Badges (Gekauft / Rabatt) und eleganter Bild-Fallback bei Ladefehlern.',
+        'Interaktive Galerie & Preis-Breakdown (ProductDetailModal): Hauptbild mit Miniatur-Thumbnail-Switcher, Ersparnis-Rechner und optimierte Aktionsleiste.',
+        'Rich Empty States: Kontextbezogene Empty-State-Karten mit konkreten Action-Buttons im Katalog, in den Favoriten, Deals und Bundles.',
+        'Such- & Filter-Controls UX: 1-Klick Clear-Button (X) in Suchfeldern, native Chevron-Pills für Sortier-Dropdowns und formatiertes Live-Datum im Dashboard.',
         'Responsives Diagramm-Fenster (Vigi / BudgetChart): Fluid-responsive Container-Messung (`ResizeObserver`), nahtloses 100%-Fitting auf Desktop & Mobilgeräten ohne Verzerrungen oder unpassende Randabstände.',
         'Login-Screen UX: Prominenter Gast-Button („Als Gast ausprobieren“) und dezente Rechtsbelehrungs-Verlinkung im Footer.',
         'Profil- & Sidebar-Anpassung: Klare Kennzeichnung der aktiven Gast-Sitzung und bequeme 1-Klick Rückkehr zum Login.'
+      ],
+      fixed: [
+        'BudgetChart Pfadneuberechnung: Lückenlose Verbindung der Ausgabenlinie mit der Prognose-Linie und synchrones Resize-Update aller Koordinaten.',
+        'BudgetDatePickerModal Keys: Eindeutige Keys für Backdrop & Drawer in `<AnimatePresence>` vergeben, um React-Key-Kollisionen zu beheben.'
       ]
     }
   },

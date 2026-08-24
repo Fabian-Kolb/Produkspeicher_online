@@ -133,7 +133,7 @@ export const MainMenuSidebar: React.FC = () => {
           </MenuButton>
 
           <MenuButton icon={<Scale size={18} />} onClick={handleLegal}>
-            Datenschutz & Haftung
+            Datenschutz und Nutzungshinweise
           </MenuButton>
 
           <MenuButton icon={<Trash2 size={18} />} onClick={handleReset} isDestructive>

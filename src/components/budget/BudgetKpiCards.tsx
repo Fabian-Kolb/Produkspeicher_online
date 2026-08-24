@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
+import { TrendingUp, Tag, ShoppingBag, Pencil, Check } from 'lucide-react';
 import { cn } from '../../utils/cn';
+import { triggerHaptic } from '../../utils/haptics';
 
 interface BudgetKpiCardsProps {
   timeRangeLabel: string;
@@ -23,6 +25,7 @@ export const BudgetKpiCards: React.FC<BudgetKpiCardsProps> = ({
   const [budgetEditMode, setBudgetEditMode] = useState<'day' | 'week' | 'month'>('month');
 
   const handleEditModeChange = (mode: 'day' | 'week' | 'month') => {
+    triggerHaptic(10);
     setBudgetEditMode(mode);
     if (mode === 'month') {
       setTempBudget(String(monthlyBudget));
@@ -43,6 +46,7 @@ export const BudgetKpiCards: React.FC<BudgetKpiCardsProps> = ({
         finalMonthlyBudget = (val / 7) * 30;
       }
       onUpdateBudget(Math.round(finalMonthlyBudget));
+      triggerHaptic(15);
     } else {
       setTempBudget(String(monthlyBudget));
     }
@@ -50,69 +54,97 @@ export const BudgetKpiCards: React.FC<BudgetKpiCardsProps> = ({
   };
 
   return (
-    <div className="grid grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-6 mb-8">
-      {/* Ausgaben */}
-      <div className="bg-[var(--theme-glass-bg)] border border-[var(--theme-glass-border)] backdrop-blur-xl p-3 sm:p-6 rounded-2xl shadow-sm">
-        <h3 className="text-[10px] font-bold text-text-secondary uppercase tracking-wider mb-2">
-          Ausgaben<span className="hidden sm:inline"> ({timeRangeLabel})</span>
-        </h3>
-        <p className="text-sm sm:text-2xl font-bold">
-          {timeRangeSpend.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €
-        </p>
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4 mb-4 sm:mb-5">
+      {/* 1. Ausgaben */}
+      <div className="bg-[var(--theme-glass-bg)] border border-[var(--theme-glass-border)] backdrop-blur-xl p-3.5 sm:p-4 rounded-2xl shadow-sm flex flex-col justify-between group hover:border-text-secondary/40 transition-colors">
+        <div className="flex items-center justify-between gap-2 mb-2">
+          <span className="text-[10px] sm:text-xs font-bold text-text-secondary uppercase tracking-wider">
+            Ausgaben ({timeRangeLabel})
+          </span>
+          <div className="w-7 h-7 rounded-xl bg-accent/10 text-accent flex items-center justify-center shrink-0">
+            <TrendingUp size={14} />
+          </div>
+        </div>
+        <div className="flex items-baseline gap-1">
+          <span className="text-xl sm:text-2xl font-extrabold tracking-tight text-text-primary">
+            {timeRangeSpend.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+          </span>
+          <span className="text-sm sm:text-base font-bold text-text-secondary">€</span>
+        </div>
       </div>
 
-      {/* Ø Preis */}
-      <div className="bg-[var(--theme-glass-bg)] border border-[var(--theme-glass-border)] backdrop-blur-xl p-3 sm:p-6 rounded-2xl shadow-sm">
-        <h3 className="text-[10px] font-bold text-text-secondary uppercase tracking-wider mb-2">
-          Ø Preis<span className="hidden sm:inline"> ({timeRangeLabel})</span>
-        </h3>
-        <p className="text-sm sm:text-2xl font-bold">
-          {averagePrice.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €
-        </p>
+      {/* 2. Ø Preis */}
+      <div className="bg-[var(--theme-glass-bg)] border border-[var(--theme-glass-border)] backdrop-blur-xl p-3.5 sm:p-4 rounded-2xl shadow-sm flex flex-col justify-between group hover:border-text-secondary/40 transition-colors">
+        <div className="flex items-center justify-between gap-2 mb-2">
+          <span className="text-[10px] sm:text-xs font-bold text-text-secondary uppercase tracking-wider">
+            Ø Preis ({timeRangeLabel})
+          </span>
+          <div className="w-7 h-7 rounded-xl bg-accent/10 text-accent flex items-center justify-center shrink-0">
+            <Tag size={14} />
+          </div>
+        </div>
+        <div className="flex items-baseline gap-1">
+          <span className="text-xl sm:text-2xl font-extrabold tracking-tight text-text-primary">
+            {averagePrice.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+          </span>
+          <span className="text-sm sm:text-base font-bold text-text-secondary">€</span>
+        </div>
       </div>
 
-      {/* Käufe */}
-      <div className="bg-[var(--theme-glass-bg)] border border-[var(--theme-glass-border)] backdrop-blur-xl p-3 sm:p-6 rounded-2xl shadow-sm">
-        <h3 className="text-[10px] font-bold text-text-secondary uppercase tracking-wider mb-2">
-          Käufe<span className="hidden sm:inline"> ({timeRangeLabel})</span>
-        </h3>
-        <p className="text-sm sm:text-2xl font-bold">{timeRangeProductsCount}</p>
+      {/* 3. Käufe */}
+      <div className="bg-[var(--theme-glass-bg)] border border-[var(--theme-glass-border)] backdrop-blur-xl p-3.5 sm:p-4 rounded-2xl shadow-sm flex flex-col justify-between group hover:border-text-secondary/40 transition-colors">
+        <div className="flex items-center justify-between gap-2 mb-2">
+          <span className="text-[10px] sm:text-xs font-bold text-text-secondary uppercase tracking-wider">
+            Käufe ({timeRangeLabel})
+          </span>
+          <div className="w-7 h-7 rounded-xl bg-accent/10 text-accent flex items-center justify-center shrink-0">
+            <ShoppingBag size={14} />
+          </div>
+        </div>
+        <div className="flex items-baseline gap-1.5">
+          <span className="text-xl sm:text-2xl font-extrabold tracking-tight text-text-primary">
+            {timeRangeProductsCount}
+          </span>
+          <span className="text-xs font-semibold text-text-secondary">
+            {timeRangeProductsCount === 1 ? 'Artikel' : 'Artikel'}
+          </span>
+        </div>
       </div>
 
-      {/* Monatsbudget */}
-      <div className="col-span-3 lg:col-span-1 bg-[var(--theme-glass-bg)] border border-[var(--theme-glass-border)] backdrop-blur-xl p-3 sm:p-6 rounded-2xl shadow-sm group transition-all duration-300 hover:shadow-md flex flex-col justify-center">
-        <div className="flex justify-between items-center mb-1.5">
-          <h3 className="text-[10px] font-bold text-text-secondary uppercase tracking-wider">Monatsbudget</h3>
+      {/* 4. Monatsbudget */}
+      <div className="bg-[var(--theme-glass-bg)] border border-[var(--theme-glass-border)] backdrop-blur-xl p-3.5 sm:p-4 rounded-2xl shadow-sm flex flex-col justify-between group hover:border-text-secondary/40 transition-colors">
+        <div className="flex items-center justify-between gap-2 mb-3">
+          <div className="flex items-center gap-1.5 min-w-0">
+            <span className="text-[10px] sm:text-xs font-bold text-text-secondary uppercase tracking-wider truncate">
+              Monatsbudget
+            </span>
+          </div>
           {!isEditingBudget && (
             <button
               onClick={() => {
+                triggerHaptic(15);
                 setIsEditingBudget(true);
                 handleEditModeChange('month');
               }}
-              className="opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity text-text-secondary hover:text-text-primary p-1 bg-text-primary/5 rounded cursor-pointer"
-              title="Budget bearbeiten"
+              className="flex items-center gap-1 text-[10px] font-bold text-accent bg-accent/10 hover:bg-accent/20 border border-accent/25 px-2.5 py-0.5 rounded-full transition-all cursor-pointer select-none"
+              title="Budget anpassen"
             >
-              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
-                ></path>
-              </svg>
+              <Pencil size={10} />
+              <span>Anpassen</span>
             </button>
           )}
         </div>
+
         {isEditingBudget ? (
-          <div className="flex flex-col gap-2 animate-in fade-in duration-300">
-            <div className="flex bg-text-primary/5 border border-[var(--theme-glass-border)] p-0.5 rounded-lg text-[9px] font-bold self-start select-none">
+          <div className="flex flex-col gap-2 animate-in fade-in duration-200">
+            <div className="flex bg-text-primary/5 border border-[var(--theme-glass-border)] p-0.5 rounded-full text-[9px] font-bold self-start select-none">
               {(['day', 'week', 'month'] as const).map((mode) => (
                 <button
                   key={mode}
                   type="button"
                   onClick={() => handleEditModeChange(mode)}
                   className={cn(
-                    'px-2 py-0.5 rounded transition-all uppercase cursor-pointer',
+                    'px-2 py-0.5 rounded-full transition-all uppercase cursor-pointer',
                     budgetEditMode === mode
                       ? 'bg-accent text-bg-primary shadow-sm'
                       : 'text-text-secondary hover:text-text-primary'
@@ -122,7 +154,7 @@ export const BudgetKpiCards: React.FC<BudgetKpiCardsProps> = ({
                 </button>
               ))}
             </div>
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-2">
               <input
                 type="number"
                 value={tempBudget}
@@ -131,36 +163,38 @@ export const BudgetKpiCards: React.FC<BudgetKpiCardsProps> = ({
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') handleBudgetSubmit();
                 }}
-                className="w-20 bg-text-primary/5 border border-border-primary/50 hover:border-text-secondary focus:border-text-secondary px-2 py-0.5 rounded-lg text-lg font-bold outline-none text-text-primary hover:-translate-y-0.5 focus:-translate-y-0.5 hover:scale-[1.03] focus:scale-[1.03] hover:shadow-md focus:shadow-md transition-all duration-300"
+                className="w-24 bg-text-primary/10 border border-accent/40 focus:border-accent px-2.5 py-1 rounded-xl text-lg font-extrabold outline-none text-text-primary shadow-sm"
                 autoFocus
               />
-              <span className="text-sm font-bold">€</span>
+              <span className="text-base font-bold text-text-secondary">€</span>
               <button
                 onMouseDown={(e) => {
                   e.preventDefault();
                   handleBudgetSubmit();
                 }}
-                className="ml-auto p-1 bg-accent/15 border border-accent/20 rounded-lg text-accent hover:bg-accent hover:text-bg-primary transition-all duration-300 cursor-pointer"
+                className="ml-auto p-1.5 bg-accent text-bg-primary rounded-xl hover:opacity-90 transition-all cursor-pointer shadow-sm"
                 title="Speichern"
               >
-                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
-                </svg>
+                <Check size={14} strokeWidth={3} />
               </button>
             </div>
           </div>
         ) : (
-          <div>
-            <p
-              className="text-2xl font-bold cursor-pointer transition-colors hover:text-accent"
-              onClick={() => {
-                setIsEditingBudget(true);
-                handleEditModeChange('month');
-              }}
-            >
-              {monthlyBudget.toLocaleString('de-DE')} €
-            </p>
-            <div className="flex gap-3 mt-1.5 text-[9px] text-text-secondary font-semibold border-t border-[var(--theme-glass-border)]/40 pt-1.5">
+          <div 
+            className="cursor-pointer group/budget"
+            onClick={() => {
+              triggerHaptic(15);
+              setIsEditingBudget(true);
+              handleEditModeChange('month');
+            }}
+          >
+            <div className="flex items-baseline gap-1">
+              <span className="text-2xl sm:text-3xl font-extrabold tracking-tight text-text-primary group-hover/budget:text-accent transition-colors">
+                {monthlyBudget.toLocaleString('de-DE')}
+              </span>
+              <span className="text-base sm:text-lg font-bold text-text-secondary">€</span>
+            </div>
+            <div className="flex gap-3 mt-1.5 text-[10px] text-text-secondary font-semibold border-t border-border-primary/10 pt-1.5">
               <div>
                 Woche: <span className="text-text-primary font-bold">{Math.round((monthlyBudget / 30) * 7)} €</span>
               </div>

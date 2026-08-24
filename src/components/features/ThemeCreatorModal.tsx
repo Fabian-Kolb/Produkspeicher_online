@@ -188,7 +188,7 @@ export const ThemeCreatorModal: React.FC = () => {
         </div>
 
         <div className="flex flex-1 overflow-hidden relative">
-          <AnimatePresence mode="wait">
+          <AnimatePresence mode={isMobile ? "wait" : "sync"}>
             {/* Left Sidebar / Presets Overview */}
             {(!isMobile || activeTab === 'presets') && (
               <motion.div 

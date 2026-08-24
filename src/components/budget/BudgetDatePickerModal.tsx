@@ -1,7 +1,10 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { cn } from '../../utils/cn';
-import { ChevronLeft, ChevronRight, X } from 'lucide-react';
+import { ChevronLeft, ChevronRight, X, Calendar, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { triggerHaptic } from '../../utils/haptics';
+import { Button } from '../common/Button';
 
 const getMonday = (d: Date): Date => {
   const date = new Date(d);
@@ -44,7 +47,8 @@ const getWeeksOfMonth = (year: number, month: number) => {
 interface BudgetDatePickerModalProps {
   isOpen: boolean;
   onClose: () => void;
-  timeRange: '7d' | 'month' | 'total';
+  timeRange: '7d' | 'month' | 'total' | 'custom';
+  setTimeRange?: (range: '7d' | 'month' | 'total' | 'custom') => void;
   currentPeriodDate: Date;
   setCurrentPeriodDate: (d: Date) => void;
   pickerYear: number;
@@ -57,12 +61,17 @@ interface BudgetDatePickerModalProps {
   setTotalStartDate: (d: Date) => void;
   totalEndDate: Date;
   setTotalEndDate: (d: Date) => void;
+  customStartDate?: Date;
+  setCustomStartDate?: (d: Date) => void;
+  customEndDate?: Date;
+  setCustomEndDate?: (d: Date) => void;
 }
 
 export const BudgetDatePickerModal: React.FC<BudgetDatePickerModalProps> = ({
   isOpen,
   onClose,
   timeRange,
+  setTimeRange,
   currentPeriodDate,
   setCurrentPeriodDate,
   pickerYear,
@@ -75,30 +84,177 @@ export const BudgetDatePickerModal: React.FC<BudgetDatePickerModalProps> = ({
   setTotalStartDate,
   totalEndDate,
   setTotalEndDate,
+  customStartDate = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+  setCustomStartDate = () => {},
+  customEndDate = new Date(),
+  setCustomEndDate = () => {},
 }) => {
-  if (!isOpen) return null;
+  const [tempCustomStart, setTempCustomStart] = useState<string>(() => {
+    return (customStartDate || new Date()).toISOString().split('T')[0];
+  });
+  const [tempCustomEnd, setTempCustomEnd] = useState<string>(() => {
+    return (customEndDate || new Date()).toISOString().split('T')[0];
+  });
+
+  useEffect(() => {
+    if (isOpen) {
+      if (customStartDate) setTempCustomStart(customStartDate.toISOString().split('T')[0]);
+      if (customEndDate) setTempCustomEnd(customEndDate.toISOString().split('T')[0]);
+    }
+  }, [isOpen, customStartDate, customEndDate]);
 
   const handleCloseDatePicker = () => {
+    triggerHaptic(10);
     onClose();
     setSelectedMonthForWeekPicker(null);
     setRangePickerStart(null);
   };
 
+  const handleApplyCustomRange = () => {
+    triggerHaptic(15);
+    const start = new Date(tempCustomStart);
+    const end = new Date(tempCustomEnd);
+    if (!isNaN(start.getTime()) && !isNaN(end.getTime())) {
+      if (start > end) {
+        setCustomStartDate(end);
+        setCustomEndDate(start);
+      } else {
+        setCustomStartDate(start);
+        setCustomEndDate(end);
+      }
+      if (setTimeRange) setTimeRange('custom');
+    }
+    handleCloseDatePicker();
+  };
+
+  const setCustomPreset = (daysBack: number) => {
+    triggerHaptic(10);
+    const now = new Date();
+    const start = new Date(now);
+    start.setDate(start.getDate() - daysBack);
+    
+    setTempCustomStart(start.toISOString().split('T')[0]);
+    setTempCustomEnd(now.toISOString().split('T')[0]);
+    setCustomStartDate(start);
+    setCustomEndDate(now);
+    if (setTimeRange) setTimeRange('custom');
+    handleCloseDatePicker();
+  };
+
   const renderDatePickerContent = () => {
     const today = new Date();
+
+    // Mode: Custom Range
+    if (timeRange === 'custom') {
+      return (
+        <div className="flex flex-col gap-4">
+          <div className="text-xs text-text-secondary">
+            Wähle ein beliebiges Start- und Enddatum für die Budget-Analyse:
+          </div>
+
+          {/* Quick Presets */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+            <button
+              type="button"
+              onClick={() => setCustomPreset(7)}
+              className="py-1.5 px-2.5 rounded-xl bg-text-primary/5 hover:bg-text-primary/10 text-[11px] font-bold text-text-primary transition-colors border border-border-primary/20 cursor-pointer"
+            >
+              Letzte 7 Tage
+            </button>
+            <button
+              type="button"
+              onClick={() => setCustomPreset(30)}
+              className="py-1.5 px-2.5 rounded-xl bg-text-primary/5 hover:bg-text-primary/10 text-[11px] font-bold text-text-primary transition-colors border border-border-primary/20 cursor-pointer"
+            >
+              Letzte 30 Tage
+            </button>
+            <button
+              type="button"
+              onClick={() => setCustomPreset(90)}
+              className="py-1.5 px-2.5 rounded-xl bg-text-primary/5 hover:bg-text-primary/10 text-[11px] font-bold text-text-primary transition-colors border border-border-primary/20 cursor-pointer"
+            >
+              Letzte 90 Tage
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                const now = new Date();
+                const startOfYear = new Date(now.getFullYear(), 0, 1);
+                setTempCustomStart(startOfYear.toISOString().split('T')[0]);
+                setTempCustomEnd(now.toISOString().split('T')[0]);
+                setCustomStartDate(startOfYear);
+                setCustomEndDate(now);
+                if (setTimeRange) setTimeRange('custom');
+                handleCloseDatePicker();
+              }}
+              className="py-1.5 px-2.5 rounded-xl bg-text-primary/5 hover:bg-text-primary/10 text-[11px] font-bold text-text-primary transition-colors border border-border-primary/20 cursor-pointer"
+            >
+              Dieses Jahr
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                const now = new Date();
+                const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+                setTempCustomStart(startOfMonth.toISOString().split('T')[0]);
+                setTempCustomEnd(now.toISOString().split('T')[0]);
+                setCustomStartDate(startOfMonth);
+                setCustomEndDate(now);
+                if (setTimeRange) setTimeRange('custom');
+                handleCloseDatePicker();
+              }}
+              className="py-1.5 px-2.5 rounded-xl bg-text-primary/5 hover:bg-text-primary/10 text-[11px] font-bold text-text-primary transition-colors border border-border-primary/20 cursor-pointer col-span-2 sm:col-span-2"
+            >
+              Dieser Monat bis heute
+            </button>
+          </div>
+
+          {/* Date Inputs */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-border-primary/20">
+            <div className="flex flex-col gap-1">
+              <label className="text-[10px] font-bold uppercase text-text-secondary tracking-wider">Startdatum</label>
+              <input
+                type="date"
+                value={tempCustomStart}
+                onChange={(e) => setTempCustomStart(e.target.value)}
+                className="w-full bg-text-primary/5 border border-border-primary/30 focus:border-accent p-2 rounded-xl text-xs font-bold text-text-primary outline-none"
+              />
+            </div>
+            <div className="flex flex-col gap-1">
+              <label className="text-[10px] font-bold uppercase text-text-secondary tracking-wider">Enddatum</label>
+              <input
+                type="date"
+                value={tempCustomEnd}
+                onChange={(e) => setTempCustomEnd(e.target.value)}
+                className="w-full bg-text-primary/5 border border-border-primary/30 focus:border-accent p-2 rounded-xl text-xs font-bold text-text-primary outline-none"
+              />
+            </div>
+          </div>
+
+          <Button
+            variant="primary"
+            onClick={handleApplyCustomRange}
+            className="w-full py-2.5 mt-2 font-bold text-xs gap-2"
+          >
+            <Check size={14} strokeWidth={3} />
+            <span>Zeitraum übernehmen</span>
+          </Button>
+        </div>
+      );
+    }
 
     if (selectedMonthForWeekPicker) {
       const weeks = getWeeksOfMonth(selectedMonthForWeekPicker.year, selectedMonthForWeekPicker.month);
 
       return (
         <div className="flex flex-col gap-3">
-          <div className="flex justify-between items-center border-b border-[var(--theme-glass-border)] pb-2 mb-1">
+          <div className="flex justify-between items-center border-b border-border-primary/20 pb-2 mb-1">
             <button
               onClick={() => setSelectedMonthForWeekPicker(null)}
               className="flex items-center gap-1 text-xs font-bold text-text-secondary hover:text-text-primary transition-colors cursor-pointer"
             >
               <ChevronLeft size={14} />
-              <span>Zurück</span>
+              <span>Zurück zu Monaten</span>
             </button>
             <span className="font-bold text-xs text-text-primary">
               {new Date(selectedMonthForWeekPicker.year, selectedMonthForWeekPicker.month).toLocaleDateString(
@@ -128,7 +284,7 @@ export const BudgetDatePickerModal: React.FC<BudgetDatePickerModalProps> = ({
                       ? 'opacity-25 cursor-not-allowed'
                       : isSelected
                       ? 'bg-accent text-bg-primary shadow-sm'
-                      : 'hover:bg-text-primary/5 text-text-secondary hover:text-text-primary border border-transparent hover:border-[var(--theme-glass-border)]'
+                      : 'hover:bg-text-primary/5 text-text-secondary hover:text-text-primary border border-transparent hover:border-border-primary/20'
                   )}
                 >
                   {w.label}
@@ -166,10 +322,11 @@ export const BudgetDatePickerModal: React.FC<BudgetDatePickerModalProps> = ({
         )}
 
         {/* Year Selector */}
-        <div className="flex justify-between items-center border-b border-[var(--theme-glass-border)] pb-3">
+        <div className="flex justify-between items-center border-b border-border-primary/20 pb-3">
           <button
             onClick={() => setPickerYear((p) => p - 1)}
-            className="p-1 rounded-full hover:bg-text-primary/5 text-text-secondary hover:text-text-primary transition-colors cursor-pointer"
+            className="p-1.5 rounded-full hover:bg-text-primary/10 text-text-secondary hover:text-text-primary transition-colors cursor-pointer"
+            title="Vorheriges Jahr"
           >
             <ChevronLeft size={16} />
           </button>
@@ -182,11 +339,12 @@ export const BudgetDatePickerModal: React.FC<BudgetDatePickerModalProps> = ({
             }}
             disabled={pickerYear >= today.getFullYear()}
             className={cn(
-              'p-1 rounded-full transition-all cursor-pointer',
+              'p-1.5 rounded-full transition-all cursor-pointer',
               pickerYear >= today.getFullYear()
                 ? 'opacity-35 cursor-not-allowed'
-                : 'hover:bg-text-primary/5 text-text-secondary hover:text-text-primary'
+                : 'hover:bg-text-primary/10 text-text-secondary hover:text-text-primary'
             )}
+            title="Nächstes Jahr"
           >
             <ChevronRight size={16} />
           </button>
@@ -281,7 +439,7 @@ export const BudgetDatePickerModal: React.FC<BudgetDatePickerModalProps> = ({
             setPickerYear(now.getFullYear());
             handleCloseDatePicker();
           }}
-          className="mt-2 py-2 w-full rounded-xl bg-text-primary/5 text-text-primary text-xs font-bold hover:bg-text-primary/10 transition-colors border border-[var(--theme-glass-border)] cursor-pointer"
+          className="mt-2 py-2 w-full rounded-xl bg-text-primary/5 text-text-primary text-xs font-bold hover:bg-text-primary/10 transition-colors border border-border-primary/20 cursor-pointer"
         >
           {timeRange === '7d'
             ? 'Aktuelle Woche (Heute)'
@@ -293,44 +451,86 @@ export const BudgetDatePickerModal: React.FC<BudgetDatePickerModalProps> = ({
     );
   };
 
-  return (
-    <>
-      {/* Desktop Date Selection Popover (Rendered inside relative parent container) */}
-      <div className="hidden sm:block absolute top-full left-1/2 -translate-x-1/2 mt-2 z-50 bg-[var(--theme-glass-bg)] border border-[var(--theme-glass-border)] backdrop-blur-2xl p-4 rounded-2xl shadow-xl w-[300px]">
-        {renderDatePickerContent()}
-      </div>
-      <div className="hidden sm:block fixed inset-0 z-40 bg-transparent" onClick={handleCloseDatePicker} />
+  if (typeof document === 'undefined') return null;
 
-      {/* Mobile Date Picker Drawer */}
-      <AnimatePresence>
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 0.4 }}
-          exit={{ opacity: 0 }}
-          onClick={handleCloseDatePicker}
-          className="sm:hidden fixed inset-0 z-50 bg-black"
-        />
-        <motion.div
-          initial={{ y: '100%' }}
-          animate={{ y: 0 }}
-          exit={{ y: '100%' }}
-          transition={{ type: 'spring', damping: 25, stiffness: 250 }}
-          className="sm:hidden fixed bottom-0 inset-x-0 z-50 bg-[var(--theme-glass-bg)] border-t border-[var(--theme-glass-border)] backdrop-blur-2xl rounded-t-3xl p-6 shadow-2xl max-h-[85vh] overflow-y-auto"
-        >
-          <div className="w-12 h-1.5 bg-text-secondary/20 rounded-full mx-auto mb-6" />
-          <div className="flex justify-between items-center mb-6">
-            <h4 className="font-bold text-base text-text-primary">Zeitraum auswählen</h4>
-            <button
-              onClick={handleCloseDatePicker}
-              className="p-1.5 rounded-full bg-text-primary/5 text-text-secondary hover:text-text-primary cursor-pointer"
-            >
-              <X size={16} />
-            </button>
-          </div>
+  return createPortal(
+    <AnimatePresence>
+      {isOpen && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6 select-none">
+          {/* Backdrop */}
+          <motion.div
+            key="budget-date-picker-backdrop"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            onClick={handleCloseDatePicker}
+            className="fixed inset-0 bg-black/70 backdrop-blur-md"
+          />
 
-          <div>{renderDatePickerContent()}</div>
-        </motion.div>
-      </AnimatePresence>
-    </>
+          {/* Centered Modal Card */}
+          <motion.div
+            key="budget-date-picker-modal"
+            initial={{ opacity: 0, scale: 0.92, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.92, y: 20 }}
+            transition={{ type: 'spring', damping: 26, stiffness: 350 }}
+            className="relative z-10 w-full max-w-sm sm:max-w-md bg-[var(--theme-glass-bg)] border border-[var(--theme-glass-border)] backdrop-blur-3xl p-5 sm:p-6 rounded-3xl shadow-2xl overflow-hidden flex flex-col text-text-primary max-h-[90vh] overflow-y-auto no-scrollbar"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between border-b border-border-primary/20 pb-3 mb-3 shrink-0">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-xl bg-accent/15 flex items-center justify-center text-accent shadow-sm">
+                  <Calendar size={16} strokeWidth={2.5} />
+                </div>
+                <h3 className="font-bold text-sm text-text-primary">
+                  {timeRange === '7d'
+                    ? 'Woche auswählen'
+                    : timeRange === 'month'
+                    ? 'Monat auswählen'
+                    : timeRange === 'total'
+                    ? 'Gesamtzeitraum wählen'
+                    : 'Benutzerdefinierter Zeitraum'}
+                </h3>
+              </div>
+              <button
+                onClick={handleCloseDatePicker}
+                className="p-1.5 rounded-full hover:bg-text-primary/10 text-text-secondary hover:text-text-primary transition-colors cursor-pointer"
+                title="Schließen"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            {/* Mode Switcher Tabs inside Modal */}
+            <div className="flex items-center bg-text-primary/5 border border-border-primary/20 p-1 rounded-2xl mb-4 gap-1 shrink-0">
+              {(['7d', 'month', 'total', 'custom'] as const).map((mode) => (
+                <button
+                  key={mode}
+                  type="button"
+                  onClick={() => {
+                    triggerHaptic(10);
+                    if (setTimeRange) setTimeRange(mode);
+                  }}
+                  className={cn(
+                    'flex-1 py-1.5 rounded-xl text-[11px] font-bold transition-all text-center cursor-pointer select-none',
+                    timeRange === mode
+                      ? 'bg-accent text-bg-primary shadow-sm'
+                      : 'text-text-secondary hover:text-text-primary'
+                  )}
+                >
+                  {mode === '7d' ? 'Woche' : mode === 'month' ? 'Monat' : mode === 'total' ? 'Gesamt' : 'Frei'}
+                </button>
+              ))}
+            </div>
+
+            {/* Content */}
+            <div className="flex-1">{renderDatePickerContent()}</div>
+          </motion.div>
+        </div>
+      )}
+    </AnimatePresence>,
+    document.body
   );
 };

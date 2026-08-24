@@ -1,7 +1,7 @@
 import React, { useMemo, useState, useEffect, useRef } from 'react';
 import { useAppStore } from '../store/useAppStore';
 import { useUIStore } from '../store/useUIStore';
-import { Layers, Trash2, Search, Check, SlidersHorizontal } from 'lucide-react';
+import { Layers, Trash2, Search, Check, SlidersHorizontal, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '../utils/cn';
 import type { BundleItem } from '../types';
@@ -384,15 +384,29 @@ export const BundlesView: React.FC = () => {
                 <div className="flex flex-col gap-3 mb-4 shrink-0">
                   {/* Search + Mobile Filter Toggle Button */}
                   <div className="flex items-center gap-2">
-                    <div className="relative flex-1">
-                      <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-text-secondary pointer-events-none" />
+                    <div className="relative flex-1 group">
+                      <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-text-secondary pointer-events-none transition-colors group-focus-within:text-text-primary" />
                       <input
                         type="text"
                         value={searchQuery}
                         onChange={e => setSearchQuery(e.target.value)}
                         placeholder="Suchen..."
-                        className="w-full glass-panel rounded-full pl-10 pr-4 py-2 text-sm outline-none hover:border-text-secondary focus:border-text-secondary hover:-translate-y-0.5 focus:-translate-y-0.5 hover:scale-[1.01] focus:scale-[1.01] hover:shadow-md focus:shadow-md transition-all duration-300 ease-out transform-gpu shadow-sm"
+                        className="w-full glass-panel rounded-full pl-10 pr-9 py-2 text-sm outline-none border border-border-primary/20 hover:border-text-secondary/60 focus:border-accent shadow-sm focus:shadow-md transition-all duration-300"
                       />
+                      {searchQuery && (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            triggerHaptic(10);
+                            setSearchQuery('');
+                          }}
+                          className="absolute right-2.5 top-1/2 -translate-y-1/2 w-6 h-6 flex items-center justify-center rounded-full text-text-secondary hover:text-text-primary bg-text-primary/5 hover:bg-text-primary/15 transition-all duration-200 cursor-pointer active:scale-90 z-10"
+                          title="Suche leeren"
+                        >
+                          <X size={13} />
+                        </button>
+                      )}
                     </div>
 
                     {/* Mobile Filter Toggle Button (Visible on mobile lg:hidden) */}
